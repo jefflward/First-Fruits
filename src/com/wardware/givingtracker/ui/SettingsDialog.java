@@ -5,8 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -19,14 +17,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.TextAction;
 
-import com.wardware.givingtracker.RecordManager;
 import com.wardware.givingtracker.Settings;
 
 public class SettingsDialog extends JDialog
 {
-    private JTextField nameField;
+    private JTextField categoryField;
     private JTextArea addressTextArea;
-    private JTextArea namesTextArea;
+    private JTextArea categoriesTextArea;
 
     public SettingsDialog()
     {
@@ -52,9 +49,9 @@ public class SettingsDialog extends JDialog
         nameLabel.setVerticalAlignment(JLabel.TOP);
         add(nameLabel, c);
        
-        nameField = new JTextField();
+        categoryField = new JTextField();
         c.gridx = 1;
-        add(nameField, c);
+        add(categoryField, c);
         
         final JLabel addressLabel = new JLabel("Organization Address");
         addressLabel.setHorizontalAlignment(JLabel.RIGHT);
@@ -72,14 +69,14 @@ public class SettingsDialog extends JDialog
         c.gridx = 0;
         c.gridy = 2;        
         c.anchor = GridBagConstraints.PAGE_START;
-        final JLabel namesLabel = new JLabel("Default Names");
+        final JLabel namesLabel = new JLabel("Categories");
         namesLabel.setHorizontalAlignment(JLabel.RIGHT);
         namesLabel.setVerticalAlignment(JLabel.TOP);
         add(namesLabel, c);
         
-        namesTextArea = new JTextArea();
+        categoriesTextArea = new JTextArea();
         c.gridx = 1;
-        final JScrollPane namesPane = new JScrollPane(namesTextArea);
+        final JScrollPane namesPane = new JScrollPane(categoriesTextArea);
         namesPane.setPreferredSize(new Dimension(190, 200));
         add(namesPane, c);
         
@@ -117,22 +114,18 @@ public class SettingsDialog extends JDialog
     private void loadSettings()
     {
         final Properties props = Settings.getInstance().getProperties();
-        nameField.setText(props.getProperty(Settings.ORGANIZATION_NAME_KEY, ""));
+        categoryField.setText(props.getProperty(Settings.ORGANIZATION_NAME_KEY, ""));
         addressTextArea.setText(props.getProperty(Settings.ORGANIZATION_ADDRESS_KEY, ""));
-        namesTextArea.setText(props.getProperty(Settings.DEFAULT_NAMES_KEY, "").replaceAll(";", "\n"));
+        categoriesTextArea.setText(props.getProperty(Settings.CATEGORIES_KEY, "").replaceAll(";", "\n"));
     }
     
     private void saveSettings()
     {
         final Properties props = Settings.getInstance().getProperties();
-        props.put(Settings.ORGANIZATION_NAME_KEY, nameField.getText());
+        props.put(Settings.ORGANIZATION_NAME_KEY, categoryField.getText());
         props.put(Settings.ORGANIZATION_ADDRESS_KEY, addressTextArea.getText());
-        props.put(Settings.DEFAULT_NAMES_KEY, namesTextArea.getText().replaceAll("\n", ";"));
-        final String[] names = namesTextArea.getText().split("\n");
+        props.put(Settings.CATEGORIES_KEY, categoriesTextArea.getText().replaceAll("\n", ";"));
         Settings.getInstance().setProperties(props);
-        final HashSet<String> uniqueNames = new HashSet<String>(Arrays.asList(names));
-        uniqueNames.add("");
-        RecordManager.getInstance().setUniqueNames(uniqueNames);
     }
     
     public static void main(String[] args)

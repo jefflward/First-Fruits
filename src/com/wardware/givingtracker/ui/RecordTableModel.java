@@ -4,32 +4,55 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.table.DefaultTableModel;
 
 import com.wardware.givingtracker.GivingRecord;
+import com.wardware.givingtracker.Settings;
 
-public class RecordTableModel extends DefaultTableModel
+public class RecordTableModel extends DefaultTableModel implements Observer
 {
-    private static final String[] COLUMNS = new String[]{"Date", "Name", "General", "Missions", "Building", "Total"};
-    
     private List<GivingRecord> records;
+
+    private ArrayList<String> columnNames;
     
     public RecordTableModel()
     {
-        super(0, COLUMNS.length);
         records = new ArrayList<GivingRecord>();
+        columnNames = new ArrayList<String>();
+        columnNames.add("Date");
+        columnNames.add("Name");
+        columnNames.addAll(Settings.getInstance().getCategories());
+        columnNames.add("Total");
+        this.setColumnIdentifiers(columnNames.toArray());
+        Settings.getInstance().addObserver(this);
     }
     
-    public static String[] getColumns()
+    private void updateColumns()
     {
-        return COLUMNS;
+        columnNames = new ArrayList<String>();
+        columnNames.add("Date");
+        columnNames.add("Name");
+        columnNames.addAll(Settings.getInstance().getCategories());
+        columnNames.add("Total");
+        this.setColumnIdentifiers(columnNames.toArray());
+        
+        fireTableStructureChanged();
+    }
+    
+    public String[] getColumns()
+    {
+        final String[] columns = new String[getColumnCount()];
+        columnNames.toArray(columns);
+        return columns;
     }
     
     @Override
     public String getColumnName(int column)
     {
-        return COLUMNS[column];
+        return getColumns()[column];
     }
     
     public void setRecords(List<GivingRecord> records)
@@ -56,15 +79,20 @@ public class RecordTableModel extends DefaultTableModel
     {
         final GivingRecord record = records.get(row);
         if (record != null) {
-            switch (column) {
-            case 0: return record.getDate();
-            case 1: return record.getName();
-            case 2: return NumberFormat.getCurrencyInstance().format(record.getGeneral());
-            case 3: return NumberFormat.getCurrencyInstance().format(record.getMissions());
-            case 4: return NumberFormat.getCurrencyInstance().format(record.getBuilding());
-            case 5: return NumberFormat.getCurrencyInstance().format(record.getTotal());
-            default:
-                return null;
+            if (column == 0) {
+                return record.getDate();
+            } else if (column == 1) {
+                return record.getName();
+            } else if (column == getColumnCount() - 1) {
+                return NumberFormat.getCurrencyInstance().format(record.getTotal());
+            } else {
+                final String columnName = getColumnName(column);
+                // MIght not have a category value
+                Double amount = record.getAmountForCategory(columnName);
+                if (amount != null)
+                {
+                    return NumberFormat.getCurrencyInstance().format(record.getAmountForCategory(columnName));
+                }
             }
         }
         return null;
@@ -95,5 +123,11 @@ public class RecordTableModel extends DefaultTableModel
             }
         }
         return records;
+    }
+
+    @Override
+    public void update(Observable o, Object arg)
+    {
+        updateColumns();
     }
 }

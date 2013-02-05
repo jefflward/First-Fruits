@@ -6,20 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-public class Settings implements Observer
+public class Settings extends Observable
 {
     public static final String ORGANIZATION_NAME_KEY = "OrganizationName"; 
     public static final String ORGANIZATION_ADDRESS_KEY = "OrganizationAddress";
-    public static final String DEFAULT_NAMES_KEY = "DefaultNames";
+    public static final String CATEGORIES_KEY = "Categories";
     private static final String SETTINGS_FILE_NAME = "GivingTracker.props";
     private static Settings INSTANCE;
     private Properties properties;
@@ -43,7 +41,16 @@ public class Settings implements Observer
     {
         properties = new Properties();
         loadSettings();
-        RecordManager.getInstance().addObserver(this);
+    }
+    
+    public List<String> getCategories()
+    {
+        final List<String> categories = new ArrayList<String>();
+        final String categoriesProperty = properties.getProperty(Settings.CATEGORIES_KEY);
+        if (categoriesProperty != null) {
+            categories.addAll(Arrays.asList(categoriesProperty.split(";")));
+        }
+        return categories;
     }
 
     private void loadSettings()
@@ -69,6 +76,8 @@ public class Settings implements Observer
     {
         this.properties = props;
         saveSettings();
+        setChanged();
+        notifyObservers();
     }
     
     public void saveSettings()
@@ -79,27 +88,6 @@ public class Settings implements Observer
             JOptionPane.showMessageDialog(null, "Error occurred while saving settings: " + e.getMessage(), "Save Settings Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error occurred while saving settings: " + e.getMessage(), "Save Settings Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    @Override
-    public void update(Observable o, Object value)
-    {
-        if (value instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<String> names = (Set<String>) value;
-            final List<String> sortedNames = new ArrayList<String>();
-            sortedNames.addAll(names);            
-            Collections.sort(sortedNames);
-            final StringBuilder builder = new StringBuilder();
-            for (String name : sortedNames) {
-                if (!name.trim().isEmpty()) {
-                    builder.append(name);
-                    builder.append(";");
-                }
-            }
-            properties.put(Settings.DEFAULT_NAMES_KEY, builder.toString());
-            saveSettings();
         }
     }
 }

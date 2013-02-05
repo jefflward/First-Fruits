@@ -5,15 +5,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.wardware.givingtracker.GivingRecord;
 import com.wardware.givingtracker.Settings;
 
 public class ReportWriter
 {
-    public static final String HEADER_CSV = "Date, General, Missions, Building, Total";
-    
     public static void writeReport(String name, File outputFile, List<GivingRecord> records) throws IOException
     {
         final FileWriter fileWriter = new FileWriter(outputFile);
@@ -24,18 +24,35 @@ public class ReportWriter
         printWriter.println();
         printWriter.println(name);
         printWriter.println();
-        printWriter.println(HEADER_CSV);
-        double totalGeneral = 0;
-        double totalMissions = 0;
-        double totalBuilding = 0;
+        final StringBuilder headerCsv = new StringBuilder();
+        headerCsv.append("Date,");
+        final List<String> categories = Settings.getInstance().getCategories();
+        final Map<String, Double> categoryTotals = new HashMap<String, Double>();
+        for (String category : categories) {
+            headerCsv.append(category + ",");
+            categoryTotals.put(category, 0.0);
+        }
+        headerCsv.append("Total");
+        printWriter.println(headerCsv.toString());
+        
+        double totalGiving = 0.0;
         for (GivingRecord record : records) {
             printWriter.println(record.toReportCsv());
-            totalGeneral += record.getGeneral();
-            totalMissions += record.getMissions();
-            totalBuilding += record.getBuilding();
+            for (String category : categories) {
+                final Double amount = record.getAmountForCategory(category);
+                categoryTotals.put(category, categoryTotals.get(category) + amount);
+                totalGiving += amount;
+            }
         }
-        final double totalGiving = totalGeneral + totalMissions + totalBuilding;
-        printWriter.println("Total," + totalGeneral + ", " + totalMissions + ", " + totalBuilding + ", " + totalGiving);
+       
+        final StringBuilder totals = new StringBuilder();
+        totals.append("Total,");
+        for (String category : categories) {
+            totals.append(categoryTotals.get(category));
+            totals.append(",");
+        }
+        totals.append(totalGiving);
+            
         printWriter.println();
         printWriter.println("Prepared by,_________________________");
         printWriter.flush();

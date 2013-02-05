@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
@@ -73,7 +72,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         setTitle("Giving Tracker");
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setPreferredSize(new Dimension(500, 600));
+        setPreferredSize(new Dimension(900, 500));
         setLocationByPlatform(true);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -209,23 +208,13 @@ public class GivingTrackerFrame extends JFrame implements Observer
         menuBar.add(helpMenu); 
         setJMenuBar(menuBar);
         
-        final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         inputPanel = new InputPanel();
-        final List<String> names = new ArrayList<String>();
-        names.add("");
-        final String defaultNamesProperty = Settings.getInstance().getProperties().getProperty(Settings.DEFAULT_NAMES_KEY);
-        if (defaultNamesProperty != null) {
-            final String[] defaultNames = defaultNamesProperty.split(";");
-            names.addAll(Arrays.asList(defaultNames));
-        }
-        RecordManager.getInstance().setUniqueNames(new HashSet<String>(names));
-        
-        inputPanel.updateNames(names);
-        splitPane.setTopComponent(inputPanel); 
+        splitPane.setLeftComponent(inputPanel); 
         
         recordsTable = new RecordsTable();
         final JScrollPane scrollPane = new JScrollPane(recordsTable);
-        splitPane.setBottomComponent(scrollPane);
+        splitPane.setRightComponent(scrollPane);
         
         final JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -454,10 +443,8 @@ public class GivingTrackerFrame extends JFrame implements Observer
             final File[] selectedFiles = fileChooser.getSelectedFiles();
             if (selectedFiles.length == 1) {
                 currentFile = selectedFiles[0];
-                RecordManager.getInstance().setUnsavedChanges(false);
             } else {
                 currentFile = null;
-                RecordManager.getInstance().setUnsavedChanges(true);
             }
             
             for (File f : fileChooser.getSelectedFiles()) {
@@ -469,26 +456,44 @@ public class GivingTrackerFrame extends JFrame implements Observer
 
     private Set<GivingRecord> getRecordsFromFile(File file) throws IOException
     {
+        final Set<GivingRecord> records = new HashSet<GivingRecord>();
         final FileInputStream fstream = new FileInputStream(file);
         final DataInputStream in = new DataInputStream(fstream);
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        final Set<GivingRecord> records = new HashSet<GivingRecord>();
-        String line;
-        while ((line = br.readLine()) != null)   {
-            try {
-                if (line.equals(GivingRecord.HEADER_CSV)) {
-                    continue;
-                }
-                final GivingRecord record = GivingRecord.fromCsv(line);
-                records.add(record);
-            } catch (ParseException e) {
-                JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
-                    "Error occurred while loading invalid record file.\n" + file.getAbsolutePath(), 
-                    "Load Error", JOptionPane.ERROR_MESSAGE);
-                break;
+        try 
+        {
+            final String firstLine = br.readLine();
+            if (firstLine == null || firstLine.isEmpty()) {
+                throw new RuntimeException(String.format("The file: %f is missing header.", file.getName()));
             }
+
+            final String[] tokens = firstLine.split(",");
+            if (tokens.length == 0) {
+                throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
+            }
+
+            // This is the old format
+            String[] headers = {"Date","Name","General", "Missions", "Building", "Total"};
+            if (tokens[0].equals("Date")) {
+                headers = tokens;
+            }
+
+            String line;
+            while ((line = br.readLine()) != null)   {
+                try {
+                    final GivingRecord record = GivingRecord.fromCsv(line, headers);
+                    records.add(record);
+                } catch (ParseException e) {
+                    JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
+                                    "Error occurred while loading invalid record file.\n" + file.getAbsolutePath(), 
+                                    "Load Error", JOptionPane.ERROR_MESSAGE);
+                    break;
+                }
+            }
+        } finally {
+           in.close();
+           br.close();
         }
-        in.close();
         return records;
     }
     
@@ -520,6 +525,15 @@ public class GivingTrackerFrame extends JFrame implements Observer
     {
         final FileWriter fileWriter = new FileWriter(currentFile);
         final PrintWriter printWriter = new PrintWriter(fileWriter);
+        final RecordTableModel tableModel = (RecordTableModel) recordsTable.getModel();
+        final String[] columnNames = tableModel.getColumns();
+        final StringBuilder columnsCsv = new StringBuilder();
+        for (String column : columnNames) {
+            columnsCsv.append(column);
+            columnsCsv.append(",");
+        }
+        columnsCsv.deleteCharAt(columnsCsv.length() - 1);
+        printWriter.println(columnsCsv.toString());    
         final List<GivingRecord> records = RecordManager.getInstance().getRecords();
         for (GivingRecord record : records) {
             printWriter.println(record.toCsv());

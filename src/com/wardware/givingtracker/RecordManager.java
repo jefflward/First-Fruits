@@ -16,26 +16,27 @@ public class RecordManager extends Observable
     private boolean unsavedChanges;
     private int selectionCount;
     private GivingRecord lastUpdated;
-    
+
     public static RecordManager getInstance()
     {
         return INSTANCE;
     }
-    
+
     @Override
     protected Object clone() throws CloneNotSupportedException
     {
         throw new CloneNotSupportedException();
     }
-    
+
     private RecordManager()
     {
         uniqueNames = new HashSet<String>();
+        uniqueNames.add("");
         records = new ArrayList<GivingRecord>();
         unsavedChanges = false;
     }
-    
-    public void updateRecord(GivingRecord record) 
+
+    public void updateRecord(GivingRecord record)
     {
         unsavedChanges = true;
         if (selectedRecord != null) {
@@ -55,7 +56,7 @@ public class RecordManager extends Observable
             }
         }
     }
-    
+
     public GivingRecord getLastUpdatedRecord()
     {
         return lastUpdated;
@@ -79,7 +80,7 @@ public class RecordManager extends Observable
         Collections.sort(namesSorted);
         return namesSorted;
     }
-    
+
     public void setUniqueNames(Set<String> names)
     {
         uniqueNames = names;
@@ -90,20 +91,26 @@ public class RecordManager extends Observable
     public void setRecords(List<GivingRecord> records)
     {
         this.records = records;
+        final Set<String> names = new HashSet<String>();
+        names.add("");
+        for (GivingRecord record : records) {
+            names.add(record.getName());
+        }
+        setUniqueNames(names);
         setChanged();
         notifyObservers(records);
     }
-    
+
     public List<GivingRecord> getRecords()
     {
         return records;
     }
-    
+
     public boolean hasUnsavedChanges()
     {
         return unsavedChanges;
     }
-    
+
     public void setUnsavedChanges(boolean value)
     {
         unsavedChanges = value;

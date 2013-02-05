@@ -2,33 +2,27 @@ package com.wardware.givingtracker;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GivingRecord implements Comparable<GivingRecord>
 {
-    public static final String HEADER_CSV = "Date, General, Missions, Building";
     private String date;
     private String name;
-    private Double general;
-    private Double missions;
-    private Double building;
+    private Map<String, Double> categorizedAmounts;
     private Double total;
-    
+
     public GivingRecord()
     {
-        general = 0.0;
-        missions = 0.0;
-        building = 0.0;
-        total = 0.0;
+        categorizedAmounts = new HashMap<String, Double>();
     }
 
-    public GivingRecord(String date, String name, Double general, Double missions, Double building)
+    public GivingRecord(String date, String name)
     {
         this.date = date;
         this.name = name;
-        this.general = general;
-        this.missions = missions;
-        this.building = building;
-        this.total = general + missions + building;
+        categorizedAmounts = new HashMap<String, Double>();
     }
 
     public String getDate()
@@ -51,56 +45,119 @@ public class GivingRecord implements Comparable<GivingRecord>
         this.name = name;
     }
 
-    public Double getGeneral()
+    public Double getAmountForCategory(String category)
     {
-        return general;
+        return categorizedAmounts.get(category);
     }
 
-    public void setGeneral(Double general)
+    public void setAmountForCategory(String category, Double amount)
     {
-        this.general = general;
+        categorizedAmounts.put(category, amount);
         updateTotal();
     }
 
-    public Double getMissions()
-    {
-        return missions;
-    }
-
-    public void setMissions(Double missions)
-    {
-        this.missions = missions;
-        updateTotal();
-    }
-
-    public Double getBuilding()
-    {
-        return building;
-    }
-
-    public void setBuilding(Double building)
-    {
-        this.building = building;
-        updateTotal();
-    }
-    
     public Double getTotal()
     {
         return total;
     }
-    
+
     private void updateTotal()
     {
-        total = general + missions + building;
+        total = 0.0;
+        for (Double value : categorizedAmounts.values()) {
+            total += value;
+        }
     }
-    
+
     public void update(GivingRecord record)
     {
         setDate(record.getDate());
         setName(record.getName());
-        setGeneral(record.getGeneral());
-        setMissions(record.getMissions());
-        setBuilding(record.getBuilding());
+        categorizedAmounts = new HashMap<String, Double>(record.categorizedAmounts);
+    }
+
+    public String toBasicString()
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(date + ", ");
+        sb.append(name);
+
+        for (String category : categorizedAmounts.keySet()) {
+            sb.append(", " + category + ": ");
+            sb.append(NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("GivingRecord [");
+        sb.append("date=" + date);
+        sb.append(", name=" + name);
+
+        for (String category : categorizedAmounts.keySet()) {
+            sb.append(", " + category + ": ");
+            sb.append(NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
+        }
+        sb.append(", total=" + NumberFormat.getCurrencyInstance().format(total) + "]");
+        return sb.toString();
+    }
+
+    public String toCsv()
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(date);
+        sb.append(", " + name);
+
+        for (String category : Settings.getInstance().getCategories()) {
+            if (categorizedAmounts.containsKey(category)) {
+                sb.append(", " + categorizedAmounts.get(category));
+            } else {
+                sb.append(", ");
+            }
+        }
+        sb.append(", " + total);
+        return sb.toString();
+    }
+
+    public String toReportCsv()
+    {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(date);
+        for (String category : categorizedAmounts.keySet()) {
+            sb.append(", " + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
+        }
+        sb.append(", " + total);
+        return sb.toString();
+    }
+
+    public static GivingRecord fromCsv(String csv, String[] headers) throws ParseException
+    {
+        try {
+            final String[] tokens = csv.split(",");
+            int tokenIndex = 0;
+            final String date = tokens[tokenIndex++];
+            final String name = tokens[tokenIndex++];
+            final GivingRecord record = new GivingRecord(date, name);
+            final String[] categories = Arrays.copyOfRange(headers, 2, headers.length - 1);
+            for (String category : categories) {
+                record.setAmountForCategory(category, Double.parseDouble(tokens[tokenIndex++]));
+            }
+            return record;
+        } catch (Exception e) {
+            throw new ParseException(csv, 0);
+        }
+    }
+
+    @Override
+    public int compareTo(GivingRecord other)
+    {
+        if (date.equals(other.date)) {
+            return name.compareTo(other.name);
+        }
+        return date.compareTo(other.date);
     }
 
     @Override
@@ -108,11 +165,10 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((categorizedAmounts == null) ? 0 : categorizedAmounts.hashCode());
         result = prime * result + ((date == null) ? 0 : date.hashCode());
-        result = prime * result + ((general == null) ? 0 : general.hashCode());
-        result = prime * result + ((missions == null) ? 0 : missions.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((building == null) ? 0 : building.hashCode());
+        result = prime * result + ((total == null) ? 0 : total.hashCode());
         return result;
     }
 
@@ -126,93 +182,26 @@ public class GivingRecord implements Comparable<GivingRecord>
         if (getClass() != obj.getClass())
             return false;
         GivingRecord other = (GivingRecord) obj;
+        if (categorizedAmounts == null) {
+            if (other.categorizedAmounts != null)
+                return false;
+        } else if (!categorizedAmounts.equals(other.categorizedAmounts))
+            return false;
         if (date == null) {
             if (other.date != null)
                 return false;
         } else if (!date.equals(other.date))
-            return false;
-        if (general == null) {
-            if (other.general != null)
-                return false;
-        } else if (!general.equals(other.general))
-            return false;
-        if (missions == null) {
-            if (other.missions != null)
-                return false;
-        } else if (!missions.equals(other.missions))
             return false;
         if (name == null) {
             if (other.name != null)
                 return false;
         } else if (!name.equals(other.name))
             return false;
-        if (this.building == null) {
-            if (other.building != null)
+        if (total == null) {
+            if (other.total != null)
                 return false;
-        } else if (!this.building.equals(other.building))
+        } else if (!total.equals(other.total))
             return false;
         return true;
-    }
-    
-    public String toBasicString()
-    {
-        return date + ", " + name + ", " + 
-            NumberFormat.getCurrencyInstance().format(general) + ", " + 
-            NumberFormat.getCurrencyInstance().format(missions) + ", " +
-            NumberFormat.getCurrencyInstance().format(building);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "GivingRecord [date=" + date + 
-                        ", name=" + name +
-                        ", general=" + general + 
-                        ", missions=" + missions + 
-                        ", building=" + building +
-                        ", total=" + total + "]";
-    }
-    
-    public String toCsv()
-    {
-        return date + 
-               "," + name +
-               "," + general + 
-               "," + missions + 
-               "," + building +
-               "," + total;
-    }
-    
-    public String toReportCsv()
-    {
-        return date + 
-               "," + general + 
-               "," + missions + 
-               "," + building +
-               "," + total;
-    }
-    
-    public static GivingRecord fromCsv(String csv) throws ParseException
-    {
-        try {
-            final String[] tokens = csv.split(",");
-            final String date = tokens[0];
-            final String name = tokens[1];
-            final Double general = Double.parseDouble(tokens[2]);
-            final Double missions = Double.parseDouble(tokens[3]);
-            final Double building = Double.parseDouble(tokens[4]);
-            return new GivingRecord(date, name, general, missions, building);
-        } catch (Exception e) {
-            throw new ParseException(csv, 0);
-        }
-    }
-
-    @Override
-    public int compareTo(GivingRecord other)
-    {
-        if (date.equals(other.date)) {
-            return name.compareTo(other.name);
-        } 
-        return date.compareTo(other.date);
     }
 }
