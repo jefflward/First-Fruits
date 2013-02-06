@@ -69,13 +69,17 @@ public class InputPanel extends JPanel implements Observer
         add(dateLabel, c);
 
         picker = new DatePicker(new Date());
+        final String date = SDF.format(picker.getDate());
+        RecordManager.getInstance().setSelectedDate(date);
         picker.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0)
             {
+                final String date = SDF.format(picker.getDate());
+                RecordManager.getInstance().setSelectedDate(date);
                 final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
                 if (selectedRecord != null) {
-                    selectedRecord.setDate(SDF.format(picker.getDate()));
+                    selectedRecord.setDate(date);
                     RecordManager.getInstance().setSelectedRecord(selectedRecord);
                 }
             }
@@ -156,13 +160,13 @@ public class InputPanel extends JPanel implements Observer
 
     public void updateCategeries(List<String> categories)
     {
-        for ( Pair<JLabel, JFormattedTextField> component : categoryInputs)
+        for (Pair<JLabel, JFormattedTextField> component : categoryInputs)
         {
             this.remove(component.getKey());
             this.remove(component.getValue());
         }
         categoryInputs.clear();
-        
+
         final GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.BOTH;
@@ -201,14 +205,18 @@ public class InputPanel extends JPanel implements Observer
         record.setDate(SDF.format(picker.getDate()));
         record.setName(nameCombo.getSelectedItem().toString());
 
-        try {
-            for (Pair<JLabel, JFormattedTextField> categoryPair : categoryInputs) {
-                final String category = categoryPair.getKey().getText();
-                final Double amount = simpleCurrencyFormat.parse(categoryPair.getValue().getText()).doubleValue();
-                record.setAmountForCategory(category, amount);
+        for (Pair<JLabel, JFormattedTextField> categoryPair : categoryInputs) {
+            final String category = categoryPair.getKey().getText();
+            final String value = categoryPair.getValue().getText();
+
+            try {
+                if (value != null && !value.isEmpty()) {
+                    final Double amount = simpleCurrencyFormat.parse(value).doubleValue();
+                    record.setAmountForCategory(category, amount);
+                }
+            } catch (ParseException e) {
+                // Invalid entry
             }
-        } catch (ParseException e) {
-            return;
         }
         RecordManager.getInstance().updateRecord(record);
         nameCombo.requestFocusInWindow();

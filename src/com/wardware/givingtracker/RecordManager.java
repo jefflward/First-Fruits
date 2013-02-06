@@ -16,6 +16,7 @@ public class RecordManager extends Observable
     private boolean unsavedChanges;
     private int selectionCount;
     private GivingRecord lastUpdated;
+    private String selectedDate;
 
     public static RecordManager getInstance()
     {
@@ -100,10 +101,22 @@ public class RecordManager extends Observable
         setChanged();
         notifyObservers(records);
     }
-
-    public List<GivingRecord> getRecords()
+    
+    public List<GivingRecord> getAllRecords()
     {
         return records;
+    }
+
+    public List<GivingRecord> getRecordsForSelectedDate()
+    {
+        final List<GivingRecord> recordsForSelectedDate = new ArrayList<GivingRecord>();
+        for (GivingRecord record : records)
+        {
+            if (selectedDate != null && selectedDate.equals(record.getDate())) {
+                recordsForSelectedDate.add(record);
+            }
+        }
+        return recordsForSelectedDate;
     }
 
     public boolean hasUnsavedChanges()
@@ -158,5 +171,17 @@ public class RecordManager extends Observable
         unsavedChanges = false;
         setChanged();
         notifyObservers(records);
+    }
+
+    public void setSelectedDate(String date)
+    {
+        setChanged();
+        selectedDate = date;
+        notifyObservers(selectedDate);
+    }
+    
+    public String getSelectedDate()
+    {
+        return selectedDate;
     }
 }

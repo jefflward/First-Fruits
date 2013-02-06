@@ -354,7 +354,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private void deleteSelectedRecords()
     {
         recordsTable.deleteSelectedRecords();
-        if (currentFile == null && RecordManager.getInstance().getRecords().size() == 0) {
+        if (currentFile == null && RecordManager.getInstance().getAllRecords().size() == 0) {
             RecordManager.getInstance().setUnsavedChanges(false);
         }
     }
@@ -534,7 +534,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         }
         columnsCsv.deleteCharAt(columnsCsv.length() - 1);
         printWriter.println(columnsCsv.toString());    
-        final List<GivingRecord> records = RecordManager.getInstance().getRecords();
+        final List<GivingRecord> records = RecordManager.getInstance().getAllRecords();
         for (GivingRecord record : records) {
             printWriter.println(record.toCsv());
         }
@@ -549,9 +549,10 @@ public class GivingTrackerFrame extends JFrame implements Observer
         if (lastUpdated != null) {
             lastEntryLabel.setText("  Last Entry: " + lastUpdated.toBasicString());
         }
-        recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getRecords().size() + "  ");
+        recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getAllRecords().size() + "  ");
         deleteButton.setEnabled(RecordManager.getInstance().getSelectionCount() > 0);
-        boolean hasRecords = RecordManager.getInstance().getRecords().size() > 0;
+        
+        boolean hasRecords = RecordManager.getInstance().getAllRecords().size() > 0;
         boolean hasUnsavedChanges = RecordManager.getInstance().hasUnsavedChanges();
         saveButton.setEnabled(hasUnsavedChanges);
         saveItem.setEnabled(hasUnsavedChanges);
