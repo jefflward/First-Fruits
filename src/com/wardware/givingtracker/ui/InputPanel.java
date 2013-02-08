@@ -28,9 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.michaelbaranov.microba.calendar.DatePicker;
 import com.wardware.givingtracker.GivingRecord;
 import com.wardware.givingtracker.RecordManager;
@@ -40,10 +37,7 @@ public class InputPanel extends JPanel implements Observer
 {
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
     private AutoComboBox nameCombo;
-    private List<Pair<JLabel, JFormattedTextField>> categoryInputs;
-    private JFormattedTextField generalField;
-    private JFormattedTextField missionsField;
-    private JFormattedTextField buildingField;
+    private List<CategoryInputPair> categoryInputs;
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
     private SelectAllFocusListener focusListener;
@@ -109,9 +103,31 @@ public class InputPanel extends JPanel implements Observer
         focusListener = new SelectAllFocusListener();
         keyListener = new MyKeyListener();
 
-        categoryInputs = new ArrayList<Pair<JLabel, JFormattedTextField>>();
+        categoryInputs = new ArrayList<CategoryInputPair>();
         final List<String> categories = Settings.getInstance().getCategories();
         updateCategeries(categories);
+    }
+
+    private class CategoryInputPair
+    {
+        private JLabel label;
+        private JFormattedTextField inputField;
+
+        public CategoryInputPair(JLabel label, JFormattedTextField inputField)
+        {
+            this.label = label;
+            this.inputField = inputField;
+        }
+
+        public JLabel getLabel()
+        {
+            return label;
+        }
+
+        public JFormattedTextField getInputField()
+        {
+            return inputField;
+        }
     }
 
     private class SelectAllFocusListener extends FocusAdapter
@@ -140,13 +156,32 @@ public class InputPanel extends JPanel implements Observer
             if (KeyEvent.VK_ENTER == event.getKeyCode()) {
                 createOrUpdateRecord();
             }
-            if (KeyEvent.VK_RIGHT == event.getKeyCode()) {
-                if (generalField.hasFocus()) {
-                    missionsField.requestFocusInWindow();
-                } else if (missionsField.hasFocus()) {
-                    buildingField.requestFocusInWindow();
-                } else if (buildingField.hasFocus()) {
-                    generalField.requestFocusInWindow();
+            if (KeyEvent.VK_DOWN == event.getKeyCode()) {
+                final CategoryInputPair[] inputs = new CategoryInputPair[categoryInputs.size()];
+                categoryInputs.toArray(inputs);
+                for (int i = 0; i < inputs.length; i++) {
+                    if (inputs[i].getInputField().hasFocus()) {
+                        if (i < inputs.length - 1) {
+                            inputs[i+1].getInputField().requestFocusInWindow();
+                        } else {
+                            inputs[0].getInputField().requestFocusInWindow();
+                        }
+                        break;
+                    }
+                }
+            }
+            if (KeyEvent.VK_UP == event.getKeyCode()) {
+                final CategoryInputPair[] inputs = new CategoryInputPair[categoryInputs.size()];
+                categoryInputs.toArray(inputs);
+                for (int i = 0; i < inputs.length; i++) {
+                    if (inputs[i].getInputField().hasFocus()) {
+                        if (i == 0) {
+                            inputs[inputs.length-1].getInputField().requestFocusInWindow();
+                        } else {
+                            inputs[i-1].getInputField().requestFocusInWindow();
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -160,10 +195,10 @@ public class InputPanel extends JPanel implements Observer
 
     public void updateCategeries(List<String> categories)
     {
-        for (Pair<JLabel, JFormattedTextField> component : categoryInputs)
+        for (CategoryInputPair input : categoryInputs)
         {
-            this.remove(component.getKey());
-            this.remove(component.getValue());
+            this.remove(input.getLabel());
+            this.remove(input.getInputField());
         }
         categoryInputs.clear();
 
@@ -189,7 +224,7 @@ public class InputPanel extends JPanel implements Observer
             c.gridwidth = 3;
             add(valueField, c);
 
-            categoryInputs.add(new ImmutablePair<JLabel, JFormattedTextField>(categoryLabel, valueField));
+            categoryInputs.add(new CategoryInputPair(categoryLabel, valueField));
         }
         invalidate();
         updateUI();
@@ -205,9 +240,9 @@ public class InputPanel extends JPanel implements Observer
         record.setDate(SDF.format(picker.getDate()));
         record.setName(nameCombo.getSelectedItem().toString());
 
-        for (Pair<JLabel, JFormattedTextField> categoryPair : categoryInputs) {
-            final String category = categoryPair.getKey().getText();
-            final String value = categoryPair.getValue().getText();
+        for (CategoryInputPair input : categoryInputs) {
+            final String category = input.getLabel().getText();
+            final String value = input.getInputField().getText();
 
             try {
                 if (value != null && !value.isEmpty()) {
@@ -221,8 +256,8 @@ public class InputPanel extends JPanel implements Observer
         RecordManager.getInstance().updateRecord(record);
         nameCombo.requestFocusInWindow();
         nameCombo.setSelectedIndex(0);
-        for (Pair<JLabel, JFormattedTextField> categoryCombo : categoryInputs) {
-            categoryCombo.getValue().setValue(null);
+        for (CategoryInputPair input : categoryInputs) {
+            input.getInputField().setValue(null);
         }
     }
 
@@ -243,14 +278,14 @@ public class InputPanel extends JPanel implements Observer
                 }
                 nameCombo.setSelectedItem(selectedRecord.getName());
 
-                for (Pair<JLabel, JFormattedTextField> categoryCombo : categoryInputs) {
-                    final String category = categoryCombo.getKey().getText();
-                    categoryCombo.getValue().setValue(selectedRecord.getAmountForCategory(category));
+                for (CategoryInputPair input : categoryInputs) {
+                    final String category = input.getLabel().getText();
+                    input.getInputField().setValue(selectedRecord.getAmountForCategory(category));
                 }
             } else {
                 nameCombo.setSelectedIndex(0);
-                for (Pair<JLabel, JFormattedTextField> categoryCombo : categoryInputs) {
-                    categoryCombo.getValue().setValue(null);
+                for (CategoryInputPair input : categoryInputs) {
+                    input.getInputField().setValue(null);
                 }
             }
         } else if (o instanceof Settings) {

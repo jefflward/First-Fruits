@@ -88,7 +88,6 @@ public class RecordsTable extends JTable implements Observer
         model.addGivingRecord(record);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void update(Observable o, Object value)
     {
