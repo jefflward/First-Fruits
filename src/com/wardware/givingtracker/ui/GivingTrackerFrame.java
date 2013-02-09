@@ -26,6 +26,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.text.TextAction;
 
@@ -60,6 +62,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private JMenuItem saveAsItem;
     private JLabel lastEntryLabel;
     private JLabel recordCountLabel;
+    private JCheckBox filterByDateCheckBox;
     
     public GivingTrackerFrame()
     {
@@ -72,7 +75,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         setTitle("Giving Tracker");
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setPreferredSize(new Dimension(900, 500));
+        setPreferredSize(new Dimension(1000, 600));
         setLocationByPlatform(true);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -213,8 +216,21 @@ public class GivingTrackerFrame extends JFrame implements Observer
         splitPane.setLeftComponent(inputPanel); 
         
         recordsTable = new RecordsTable();
+        final JPanel right = new JPanel(new BorderLayout());
+        final JPanel topRight = new JPanel(new BorderLayout());
+        filterByDateCheckBox = new JCheckBox("Only display records for selected date");
+        //filterByDateCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
+        filterByDateCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                RecordManager.getInstance().setFilterByDate(filterByDateCheckBox.isSelected());
+            }
+        });
+        topRight.add(filterByDateCheckBox, BorderLayout.EAST);
+        right.add(topRight, BorderLayout.NORTH);
         final JScrollPane scrollPane = new JScrollPane(recordsTable);
-        splitPane.setRightComponent(scrollPane);
+        right.add(scrollPane, BorderLayout.CENTER);
+        splitPane.setRightComponent(right);
         
         final JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -549,7 +565,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         if (lastUpdated != null) {
             lastEntryLabel.setText("  Last Entry: " + lastUpdated.toBasicString());
         }
-        recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getAllRecords().size() + "  ");
+        recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getRecords().size() + "  ");
         deleteButton.setEnabled(RecordManager.getInstance().getSelectionCount() > 0);
         
         boolean hasRecords = RecordManager.getInstance().getAllRecords().size() > 0;

@@ -61,7 +61,7 @@ public class InputPanel extends JPanel implements Observer
         final JLabel dateLabel = new JLabel("Date");
         dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         add(dateLabel, c);
-
+        
         picker = new DatePicker(new Date());
         final String date = SDF.format(picker.getDate());
         RecordManager.getInstance().setSelectedDate(date);
@@ -81,11 +81,15 @@ public class InputPanel extends JPanel implements Observer
         c.gridx = 1;
         c.gridwidth = 3;
         add(picker, c);
+        
+        c.gridwidth = 3;
+        c.gridx = 1;
+        c.gridy = 1;
 
         final JLabel nameLabel = new JLabel("Name");
         nameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         c.gridx = 0;
-        c.gridy = 1;
+        c.gridy = 2;
         c.gridwidth = 1;
         add(nameLabel, c);
 
@@ -205,7 +209,7 @@ public class InputPanel extends JPanel implements Observer
         final GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(5, 5, 5, 5);
         c.fill = GridBagConstraints.BOTH;
-        int gridy = 2;
+        int gridy = 3;
         c.gridx = 0;
         c.gridwidth = 1;
         for (String category : categories) {

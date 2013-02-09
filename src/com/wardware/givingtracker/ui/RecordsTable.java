@@ -95,9 +95,9 @@ public class RecordsTable extends JTable implements Observer
             model.fireTableRowsUpdated(getSelectedRow(), getSelectedRow());
             clearSelection();
         } else if (value instanceof List) {
-            model.setRecords(RecordManager.getInstance().getRecordsForSelectedDate());
-        } else if (value instanceof String) {
-            model.setRecords(RecordManager.getInstance().getRecordsForSelectedDate());
+            model.setRecords(RecordManager.getInstance().getRecords());
+        } else if (value instanceof Boolean) {
+            model.setRecords(RecordManager.getInstance().getRecords());
         }
     }
 }
