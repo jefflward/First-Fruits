@@ -492,8 +492,8 @@ public class GivingTrackerFrame extends JFrame implements Observer
             for (File f : fileChooser.getSelectedFiles()) {
                 records.addAll(getRecordsFromFile(f));
             }
+            RecordManager.getInstance().setRecords(records);
         }
-        RecordManager.getInstance().setRecords(records);
     }
 
     private Set<GivingRecord> getRecordsFromFile(File file) throws IOException
