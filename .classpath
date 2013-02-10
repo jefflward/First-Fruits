@@ -4,8 +4,25 @@
 	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="libs/microba-0.4.4.3.jar"/>
-	<classpathentry kind="lib" path="libs/commons-lang3-3.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="libs/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="libs/microba-0.4.4.3.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/dist/dynamicreports-adhoc-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/dist/dynamicreports-core-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/dist/dynamicreports-examples-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/commons-lang-2.5.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/jasperreports-4.7.1.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/jcommon-1.0.15.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/jfreechart-1.0.12.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/jxl-2.6.10.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/poi-3.7.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/jdtcore-3.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/commons-digester-2.1.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/spring-core-2.5.jar"/>
+	<classpathentry kind="lib" path="libs/DynamicReports/libs/spring-beans-2.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

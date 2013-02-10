@@ -47,7 +47,10 @@ public class GivingRecord implements Comparable<GivingRecord>
 
     public Double getAmountForCategory(String category)
     {
-        return categorizedAmounts.get(category);
+        if (categorizedAmounts.containsKey(category)) {
+            return categorizedAmounts.get(category);
+        }
+        return 0.0;
     }
 
     public void setAmountForCategory(String category, Double amount)

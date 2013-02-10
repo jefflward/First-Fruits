@@ -197,6 +197,20 @@ public class GivingTrackerFrame extends JFrame implements Observer
         reportAll.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/report_all.png")));
         reportAll.setMnemonic('A');
         reportsMenu.add(reportAll);
+        
+        final JMenuItem offeringReport = new JMenuItem(new TextAction("Offering Report") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    runOfferingReport();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //offeringReport.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/report_all.png")));
+        offeringReport.setMnemonic('O');
+        reportsMenu.add(offeringReport);
         menuBar.add(reportsMenu);
         
         final JMenu helpMenu = new JMenu("Help");
@@ -391,6 +405,19 @@ public class GivingTrackerFrame extends JFrame implements Observer
             @Override
             public void run() {
                 final ReportAllDialog dialog = new ReportAllDialog();
+                dialog.setLocationRelativeTo(GivingTrackerFrame.this);
+                dialog.setVisible(true);
+                dialog.setAlwaysOnTop(true);
+            }
+        });
+    }
+    
+    private void runOfferingReport() throws IOException
+    {
+        SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run() {
+                final OfferingReportDialog dialog = new OfferingReportDialog();
                 dialog.setLocationRelativeTo(GivingTrackerFrame.this);
                 dialog.setVisible(true);
                 dialog.setAlwaysOnTop(true);

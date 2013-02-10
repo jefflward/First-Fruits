@@ -107,18 +107,23 @@ public class RecordManager extends Observable
     {
         return records;
     }
+    
+    public List<GivingRecord> getRecordsForDate(String date)
+    {
+        final List<GivingRecord> recordsForSelectedDate = new ArrayList<GivingRecord>();
+        for (GivingRecord record : records)
+        {
+            if (date != null && date.equals(record.getDate())) {
+                recordsForSelectedDate.add(record);
+            }
+        }
+        return recordsForSelectedDate;
+    }
 
     public List<GivingRecord> getRecords()
     {
         if (filterByDate) {
-            final List<GivingRecord> recordsForSelectedDate = new ArrayList<GivingRecord>();
-            for (GivingRecord record : records)
-            {
-                if (selectedDate != null && selectedDate.equals(record.getDate())) {
-                    recordsForSelectedDate.add(record);
-                }
-            }
-            return recordsForSelectedDate;
+            return getRecordsForDate(selectedDate);
         }
         return records;
     }
@@ -195,4 +200,5 @@ public class RecordManager extends Observable
         setChanged();
         this.notifyObservers(filterByDate);
     }
+
 }

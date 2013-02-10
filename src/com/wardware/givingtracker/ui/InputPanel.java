@@ -103,6 +103,7 @@ public class InputPanel extends JPanel implements Observer
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
+        simpleCurrencyFormat.setMinimumFractionDigits(2);
 
         focusListener = new SelectAllFocusListener();
         keyListener = new MyKeyListener();

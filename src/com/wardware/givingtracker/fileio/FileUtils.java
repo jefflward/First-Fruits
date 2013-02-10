@@ -5,6 +5,7 @@ import java.io.File;
 public class FileUtils
 {
     public static final String CSV = "csv";
+    public static final String XLSX = "xlsx";
     
     public static String getExtension(File f) {
         String ext = null;
