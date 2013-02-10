@@ -1,14 +1,11 @@
 package com.wardware.givingtracker.ui;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
@@ -26,7 +23,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 import com.wardware.givingtracker.GivingRecord;
@@ -40,7 +36,6 @@ public class InputPanel extends JPanel implements Observer
     private List<CategoryInputPair> categoryInputs;
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
-    private SelectAllFocusListener focusListener;
     private MyKeyListener keyListener;
 
     public InputPanel()
@@ -105,7 +100,6 @@ public class InputPanel extends JPanel implements Observer
         simpleCurrencyFormat.setMaximumFractionDigits(2);
         simpleCurrencyFormat.setMinimumFractionDigits(2);
 
-        focusListener = new SelectAllFocusListener();
         keyListener = new MyKeyListener();
 
         categoryInputs = new ArrayList<CategoryInputPair>();
@@ -132,24 +126,6 @@ public class InputPanel extends JPanel implements Observer
         public JFormattedTextField getInputField()
         {
             return inputField;
-        }
-    }
-
-    private class SelectAllFocusListener extends FocusAdapter
-    {
-        @Override
-        public void focusGained(final FocusEvent event)
-        {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run()
-                {
-                    final Component component = event.getComponent();
-                    if (component instanceof JFormattedTextField) {
-                        ((JFormattedTextField) component).selectAll();
-                    }
-                }
-            });
         }
     }
 
@@ -221,10 +197,9 @@ public class InputPanel extends JPanel implements Observer
             c.gridwidth = 1;
             add(categoryLabel, c);
 
-            final JFormattedTextField valueField = new JFormattedTextField(simpleCurrencyFormat);
+            final JFormattedTextField valueField = new CurrencyFormattedTextField();
             valueField.setMinimumSize(new Dimension(150, valueField.getHeight()));
             valueField.addKeyListener(keyListener);
-            valueField.addFocusListener(focusListener);
             c.gridx = 1;
             c.gridwidth = 3;
             add(valueField, c);
