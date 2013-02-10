@@ -48,6 +48,8 @@ public class RecordsTable extends JTable implements Observer
                     // Selects the row under the click when there is no 
                     // selection or only a single row selected
                     final int[] selectedRows = getSelectedRows();
+                    final String deleteActionText = selectedRows.length > 1 ? "Delete selected rows" : "Delete selected row";
+                    
                     if (selectedRows.length <= 1) {
                         final int r = rowAtPoint(e.getPoint());
                         if (r >= 0 && r < getRowCount()) {
@@ -56,10 +58,16 @@ public class RecordsTable extends JTable implements Observer
                     }
 
                     final JPopupMenu popup = new JPopupMenu();
-                    popup.add(new TextAction("Delete Selected Row(s)") {
+                    popup.add(new TextAction(deleteActionText) {
                         @Override
                         public void actionPerformed(ActionEvent arg0) {
                             deleteSelectedRecords();
+                        }
+                    });
+                    popup.add(new TextAction("Clear selection") {
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            clearSelection();
                         }
                     });
                     popup.show(e.getComponent(), e.getX(), e.getY());

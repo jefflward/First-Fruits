@@ -20,7 +20,7 @@ import javax.swing.text.TextAction;
 import com.wardware.givingtracker.GivingRecord;
 import com.wardware.givingtracker.RecordManager;
 import com.wardware.givingtracker.fileio.FileUtils;
-import com.wardware.givingtracker.fileio.ReportWriter;
+import com.wardware.givingtracker.fileio.GivingStatementWriter;
 
 public class ReportAllDialog extends JDialog
 {
@@ -115,8 +115,8 @@ public class ReportAllDialog extends JDialog
         for (String name : names) {
             final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(name);
             if (!name.trim().isEmpty() && records.size() > 0) {
-                final File outputFile = new File(outputDirectory.getAbsoluteFile() + File.separator + name + "." + FileUtils.CSV);
-                ReportWriter.writeReport(name, outputFile, records);
+                final File outputFile = new File(outputDirectory.getAbsoluteFile() + File.separator + name + "." + FileUtils.XLSX);
+                GivingStatementWriter.writeGivingStatement(name, outputFile);
             } 
         }
         setVisible(false);

@@ -141,8 +141,8 @@ public class GivingRecord implements Comparable<GivingRecord>
         try {
             final String[] tokens = csv.split(",");
             int tokenIndex = 0;
-            final String date = tokens[tokenIndex++];
-            final String name = tokens[tokenIndex++];
+            final String date = tokens[tokenIndex++].trim();
+            final String name = tokens[tokenIndex++].trim();
             final GivingRecord record = new GivingRecord(date, name);
             final String[] categories = Arrays.copyOfRange(headers, 2, headers.length - 1);
             for (String category : categories) {

@@ -52,7 +52,7 @@ public class RecordManager extends Observable
             setChanged();
             notifyObservers(records);
             if (!uniqueNames.contains(record.getName())) {
-                uniqueNames.add(record.getName());
+                uniqueNames.add(record.getName().trim());
                 setChanged();
                 notifyObservers(uniqueNames);
             }
@@ -96,7 +96,7 @@ public class RecordManager extends Observable
         final Set<String> names = new HashSet<String>();
         names.add("");
         for (GivingRecord record : records) {
-            names.add(record.getName());
+            names.add(record.getName().trim());
         }
         setUniqueNames(names);
         setChanged();

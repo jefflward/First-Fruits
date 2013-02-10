@@ -62,6 +62,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private JLabel lastEntryLabel;
     private JLabel recordCountLabel;
     private JCheckBox filterByDateCheckBox;
+    private AbstractButton offeringReportButton;
     
     public GivingTrackerFrame()
     {
@@ -170,7 +171,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         reportsMenu = new JMenu("Reports");
         reportsMenu.setMnemonic('R');
         reportsMenu.setEnabled(false);
-        final JMenuItem reportItem = new JMenuItem(new TextAction("Create Report") {
+        final JMenuItem reportItem = new JMenuItem(new TextAction("Giving statement") {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
@@ -208,7 +209,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
                 }
             }
         });
-        //offeringReport.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/report_all.png")));
+        offeringReport.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/offering.png")));
         offeringReport.setMnemonic('O');
         reportsMenu.add(offeringReport);
         menuBar.add(reportsMenu);
@@ -308,7 +309,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
                 }
             }
         });
-        reportButton.setToolTipText("Create Report");
+        reportButton.setToolTipText("Giving statement");
         reportButton.setEnabled(false);
         buttonPanel.add(reportButton);
         
@@ -326,6 +327,21 @@ public class GivingTrackerFrame extends JFrame implements Observer
         reportAllButton.setToolTipText("Report All");
         reportAllButton.setEnabled(false);
         buttonPanel.add(reportAllButton);
+        
+        offeringReportButton = new JButton(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/offering.png")));
+        offeringReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    runOfferingReport();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        offeringReportButton.setToolTipText("Offering Report");
+        offeringReportButton.setEnabled(false);
+        buttonPanel.add(offeringReportButton);
         
         deleteButton = new JButton(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/delete.png")));
         deleteButton.addActionListener(new ActionListener() {
@@ -430,7 +446,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final ReportDialog reportDialog = new ReportDialog();
+                final GivingStatementDialog reportDialog = new GivingStatementDialog();
                 reportDialog.setLocationRelativeTo(GivingTrackerFrame.this);
                 reportDialog.setVisible(true);
                 reportDialog.setAlwaysOnTop(true);
@@ -602,5 +618,6 @@ public class GivingTrackerFrame extends JFrame implements Observer
         reportsMenu.setEnabled(hasRecords);
         reportButton.setEnabled(hasRecords);
         reportAllButton.setEnabled(hasRecords);
+        offeringReportButton.setEnabled(hasRecords);
     }
 }

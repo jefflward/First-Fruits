@@ -10,7 +10,6 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -20,20 +19,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.text.TextAction;
 
-import com.wardware.givingtracker.GivingRecord;
 import com.wardware.givingtracker.RecordManager;
-import com.wardware.givingtracker.fileio.CsvFileFilter;
 import com.wardware.givingtracker.fileio.FileUtils;
-import com.wardware.givingtracker.fileio.ReportWriter;
+import com.wardware.givingtracker.fileio.GivingStatementWriter;
+import com.wardware.givingtracker.fileio.XlsxFileFilter;
 
-public class ReportDialog extends JDialog
+public class GivingStatementDialog extends JDialog
 {
     private AutoComboBox nameCombo;
     private File outputFile;
-    private JLabel outputFileLabel;
-    private JButton runReportButton;
+    private JButton saveButton;
     
-    public ReportDialog()
+    public GivingStatementDialog()
     {
         initComponents();
     }
@@ -43,7 +40,7 @@ public class ReportDialog extends JDialog
         setLayout(new GridBagLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
 
-        setTitle("Run Report");
+        setTitle("Giving statement");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(300, 150));
         
@@ -61,11 +58,10 @@ public class ReportDialog extends JDialog
         nameCombo.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent arg0) {
-                if (!nameCombo.getSelectedItem().toString().trim().isEmpty() &&
-                    outputFile != null) {
-                    runReportButton.setEnabled(true);
+                if (!nameCombo.getSelectedItem().toString().trim().isEmpty()) {
+                    saveButton.setEnabled(true);
                 } else {
-                    runReportButton.setEnabled(false);
+                    saveButton.setEnabled(false);
                 }
             }
         });
@@ -73,36 +69,23 @@ public class ReportDialog extends JDialog
         c.gridwidth = 3;
         add(nameCombo, c);
         
-        final JButton outputFileButton = new JButton(new TextAction("Output File: "){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chooseOutputFile();
-            }
-        });
-        c.gridx = 0;
-        c.gridy = 1;        
-        c.gridwidth = 1;
-        add(outputFileButton, c);
-        
-        outputFileLabel = new JLabel();
-        c.gridx = 1;
-        c.gridwidth = 3;
-        add(outputFileLabel, c);
-        
         final JPanel buttonPanel = new JPanel();
-        runReportButton = new JButton(new TextAction("Run"){
+        saveButton = new JButton(new TextAction("Save"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    runReport();
+                    if (chooseOutputFile()) {
+                        setVisible(false);
+                        runReport();
+                    }
                 } catch (IOException e) {
-                    JOptionPane.showMessageDialog(ReportDialog.this, "Error occurred while running report: " + e.getMessage(), "Run report error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(GivingStatementDialog.this, "Error occurred while running report: " + e.getMessage(), "Run report error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-        runReportButton.setEnabled(false);
+        saveButton.setEnabled(false);
         
-        buttonPanel.add(runReportButton);
+        buttonPanel.add(saveButton);
         
         final JButton cancelButton = new JButton(new TextAction("Cancel"){
             @Override
@@ -112,7 +95,7 @@ public class ReportDialog extends JDialog
             }
         });
         buttonPanel.add(cancelButton);
-        c.gridx = 2;
+        c.gridx = 1;
         c.gridy = 2;        
         c.gridwidth = 2;
         c.fill = GridBagConstraints.EAST;
@@ -121,29 +104,28 @@ public class ReportDialog extends JDialog
         pack();
     }
     
-    private void chooseOutputFile()
+    private boolean chooseOutputFile()
     {
         final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new CsvFileFilter());                    
+        fileChooser.setFileFilter(new XlsxFileFilter());                    
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             outputFile = fileChooser.getSelectedFile();
             if (FileUtils.getExtension(outputFile) == null) {
-                outputFile = new File(outputFile.getAbsolutePath().concat("." + FileUtils.CSV));
+                outputFile = new File(outputFile.getAbsolutePath().concat("." + FileUtils.XLSX));
             }
-            outputFileLabel.setText(outputFile.getAbsolutePath());
             if (!nameCombo.getSelectedItem().toString().trim().isEmpty()) {
-                runReportButton.setEnabled(true);
+                saveButton.setEnabled(true);
             }
-            invalidate();
-            pack();
+            return true;
         }
+        outputFile = null;
+        return false;
     }
     
     private void runReport() throws IOException
     {
         final String selectedName = (String) nameCombo.getSelectedItem();
-        final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(selectedName);
-        ReportWriter.writeReport(selectedName, outputFile, records);
+        GivingStatementWriter.writeGivingStatement(selectedName, outputFile);
         setVisible(false);
         dispose();
     }
