@@ -409,7 +409,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final SettingsDialog settings = new SettingsDialog();
+                final SettingsDialog settings = new SettingsDialog(GivingTrackerFrame.this);
                 settings.setVisible(true);
             }
         });

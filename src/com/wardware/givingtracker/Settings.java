@@ -18,6 +18,12 @@ public class Settings extends Observable
     public static final String ORGANIZATION_NAME_KEY = "OrganizationName"; 
     public static final String ORGANIZATION_ADDRESS_KEY = "OrganizationAddress";
     public static final String CATEGORIES_KEY = "Categories";
+    public static final String ADDRESS1 = "Address1";
+    public static final String ADDRESS2 = "Address2";
+    public static final String CITY = "City";
+    public static final String STATE = "State";
+    public static final String ZIP = "Zip";
+    
     private static final String SETTINGS_FILE_NAME = "GivingTracker.props";
     private static Settings INSTANCE;
     private Properties properties;
@@ -84,6 +90,8 @@ public class Settings extends Observable
     {
         try {
             properties.store(new FileOutputStream(new File(SETTINGS_FILE_NAME)), "Properties for GivingTracker");
+            setChanged();
+            notifyObservers();
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Error occurred while saving settings: " + e.getMessage(), "Save Settings Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {

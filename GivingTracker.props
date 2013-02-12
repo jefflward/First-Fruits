@@ -1,5 +1,9 @@
 #Properties for GivingTracker
-#Sun Feb 10 17:16:21 EST 2013
+#Mon Feb 11 21:45:08 EST 2013
+Zip=12345
 OrganizationName=A Baptist Church
-Categories=General;Missions;Building
-OrganizationAddress=PO Box 1234\nSomewhere MI 12345\n(123) 456-7890
+State=MI
+City=Some City
+Address2=
+Address1=1234 Some Road
+Categories=Building;General;Missions
