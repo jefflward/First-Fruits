@@ -1,9 +1,8 @@
 package com.wardware.givingtracker.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -37,6 +36,7 @@ public class InputPanel extends JPanel implements Observer
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
     private MyKeyListener keyListener;
+    private JPanel contentPanel;
 
     public InputPanel()
     {
@@ -47,15 +47,12 @@ public class InputPanel extends JPanel implements Observer
 
     private void initComponents()
     {
-        setLayout(new GridBagLayout());
-        final GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
-        c.fill = GridBagConstraints.BOTH;
-        c.gridx = 0;
-        c.gridy = 0;
+        setLayout(new BorderLayout());
+        
+        contentPanel = new JPanel(new GridBagLayout());
         final JLabel dateLabel = new JLabel("Date");
         dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        add(dateLabel, c);
+        contentPanel.add(dateLabel, Gbc.xyi(0, 0, 2).top(50).east());
         
         picker = new DatePicker(new Date());
         final String date = SDF.format(picker.getDate());
@@ -73,28 +70,17 @@ public class InputPanel extends JPanel implements Observer
                 }
             }
         });
-        c.gridx = 1;
-        c.gridwidth = 3;
-        add(picker, c);
+        contentPanel.add(picker, Gbc.xyi(1, 0, 2).top(50).horizontal());
         
-        c.gridwidth = 3;
-        c.gridx = 1;
-        c.gridy = 1;
-
         final JLabel nameLabel = new JLabel("Name");
         nameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        c.gridx = 0;
-        c.gridy = 2;
-        c.gridwidth = 1;
-        add(nameLabel, c);
+        contentPanel.add(nameLabel, Gbc.xyi(0, 2, 2).east());
 
         nameCombo = new AutoComboBox(new ArrayList<String>());
         nameCombo.setMinimumSize(new Dimension(150, nameCombo.getHeight()));
         nameCombo.setCaseSensitive(false);
         nameCombo.setStrict(false);
-        c.gridx = 1;
-        c.gridwidth = 3;
-        add(nameCombo, c);
+        contentPanel.add(nameCombo, Gbc.xyi(1, 2, 2).horizontal());
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
@@ -103,8 +89,8 @@ public class InputPanel extends JPanel implements Observer
         keyListener = new MyKeyListener();
 
         categoryInputs = new ArrayList<CategoryInputPair>();
-        final List<String> categories = Settings.getInstance().getCategories();
-        updateCategeries(categories);
+        updateCategeries();
+        add(contentPanel, BorderLayout.NORTH);
     }
 
     private class CategoryInputPair
@@ -174,8 +160,9 @@ public class InputPanel extends JPanel implements Observer
         nameCombo.setDataList(names);
     }
 
-    public void updateCategeries(List<String> categories)
+    public void updateCategeries()
     {
+        final List<String> categories = Settings.getInstance().getCategories();
         for (CategoryInputPair input : categoryInputs)
         {
             this.remove(input.getLabel());
@@ -183,28 +170,18 @@ public class InputPanel extends JPanel implements Observer
         }
         categoryInputs.clear();
 
-        final GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
-        c.fill = GridBagConstraints.BOTH;
         int gridy = 3;
-        c.gridx = 0;
-        c.gridwidth = 1;
         for (String category : categories) {
             final JLabel categoryLabel = new JLabel(category);
             categoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            c.gridx = 0;
-            c.gridy = gridy++;
-            c.gridwidth = 1;
-            add(categoryLabel, c);
+            contentPanel.add(categoryLabel, Gbc.xyi(0, gridy, 2).left(5).east());
 
             final JFormattedTextField valueField = new CurrencyFormattedTextField();
-            valueField.setMinimumSize(new Dimension(150, valueField.getHeight()));
             valueField.addKeyListener(keyListener);
-            c.gridx = 1;
-            c.gridwidth = 3;
-            add(valueField, c);
+            contentPanel.add(valueField, Gbc.xyi(1, gridy, 2).horizontal());
 
             categoryInputs.add(new CategoryInputPair(categoryLabel, valueField));
+            gridy++;
         }
         invalidate();
         updateUI();
@@ -269,8 +246,7 @@ public class InputPanel extends JPanel implements Observer
                 }
             }
         } else if (o instanceof Settings) {
-            final List<String> categories = Settings.getInstance().getCategories();
-            updateCategeries(categories);
+            updateCategeries();
         }
     }
 }

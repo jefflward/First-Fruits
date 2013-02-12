@@ -12,6 +12,7 @@ public class Gbc extends GridBagConstraints
         c.insets = new Insets(i, i, i, i);
         c.gridx = x; 
         c.gridy = y;
+        c.gridwidth = 1;
         c.weightx = 0;
         return c;
     }
@@ -68,6 +69,12 @@ public class Gbc extends GridBagConstraints
     public Gbc top(int t)
     {
         c.insets.top = t;
+        return c;
+    }
+    
+    public Gbc left(int l)
+    {
+        c.insets.left = l;
         return c;
     }
 }
