@@ -56,20 +56,15 @@ public class GivingRecord implements Comparable<GivingRecord>
     public void setAmountForCategory(String category, Double amount)
     {
         categorizedAmounts.put(category, amount);
-        updateTotal();
     }
 
     public Double getTotal()
     {
-        return total;
-    }
-
-    private void updateTotal()
-    {
-        total = 0.0;
+        Double total = 0.0;
         for (Double value : categorizedAmounts.values()) {
             total += value;
         }
+        return total;
     }
 
     public void update(GivingRecord record)
