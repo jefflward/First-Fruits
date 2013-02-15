@@ -48,6 +48,7 @@ public class InputPanel extends JPanel implements Observer
     private void initComponents()
     {
         setLayout(new BorderLayout());
+        removeAll();
         
         contentPanel = new JPanel(new GridBagLayout());
         final JLabel dateLabel = new JLabel("Date");
@@ -168,6 +169,8 @@ public class InputPanel extends JPanel implements Observer
             this.remove(input.getLabel());
             this.remove(input.getInputField());
         }
+        contentPanel.invalidate();
+        contentPanel.updateUI();
         categoryInputs.clear();
 
         int gridy = 3;
@@ -246,7 +249,7 @@ public class InputPanel extends JPanel implements Observer
                 }
             }
         } else if (o instanceof Settings) {
-            updateCategeries();
+            initComponents();
         }
     }
 }

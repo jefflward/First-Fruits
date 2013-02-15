@@ -71,10 +71,22 @@ public class Gbc extends GridBagConstraints
         c.insets.top = t;
         return c;
     }
+
+    public Gbc bottom(int b)
+    {
+        c.insets.bottom = b;
+        return c;
+    }
     
     public Gbc left(int l)
     {
         c.insets.left = l;
+        return c;
+    }
+
+    public Gbc right(int r)
+    {
+        c.insets.right = r;
         return c;
     }
 }

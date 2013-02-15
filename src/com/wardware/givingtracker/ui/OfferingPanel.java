@@ -94,17 +94,17 @@ public class OfferingPanel extends JPanel
 
         final JPanel center = new JPanel(new GridBagLayout());
         final JLabel currencyLabel = new JLabel("Currency");
-        currencyLabel.setPreferredSize(new Dimension(100, currencyLabel.getHeight()));
+        currencyLabel.setPreferredSize(new Dimension(100, currencyLabel.getPreferredSize().height));
         currencyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(currencyLabel, Gbc.xyi(1, 0, 2));
+        center.add(currencyLabel, Gbc.xyi(1, 0, 0).right(2).top(20));
         final JLabel checksLabel = new JLabel("Checks");
+        checksLabel.setPreferredSize(new Dimension(100, checksLabel.getPreferredSize().height));
         checksLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        checksLabel.setPreferredSize(new Dimension(100, checksLabel.getHeight()));
-        center.add(checksLabel, Gbc.xyi(2, 0, 2));
+        center.add(checksLabel, Gbc.xyi(2, 0, 0).right(2).top(20));
         final JLabel totalLabel = new JLabel("Total");
+        totalLabel.setPreferredSize(new Dimension(100, totalLabel.getPreferredSize().height));
         totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        totalLabel.setPreferredSize(new Dimension(100, totalLabel.getHeight()));
-        center.add(totalLabel, Gbc.xyi(3, 0, 2));
+        center.add(totalLabel, Gbc.xyi(3, 0, 0).right(2).top(20));
 
         categoryInputs = new HashMap<String, CategoryInputFields>();
         int y = 1;
@@ -116,13 +116,13 @@ public class OfferingPanel extends JPanel
         
         final JLabel offeringTotalLabel = new JLabel("Offering Total");
         offeringTotalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(offeringTotalLabel, Gbc.xyi(2, y, 2).east());
+        center.add(offeringTotalLabel, Gbc.xyi(2, y, 2).bottom(20));
         offeringTotalField = new CurrencyFormattedTextField();
         offeringTotalField.setEditable(false);
         
-        center.add(offeringTotalField, Gbc.xyi(3, y, 2));
+        center.add(offeringTotalField, Gbc.xyi(3, y, 2).bottom(20));
         offeringBalancesLabel = new JLabel();
-        center.add(offeringBalancesLabel, Gbc.xyi(4, y, 2));
+        center.add(offeringBalancesLabel, Gbc.xyi(4, y, 2).bottom(20));
         
         add(center, BorderLayout.CENTER);
         
