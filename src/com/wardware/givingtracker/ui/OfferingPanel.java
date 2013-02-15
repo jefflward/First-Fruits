@@ -2,7 +2,7 @@ package com.wardware.givingtracker.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -42,9 +41,11 @@ public class OfferingPanel extends JPanel
     private JFormattedTextField offeringTotalField;
     private JLabel offeringBalancesLabel;
     private Double totalForAllCategories;
+    private boolean initialized;
 
     public OfferingPanel()
     {
+        initialized = false;
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
         simpleCurrencyFormat.setMinimumFractionDigits(2);
@@ -52,6 +53,7 @@ public class OfferingPanel extends JPanel
         totalForAllCategories = 0.0;
 
         initComponents();
+        initialized = true;
     }
 
     private void initComponents()
@@ -89,56 +91,53 @@ public class OfferingPanel extends JPanel
         datePanel.add(picker);
         add(datePanel, BorderLayout.NORTH);
         
-        final JPanel bottomPanel = new JPanel(new GridLayout(0, 5, 5, 5));
-        bottomPanel.add(new JLabel());
-        bottomPanel.add(new JLabel());
-        bottomPanel.add(new JLabel("Offering Total"));
+
+        final JPanel center = new JPanel(new GridBagLayout());
+        final JLabel currencyLabel = new JLabel("Currency");
+        currencyLabel.setPreferredSize(new Dimension(100, currencyLabel.getHeight()));
+        currencyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        center.add(currencyLabel, Gbc.xyi(1, 0, 2));
+        final JLabel checksLabel = new JLabel("Checks");
+        checksLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        checksLabel.setPreferredSize(new Dimension(100, checksLabel.getHeight()));
+        center.add(checksLabel, Gbc.xyi(2, 0, 2));
+        final JLabel totalLabel = new JLabel("Total");
+        totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        totalLabel.setPreferredSize(new Dimension(100, totalLabel.getHeight()));
+        center.add(totalLabel, Gbc.xyi(3, 0, 2));
+
+        categoryInputs = new HashMap<String, CategoryInputFields>();
+        int y = 1;
+        addInputsForCategory(center, y++, "Uncategorized", false);
+        final List<String> categories = Settings.getInstance().getCategories();
+        for (String category : categories) {
+            addInputsForCategory(center, y++, category, true);
+        }
+        
+        final JLabel offeringTotalLabel = new JLabel("Offering Total");
+        offeringTotalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        center.add(offeringTotalLabel, Gbc.xyi(2, y, 2).east());
         offeringTotalField = new CurrencyFormattedTextField();
         offeringTotalField.setEditable(false);
         
-        bottomPanel.add(offeringTotalField);
+        center.add(offeringTotalField, Gbc.xyi(3, y, 2));
         offeringBalancesLabel = new JLabel();
-        bottomPanel.add(offeringBalancesLabel);
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        final JPanel center = new JPanel();
-        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
-        final JPanel headerPanel = new JPanel(new GridLayout(0, 5, 5, 5));
-        headerPanel.add(new JLabel());
-        final JLabel currencyLabel = new JLabel("Currency");
-        currencyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        headerPanel.add(currencyLabel);
-        final JLabel checksLabel = new JLabel("Checks");
-        checksLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        headerPanel.add(checksLabel);
-        final JLabel totalLabel = new JLabel("Total");
-        totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        headerPanel.add(totalLabel);
-        center.add(headerPanel);
-
-        categoryInputs = new HashMap<String, CategoryInputFields>();
-        final JPanel categoryPanel = new JPanel(new GridLayout(0, 5, 5, 5));
-        addPanelForCategory(center, categoryPanel, "Uncategorized", false);
-        final List<String> categories = Settings.getInstance().getCategories();
-        for (String category : categories) {
-            addPanelForCategory(center, categoryPanel, category, true);
-        }
+        center.add(offeringBalancesLabel, Gbc.xyi(4, y, 2));
+        
         add(center, BorderLayout.CENTER);
-
+        
         invalidate();
         updateUI();
     }
 
-    private void addPanelForCategory(final JPanel center, final JPanel categoryPanel, String category,
-                    boolean checkBalance)
+    private void addInputsForCategory(final JPanel center, int y, String category, boolean checkBalance)
     {
         final CategoryInputFields fields = new CategoryInputFields(category, checkBalance);
-        categoryPanel.add(fields.getCategoryNameLabel());
-        categoryPanel.add(fields.getCurrencyField());
-        categoryPanel.add(fields.getChecksField());
-        categoryPanel.add(fields.getTotalField());
-        categoryPanel.add(fields.getBalancesLabel());
-        center.add(categoryPanel);
+        center.add(fields.getCategoryNameLabel(), Gbc.xyi(0, y, 2).east().both());
+        center.add(fields.getCurrencyField(), Gbc.xyi(1, y, 2).both());
+        center.add(fields.getChecksField(), Gbc.xyi(2, y, 2).both());
+        center.add(fields.getTotalField(), Gbc.xyi(3, y, 2).both());
+        center.add(fields.getBalancesLabel(), Gbc.xyi(4, y, 2).both());
         categoryInputs.put(category, fields);
     }
 
@@ -183,12 +182,12 @@ public class OfferingPanel extends JPanel
 
             currencyField = new CurrencyFormattedTextField();
             currencyField.addPropertyChangeListener("value", valueChangedListener);
-            currencyField.setMinimumSize(new Dimension(150, currencyField.getHeight()));
+            currencyField.setMinimumSize(new Dimension(100, currencyField.getHeight()));
             checksField = new CurrencyFormattedTextField();
             checksField.addPropertyChangeListener("value", valueChangedListener);
-            checksField.setMinimumSize(new Dimension(150, checksField.getHeight()));
+            checksField.setMinimumSize(new Dimension(100, checksField.getHeight()));
             totalField = new CurrencyFormattedTextField();
-            totalField.setMinimumSize(new Dimension(150, totalField.getHeight()));
+            totalField.setMinimumSize(new Dimension(100, totalField.getHeight()));
             totalField.setEditable(false);
             balancesLabel = new JLabel();
             balancesLabel.setMinimumSize(new Dimension(20, 20));
@@ -302,6 +301,9 @@ public class OfferingPanel extends JPanel
 
     private void updateOfferingBalances()
     {
+        if (!initialized) {
+            return;
+        }
         totalForAllCategories = 0.0;
         boolean categoriesBalanced = true;
         for (CategoryInputFields category : categoryInputs.values()) {
