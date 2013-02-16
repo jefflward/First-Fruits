@@ -11,7 +11,6 @@ public class GivingRecord implements Comparable<GivingRecord>
     private String date;
     private String name;
     private Map<String, Double> categorizedAmounts;
-    private Double total;
 
     public GivingRecord()
     {
@@ -99,7 +98,7 @@ public class GivingRecord implements Comparable<GivingRecord>
             sb.append(", " + category + ": ");
             sb.append(NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
         }
-        sb.append(", total=" + NumberFormat.getCurrencyInstance().format(total) + "]");
+        sb.append(", total=" + NumberFormat.getCurrencyInstance().format(getTotal()) + "]");
         return sb.toString();
     }
 
@@ -116,7 +115,7 @@ public class GivingRecord implements Comparable<GivingRecord>
                 sb.append(", ");
             }
         }
-        sb.append(", " + total);
+        sb.append(", " + getTotal());
         return sb.toString();
     }
 
@@ -127,7 +126,7 @@ public class GivingRecord implements Comparable<GivingRecord>
         for (String category : categorizedAmounts.keySet()) {
             sb.append(", " + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
         }
-        sb.append(", " + total);
+        sb.append(", " + getTotal());
         return sb.toString();
     }
 
@@ -166,7 +165,6 @@ public class GivingRecord implements Comparable<GivingRecord>
         result = prime * result + ((categorizedAmounts == null) ? 0 : categorizedAmounts.hashCode());
         result = prime * result + ((date == null) ? 0 : date.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((total == null) ? 0 : total.hashCode());
         return result;
     }
 
@@ -194,11 +192,6 @@ public class GivingRecord implements Comparable<GivingRecord>
             if (other.name != null)
                 return false;
         } else if (!name.equals(other.name))
-            return false;
-        if (total == null) {
-            if (other.total != null)
-                return false;
-        } else if (!total.equals(other.total))
             return false;
         return true;
     }

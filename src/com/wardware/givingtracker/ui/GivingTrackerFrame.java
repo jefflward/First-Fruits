@@ -6,21 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -46,6 +38,8 @@ import com.wardware.givingtracker.RecordManager;
 import com.wardware.givingtracker.Settings;
 import com.wardware.givingtracker.fileio.CsvFileFilter;
 import com.wardware.givingtracker.fileio.FileUtils;
+import com.wardware.givingtracker.fileio.GivingRecordsReader;
+import com.wardware.givingtracker.fileio.GivingRecordsWriter;
 
 public class GivingTrackerFrame extends JFrame implements Observer
 {
@@ -506,53 +500,16 @@ public class GivingTrackerFrame extends JFrame implements Observer
             }
             
             for (File f : fileChooser.getSelectedFiles()) {
-                records.addAll(getRecordsFromFile(f));
+                try {
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                } catch (ParseException e) {
+                    JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
+                                    "Error occurred while loading invalid record file.\n" + f.getAbsolutePath(), 
+                                    "Load Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
             RecordManager.getInstance().setRecords(records);
         }
-    }
-
-    private Set<GivingRecord> getRecordsFromFile(File file) throws IOException
-    {
-        final Set<GivingRecord> records = new HashSet<GivingRecord>();
-        final FileInputStream fstream = new FileInputStream(file);
-        final DataInputStream in = new DataInputStream(fstream);
-        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        try 
-        {
-            final String firstLine = br.readLine();
-            if (firstLine == null || firstLine.isEmpty()) {
-                throw new RuntimeException(String.format("The file: %f is missing header.", file.getName()));
-            }
-
-            final String[] tokens = firstLine.split(",");
-            if (tokens.length == 0) {
-                throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
-            }
-
-            // This is the old format
-            String[] headers = {"Date","Name","General", "Missions", "Building", "Total"};
-            if (tokens[0].equals("Date")) {
-                headers = tokens;
-            }
-
-            String line;
-            while ((line = br.readLine()) != null)   {
-                try {
-                    final GivingRecord record = GivingRecord.fromCsv(line, headers);
-                    records.add(record);
-                } catch (ParseException e) {
-                    JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
-                                    "Error occurred while loading invalid record file.\n" + file.getAbsolutePath(), 
-                                    "Load Error", JOptionPane.ERROR_MESSAGE);
-                    break;
-                }
-            }
-        } finally {
-           in.close();
-           br.close();
-        }
-        return records;
     }
     
     private void saveAs() throws IOException
@@ -564,7 +521,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
             if (FileUtils.getExtension(currentFile) == null) {
                 currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.CSV));
             }
-            writeRecordsToFile();
+            GivingRecordsWriter.writeRecordsToFile(currentFile);
         }
         RecordManager.getInstance().setUnsavedChanges(false);
     }
@@ -572,32 +529,11 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private void saveFile() throws IOException 
     {
         if (currentFile != null) {
-            writeRecordsToFile();
+            GivingRecordsWriter.writeRecordsToFile(currentFile);
         } else {
             saveAs();
         }
         RecordManager.getInstance().setUnsavedChanges(false);
-    }
-
-    private void writeRecordsToFile() throws IOException
-    {
-        final FileWriter fileWriter = new FileWriter(currentFile);
-        final PrintWriter printWriter = new PrintWriter(fileWriter);
-        final RecordTableModel tableModel = (RecordTableModel) recordsTable.getModel();
-        final String[] columnNames = tableModel.getColumns();
-        final StringBuilder columnsCsv = new StringBuilder();
-        for (String column : columnNames) {
-            columnsCsv.append(column);
-            columnsCsv.append(",");
-        }
-        columnsCsv.deleteCharAt(columnsCsv.length() - 1);
-        printWriter.println(columnsCsv.toString());    
-        final List<GivingRecord> records = RecordManager.getInstance().getAllRecords();
-        for (GivingRecord record : records) {
-            printWriter.println(record.toCsv());
-        }
-        printWriter.flush();
-        printWriter.close();
     }
 
     @Override
