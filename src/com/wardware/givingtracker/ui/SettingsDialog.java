@@ -24,6 +24,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.TextAction;
@@ -97,16 +98,23 @@ public class SettingsDialog extends JDialog
         private JList list;
         private DefaultListModel listModel;
         private JTextField categoryName;
+        private JButton removeButton;
 
         public CategoriesPanel()
         {
             this.setLayout(new BorderLayout());
+            this.setBorder(new TitledBorder("Category Settings"));
+            
+            final JLabel categorySettingsHelp = new JLabel("<HTML>The categories defined here will be used throughout the application." +
+            		"<BR>The categories will be displayed in the order specified below." +
+            		"<BR><BR><B>Note:</B> To re-order categories simply drag and drop in the desired order.</HTML>");
+            add(categorySettingsHelp, BorderLayout.NORTH);
             
             listModel = new DefaultListModel();
             
             final List<String> categories = Settings.getInstance().getCategories();
             for (String category : categories) {
-                listModel.addElement(category);
+                listModel.addElement(category.trim());
             }
             
             list = new JList(listModel);
@@ -120,6 +128,12 @@ public class SettingsDialog extends JDialog
                             listModel.remove(list.getSelectedIndex());
                         }
                     }
+                }
+            });
+            list.addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent arg0) {
+                    removeButton.setEnabled(list.getSelectedIndices().length > 0);
                 }
             });
             JScrollPane scrollPane = new JScrollPane(list);
@@ -139,14 +153,22 @@ public class SettingsDialog extends JDialog
                 }
             });
             inputPanel.add(categoryName, Gbc.xyi(0, 0, 2).horizontal());
-            final JButton addButton = new JButton(new TextAction("Add Category"){
+            final JButton addButton = new JButton(new TextAction("Add"){
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
                     addCategory();
                 }
             });
             addButton.setDefaultCapable(true);
-            inputPanel.add(addButton, Gbc.xyi(1, 0, 2).west());
+            inputPanel.add(addButton, Gbc.xyi(1, 0, 2));
+            removeButton = new JButton(new TextAction("Remove"){
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    removeCategories();
+                }
+            });
+            removeButton.setEnabled(false);
+            inputPanel.add(removeButton, Gbc.xyi(2, 0, 2));
             
             add(inputPanel, BorderLayout.SOUTH);
         }
@@ -157,6 +179,15 @@ public class SettingsDialog extends JDialog
             if (!category.isEmpty()) {
                 listModel.addElement(category);
             }
+            categoryName.setText("");
+        }
+        
+        private void removeCategories()
+        {
+            final int[] selectedIndices = list.getSelectedIndices();
+            for (int i = selectedIndices.length-1; i >=0; i--) {
+                listModel.removeElementAt(selectedIndices[i]);
+            } 
             categoryName.setText("");
         }
         

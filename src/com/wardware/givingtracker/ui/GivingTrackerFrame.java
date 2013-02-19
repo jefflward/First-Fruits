@@ -33,12 +33,15 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.TextAction;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.wardware.givingtracker.GivingRecord;
 import com.wardware.givingtracker.RecordManager;
 import com.wardware.givingtracker.Settings;
 import com.wardware.givingtracker.fileio.CsvFileFilter;
 import com.wardware.givingtracker.fileio.FileUtils;
 import com.wardware.givingtracker.fileio.GivingRecordsReader;
+import com.wardware.givingtracker.fileio.GivingRecordsReader.CategoryComparison;
 import com.wardware.givingtracker.fileio.GivingRecordsWriter;
 
 public class GivingTrackerFrame extends JFrame implements Observer
@@ -501,6 +504,21 @@ public class GivingTrackerFrame extends JFrame implements Observer
             
             for (File f : fileChooser.getSelectedFiles()) {
                 try {
+                    final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
+                    if (categoryComparison.hasConflicts()) {
+                        final int choice = JOptionPane.showConfirmDialog(GivingTrackerFrame.this, 
+                                        "Records in file do not match categories defined in settings\n" +
+                                        "\n\tExtra categories: " + StringUtils.join(categoryComparison.extraCategories, ",") + 
+                                        "\n\tMissing categories: " + StringUtils.join(categoryComparison.missingCategories, ","),
+                                        "Save Changes", 
+                                        JOptionPane.YES_NO_CANCEL_OPTION);
+                        if (choice == JOptionPane.YES_OPTION) {
+                            System.out.println("you chose yes...");
+                        } else if (choice == JOptionPane.NO_OPTION) {
+                            System.out.println("you chose no...");
+                        }
+                        
+                    }
                     records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                 } catch (ParseException e) {
                     JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
