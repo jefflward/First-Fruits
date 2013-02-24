@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.text.TextAction;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 import com.wardware.givingtracker.GivingRecord;
@@ -90,7 +92,15 @@ public class InputPanel extends JPanel implements Observer
         keyListener = new MyKeyListener();
 
         categoryInputs = new ArrayList<CategoryInputPair>();
-        updateCategeries();
+        int gridy = updateCategeries();
+        
+        final JButton add = new JButton(new TextAction("Add") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                createOrUpdateRecord();
+            }
+        });
+        contentPanel.add(add, Gbc.xyi(1, gridy++, 2).horizontal());
         add(contentPanel, BorderLayout.NORTH);
     }
 
@@ -161,7 +171,7 @@ public class InputPanel extends JPanel implements Observer
         nameCombo.setDataList(names);
     }
 
-    public void updateCategeries()
+    public int updateCategeries()
     {
         final List<String> categories = Settings.getInstance().getCategories();
         for (CategoryInputPair input : categoryInputs)
@@ -188,6 +198,7 @@ public class InputPanel extends JPanel implements Observer
         }
         invalidate();
         updateUI();
+        return gridy;
     }
 
     private void createOrUpdateRecord()

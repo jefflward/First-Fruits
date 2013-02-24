@@ -366,7 +366,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
     protected void about()
     {
         JOptionPane.showMessageDialog(this, "Giving Tracker\n" +
-                "Version: 0.1\n" +
+                "Version: 0.2\n" +
                 "Developed By: Jeff Ward\n" +
                 "(c) Copyright Jeff Ward 2012, 2013.  All rights reserved.", "About Giving Tracker", 
                 JOptionPane.INFORMATION_MESSAGE);
