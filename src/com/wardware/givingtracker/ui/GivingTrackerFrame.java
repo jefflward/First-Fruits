@@ -507,19 +507,26 @@ public class GivingTrackerFrame extends JFrame implements Observer
                     final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
                     if (categoryComparison.hasConflicts()) {
                         final int choice = JOptionPane.showConfirmDialog(GivingTrackerFrame.this, 
-                                        "Records in file do not match categories defined in settings\n" +
-                                        "\n\tExtra categories: " + StringUtils.join(categoryComparison.extraCategories, ",") + 
-                                        "\n\tMissing categories: " + StringUtils.join(categoryComparison.missingCategories, ","),
-                                        "Save Changes", 
+                                        "<HTML>The records being imported do not match the categories defined in the program settings.<BR>" +
+                                        "The records contain the following categories:<BR>" + 
+                                        "<B>[" + StringUtils.join(categoryComparison.allCategories, ", ") + "]</B><BR>" +
+                                        "<BR>The records do not contain the following categories " + 
+                                        "(<I>values will be zero</I>):<BR>" + 
+                                        "<B>[" + StringUtils.join(categoryComparison.missingCategories, ", ") + "]</B><BR>" +
+                                        "<BR>Do you want to add these categories to the settings?  If you choose 'No', data for these<BR>" +
+                                        "categories will be ignored:<BR>" +
+                                        "<B>[" + StringUtils.join(categoryComparison.extraCategories, ", ") + "]</B><BR>",
+                                        "Category Conflicts Detected", 
                                         JOptionPane.YES_NO_CANCEL_OPTION);
                         if (choice == JOptionPane.YES_OPTION) {
-                            System.out.println("you chose yes...");
+                            for (String category : categoryComparison.extraCategories) {
+                                Settings.getInstance().addCategory(category);
+                            }
+                            records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                         } else if (choice == JOptionPane.NO_OPTION) {
-                            System.out.println("you chose no...");
+                            records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                         }
-                        
                     }
-                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                 } catch (ParseException e) {
                     JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
                                     "Error occurred while loading invalid record file.\n" + f.getAbsolutePath(), 

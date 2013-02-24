@@ -5,9 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
-public class RecordManager extends Observable
+public class RecordManager extends Observable implements Observer
 {
     private static RecordManager INSTANCE = new RecordManager();
     private List<GivingRecord> records;
@@ -36,6 +37,7 @@ public class RecordManager extends Observable
         uniqueNames.add("");
         records = new ArrayList<GivingRecord>();
         unsavedChanges = false;
+        Settings.getInstance().addObserver(this);
     }
 
     public void updateRecord(GivingRecord record)
@@ -201,4 +203,12 @@ public class RecordManager extends Observable
         this.notifyObservers(filterByDate);
     }
 
+    @Override
+    public void update(Observable arg0, Object arg1)
+    {
+        final List<String> categories = Settings.getInstance().getCategories();
+        for (GivingRecord record : records) {
+            record.updateCategories(categories);
+        }
+    }
 }

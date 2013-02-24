@@ -7,11 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class Settings extends Observable
 {
@@ -51,12 +55,20 @@ public class Settings extends Observable
     
     public List<String> getCategories()
     {
-        final List<String> categories = new ArrayList<String>();
+        final Set<String> categories = new HashSet<String>();
         final String categoriesProperty = properties.getProperty(Settings.CATEGORIES_KEY);
         if (categoriesProperty != null) {
             categories.addAll(Arrays.asList(categoriesProperty.split(";")));
         }
-        return categories;
+        return new ArrayList<String>(categories);
+    }
+    
+    public void addCategory(String category)
+    {
+        final Set<String> categories = new HashSet<String>(getCategories());
+        categories.add(category.trim());
+        properties.setProperty(Settings.CATEGORIES_KEY, StringUtils.join(categories, ";"));
+        saveSettings();
     }
 
     private void loadSettings()

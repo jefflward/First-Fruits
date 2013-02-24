@@ -7,9 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
@@ -177,7 +179,10 @@ public class SettingsDialog extends JDialog
         {
             final String category = categoryName.getText().trim();
             if (!category.isEmpty()) {
-                listModel.addElement(category);
+                final Set<String> currentCategories = getCategories();
+                if (!currentCategories.contains(category)) {
+                    listModel.addElement(category);
+                }
             }
             categoryName.setText("");
         }
@@ -191,9 +196,14 @@ public class SettingsDialog extends JDialog
             categoryName.setText("");
         }
         
-        public Object[] getCategories()
+        public Set<String> getCategories()
         {
-            return listModel.toArray();
+            final Set<String> categories = new HashSet<String>();
+            final Object[] items = listModel.toArray();
+            for (Object item : items) {
+                categories.add(item.toString());
+            }
+            return categories;
         }
 
         public void saveSettings()

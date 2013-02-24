@@ -4,7 +4,10 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GivingRecord implements Comparable<GivingRecord>
 {
@@ -139,8 +142,11 @@ public class GivingRecord implements Comparable<GivingRecord>
             final String name = tokens[tokenIndex++].trim();
             final GivingRecord record = new GivingRecord(date, name);
             final String[] categories = Arrays.copyOfRange(headers, 2, headers.length - 1);
+            final List<String> definedCategories = Settings.getInstance().getCategories();
             for (String category : categories) {
-                record.setAmountForCategory(category, Double.parseDouble(tokens[tokenIndex++]));
+                if (definedCategories.contains(category)) {
+                    record.setAmountForCategory(category, Double.parseDouble(tokens[tokenIndex++]));
+                }
             }
             return record;
         } catch (Exception e) {
@@ -194,5 +200,14 @@ public class GivingRecord implements Comparable<GivingRecord>
         } else if (!name.equals(other.name))
             return false;
         return true;
+    }
+
+    public void updateCategories(List<String> categories)
+    {
+        final Set<String> keys = new HashSet<String>(categorizedAmounts.keySet());
+        keys.removeAll(categories);
+        for (String key : keys) {
+            categorizedAmounts.remove(key);
+        }
     }
 }
