@@ -221,7 +221,7 @@ public class InputPanel extends JPanel implements Observer
                     record.setAmountForCategory(category, amount);
                 }
             } catch (ParseException e) {
-                System.err.println("couldn't parse input value: " + value);
+                return;
             }
         }
         RecordManager.getInstance().updateRecord(record);
