@@ -505,7 +505,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
             for (File f : fileChooser.getSelectedFiles()) {
                 try {
                     final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
-                    if (categoryComparison.hasConflicts()) {
+                    if (categoryComparison.hasExtraCategories()) {
                         final int choice = JOptionPane.showConfirmDialog(GivingTrackerFrame.this, 
                                         "<HTML>The records being imported do not match the categories defined in the program settings.<BR>" +
                                         "The records contain the following categories:<BR>" + 
@@ -526,6 +526,8 @@ public class GivingTrackerFrame extends JFrame implements Observer
                         } else if (choice == JOptionPane.NO_OPTION) {
                             records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                         }
+                    } else {
+                        records.addAll(GivingRecordsReader.readRecordsFromFile(f));
                     }
                 } catch (ParseException e) {
                     JOptionPane.showMessageDialog(GivingTrackerFrame.this, 

@@ -31,9 +31,9 @@ public class GivingRecordsReader
             missingCategories = missing;
         } 
         
-        public boolean hasConflicts()
+        public boolean hasExtraCategories()
         {
-            return extraCategories.size() > 0 || missingCategories.size() > 0;
+            return extraCategories.size() > 0;
         }
     }
     

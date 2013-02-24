@@ -72,6 +72,7 @@ public class SettingsDialog extends JDialog
             addNamedInputFields(Settings.CITY, "City", 3);
             addNamedInputFields(Settings.STATE, "State", 4);
             addNamedInputFields(Settings.ZIP, "Zip", 5);
+            addNamedInputFields(Settings.PHONE, "Phone", 6);
             add(contents, BorderLayout.NORTH);
         }
         

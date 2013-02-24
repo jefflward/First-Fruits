@@ -84,6 +84,7 @@ public class GivingStatementDialog extends JDialog
             }
         });
         saveButton.setEnabled(false);
+        saveButton.setDefaultCapable(true);
         
         buttonPanel.add(saveButton);
         
@@ -108,7 +109,7 @@ public class GivingStatementDialog extends JDialog
     {
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new XlsxFileFilter());                    
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             outputFile = fileChooser.getSelectedFile();
             if (FileUtils.getExtension(outputFile) == null) {
                 outputFile = new File(outputFile.getAbsolutePath().concat("." + FileUtils.XLSX));

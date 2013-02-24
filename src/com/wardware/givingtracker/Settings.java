@@ -27,6 +27,7 @@ public class Settings extends Observable
     public static final String CITY = "City";
     public static final String STATE = "State";
     public static final String ZIP = "Zip";
+    public static final String PHONE = "Phone";
     
     private static final String SETTINGS_FILE_NAME = "GivingTracker.props";
     private static Settings INSTANCE;

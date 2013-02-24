@@ -1,9 +1,10 @@
 #Properties for GivingTracker
-#Sun Feb 24 12:00:42 EST 2013
-Zip=12345
-OrganizationName=A Baptist Church
-State=MI
-City=Some City
-Address2=
-Address1=1234 Some Road
-Categories=Building Fund;General;Love Offering;Bearing Precious Seed;Special;Missions;Tithe;Building;Other;School;Youth
+#Sun Feb 24 15:56:09 EST 2013
+Zip=13131
+OrganizationName=Fellowship Baptist Church
+State=NY
+City=Parish
+Address2=PO BOX 558
+Phone=(315) 625-7485
+Address1=2604 US Rt. 11
+Categories=General;Missions;Building;Other

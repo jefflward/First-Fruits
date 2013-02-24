@@ -14,9 +14,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
+import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
+import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.builder.subtotal.AggregationSubtotalBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
@@ -32,17 +36,17 @@ public class GivingStatementWriter
 {
     public static void writeGivingStatement(String name, File outputFile) throws IOException
     {
-        final StyleBuilder boldStyle         = stl.style().bold();  
-        final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);  
-        final StyleBuilder columnTitleStyle  = stl.style(boldCenteredStyle)  
-                                            .setBorder(stl.pen1Point())  
-                                            .setBackgroundColor(Color.LIGHT_GRAY);    
-                  
-        final TextColumnBuilder<String> dateColumn  = col.column("Date", "date", type.stringType());  
-        
+        final StyleBuilder boldStyle = stl.style().bold();
+        final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
+        final StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle)
+                        .setBorder(stl.pen1Point())
+                        .setBackgroundColor(Color.LIGHT_GRAY);
+
+        final TextColumnBuilder<String> dateColumn = col.column("Date", "date", type.stringType());
+
         final List<TextColumnBuilder<?>> columnList = new ArrayList<TextColumnBuilder<?>>();
         columnList.add(dateColumn);
-        
+
         final List<AggregationSubtotalBuilder<BigDecimal>> subtotalBuilders = new ArrayList<AggregationSubtotalBuilder<BigDecimal>>();
         final List<String> categories = Settings.getInstance().getCategories();
         for (String category : categories) {
@@ -50,52 +54,107 @@ public class GivingStatementWriter
             columnList.add(categoryColumn);
             subtotalBuilders.add(sbt.sum(categoryColumn));
         }
-        final TextColumnBuilder<BigDecimal> totalsColumn     = col.column("Total", "total", type.bigDecimalType());
+        final TextColumnBuilder<BigDecimal> totalsColumn = col.column("Total", "total", type.bigDecimalType());
         columnList.add(totalsColumn);
         subtotalBuilders.add(sbt.sum(totalsColumn));
-        
+
         final AggregationSubtotalBuilder<?>[] sbtBuilders = new AggregationSubtotalBuilder<?>[subtotalBuilders.size()];
         subtotalBuilders.toArray(sbtBuilders);
-        
+
         final TextColumnBuilder<?>[] columns = new TextColumnBuilder<?>[columnList.size()];
         columnList.toArray(columns);
         
+        final VerticalListBuilder summary = cmp.verticalList();
+        summary.add(cmp.verticalGap(15));
+        summary.add(cmp.text("Authorized signature: ").setStyle(boldStyle));
+        summary.add(cmp.verticalGap(10));
+        summary.add(cmp.text("                                            ").setStyle(stl.style().underline()));
+
         final FileOutputStream os = new FileOutputStream(outputFile);
-        try {             
-            report()//create new report design  
-              .setTemplate(Templates.reportTemplate)  
-              .setColumnTitleStyle(columnTitleStyle)  
-              .highlightDetailEvenRows()  
-              .columns(columns)
-              .title(cmp.text("STATEMENT OF GIVING").setStyle(boldCenteredStyle))//shows report title  
-              .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))//shows number of page at page footer  
-              .setDataSource(createDataSource(name))//set datasource  
-              .subtotalsAtSummary(sbtBuilders)
-              .summary(cmp.text("Authorized signature: ______________________________").setStyle(boldStyle))
-              .toXlsx(os);
-        } catch (DRException e) {  
-            e.printStackTrace();  
+        try {
+            report()// create new report design
+            .setTemplate(Templates.reportTemplate)
+            .setColumnTitleStyle(columnTitleStyle)
+            .highlightDetailEvenRows()
+            .columns(columns)
+            .title(createTitle(name))
+            .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
+            .setDataSource(createDataSource(name))
+            .subtotalsAtSummary(sbtBuilders)
+            .summary(summary)
+            .toXlsx(os);
+        } catch (DRException e) {
+            e.printStackTrace();
         } finally {
             os.flush();
             os.close();
         }
-   }
+    }
     
-    private static JRDataSource createDataSource(String name) 
-    {  
+    private static ComponentBuilder<?, ?> createTitle(String name)
+    {
+        final VerticalListBuilder list = cmp.verticalList();
+        list.add(cmp.text("Statement of Giving").setStyle(stl.style().bold()).setHorizontalAlignment(HorizontalAlignment.CENTER));
+        list.add(cmp.horizontalList()
+                      .setStyle(stl.style(10).setHorizontalAlignment(HorizontalAlignment.LEFT))
+                      .setGap(50)
+                      .add(cmp.hListCell(createNameComponent(name)).heightFixedOnTop())
+                      .add(cmp.hListCell(createChurchAddressComponent()).heightFixedOnTop()), 
+                 cmp.verticalGap(10));
+       
+        return list;
+    }
+    
+    private static ComponentBuilder<?, ?> createNameComponent(String name)
+    {
+        final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
+        addAddressAttribute(list, "Name", name);
+        final HorizontalListBuilder title = cmp.horizontalFlowList();
+        title.add(cmp.text("Contributor").setStyle(Templates.boldStyle)).newRow();
+        return cmp.verticalList(title, list);
+    }
+    
+    private static ComponentBuilder<?, ?> createChurchAddressComponent()
+    {
+        final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
+        final Properties properties = Settings.getInstance().getProperties();
+        addAddressAttribute(list, "Name", properties.getProperty(Settings.ORGANIZATION_NAME_KEY));
+        addAddressAttribute(list, "Address", properties.getProperty(Settings.ADDRESS1));
+        addAddressAttribute(list, "", properties.getProperty(Settings.ADDRESS2));
+        addAddressAttribute(list, "City", properties.getProperty(Settings.CITY));
+        addAddressAttribute(list, "State", properties.getProperty(Settings.STATE));
+        addAddressAttribute(list, "Zip", properties.getProperty(Settings.ZIP));
+        addAddressAttribute(list, "Phone", properties.getProperty(Settings.PHONE));
+        final HorizontalListBuilder title = cmp.horizontalFlowList();
+        title.add(cmp.text("Organization Address").setStyle(Templates.boldStyle)).newRow();
+        return cmp.verticalList(title, list);
+    }
+    
+    private static void addAddressAttribute(HorizontalListBuilder list, String label, String value) {
+        if (value != null && !value.isEmpty()) {
+            if (label != null && !label.isEmpty()) {
+                list.add(cmp.text(label + ":").setFixedColumns(8).setStyle(Templates.boldStyle), cmp.text(value)).newRow();
+            } else {
+                list.add(cmp.text("").setFixedColumns(8).setStyle(Templates.boldStyle), cmp.text(value)).newRow();
+            }
+        }
+    }
+
+    private static JRDataSource createDataSource(String name)
+    {
         final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(name);
-        
+
         final List<String> columnList = new ArrayList<String>();
         columnList.add("date");
         final List<String> categories = Settings.getInstance().getCategories();
         columnList.addAll(categories);
         columnList.add("total");
-        
+
         final String[] columns = new String[columnList.size()];
         columnList.toArray(columns);
-        
+
         final DRDataSource dataSource = new DRDataSource(columns);
-        
+
         for (GivingRecord record : records) {
             final List<Object> data = new ArrayList<Object>();
             data.add(record.getDate());
@@ -106,7 +165,7 @@ public class GivingStatementWriter
             data.add(new BigDecimal(record.getTotal()));
             dataSource.add(data.toArray());
         }
-        
-        return dataSource;  
+
+        return dataSource;
     }
 }

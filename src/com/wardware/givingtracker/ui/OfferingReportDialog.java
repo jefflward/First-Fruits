@@ -29,6 +29,7 @@ import net.sf.dynamicreports.report.constant.HorizontalAlignment;
 import net.sf.dynamicreports.report.exception.DRException;
 
 import com.wardware.givingtracker.RecordManager;
+import com.wardware.givingtracker.Settings;
 import com.wardware.givingtracker.fileio.FileUtils;
 import com.wardware.givingtracker.fileio.XlsxFileFilter;
 
@@ -61,7 +62,9 @@ public class OfferingReportDialog extends JDialog
                 try {
                     chooseOutputFile();
                     if (outputFile != null) {
+                        setVisible(false);
                         saveReport();
+                        dispose();
                     }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(OfferingReportDialog.this, "Error occurred while running report: " + e.getMessage(), "Run Report Error", JOptionPane.ERROR_MESSAGE);
@@ -100,34 +103,30 @@ public class OfferingReportDialog extends JDialog
     
     private void saveReport() throws IOException
     {
-        StyleBuilder boldStyle         = stl.style().bold();  
-        StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);  
-        StyleBuilder columnTitleStyle  = stl.style(boldCenteredStyle)  
+        final StyleBuilder boldStyle         = stl.style().bold();  
+        final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);  
+        final StyleBuilder columnTitleStyle  = stl.style(boldCenteredStyle)  
                                             .setBorder(stl.pen1Point())  
                                             .setBackgroundColor(Color.LIGHT_GRAY);    
                   
-        //                                                           title,     field name     data type  
-        TextColumnBuilder<String> categoryColumn  = col.column("Category", "category", type.stringType());  
-        TextColumnBuilder<BigDecimal> currencyColumn  = col.column("Currency", "currency", type.bigDecimalType());  
-        TextColumnBuilder<BigDecimal> checkColumn     = col.column("Checks", "checks", type.bigDecimalType());  
-        TextColumnBuilder<BigDecimal> totalsColumn     = col.column("Total", "total", type.bigDecimalType());
-        
-        //StyleBuilder offeringTotalStyle = stl.style(Templates.boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT);  
+        final TextColumnBuilder<String> categoryColumn  = col.column("Category", "category", type.stringType());  
+        final TextColumnBuilder<BigDecimal> currencyColumn  = col.column("Currency", "currency", type.bigDecimalType());  
+        final TextColumnBuilder<BigDecimal> checkColumn     = col.column("Checks", "checks", type.bigDecimalType());  
+        final TextColumnBuilder<BigDecimal> totalsColumn     = col.column("Total", "total", type.bigDecimalType());
         
         final FileOutputStream os = new FileOutputStream(outputFile);
         try {             
-            report()//create new report design  
+            report()
               .setTemplate(Templates.reportTemplate)  
               .setColumnTitleStyle(columnTitleStyle)  
               .highlightDetailEvenRows()  
-              .columns(//add columns  
-                categoryColumn, currencyColumn, checkColumn, totalsColumn)  
-              .title(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldCenteredStyle))//shows report title  
-              .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))//shows number of page at page footer  
-              .setDataSource(offeringPanel.createDataSource())//set datasource  
-              .subtotalsAtSummary(sbt.sum(totalsColumn))
-              //.summary(  
-                  //cmp.text(offeringPanel.getOfferingTotal()).setValueFormatter(Templates.createCurrencyValueFormatter("Offering Total:")).setStyle(offeringTotalStyle)) 
+              .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
+              .title(cmp.horizontalList()
+                        .add(cmp.text(Settings.getInstance().getProperties().getProperty(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                        .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
+              .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
+              .setDataSource(offeringPanel.createDataSource())
+              .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn))
               .toXlsx(os);
         } catch (DRException e) {  
             e.printStackTrace();  
