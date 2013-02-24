@@ -1,9 +1,13 @@
 package com.wardware.givingtracker.ui;
 
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -151,10 +155,17 @@ public class RecordTableModel extends DefaultTableModel implements Observer
             @Override
             public int compare(GivingRecord lhs, GivingRecord rhs) {
                 if (sortColumn.equals("Date")) {
-                    if (reverseSort) {
-                        return rhs.getDate().compareTo(lhs.getDate());
+                    final DateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                    try {
+                        final Date lhsDate = sdf.parse(lhs.getDate());
+                        final Date rhsDate = sdf.parse(rhs.getDate());
+                        if (reverseSort) {
+                            return rhsDate.compareTo(lhsDate);
+                        }
+                        return lhsDate.compareTo(rhsDate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
-                    return lhs.getDate().compareTo(rhs.getDate());
                 } else if (sortColumn.equals("Name")) {
                     if (reverseSort) {
                         return rhs.getName().compareTo(lhs.getName());
