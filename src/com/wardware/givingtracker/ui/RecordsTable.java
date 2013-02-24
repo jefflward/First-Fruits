@@ -1,6 +1,8 @@
 package com.wardware.givingtracker.ui;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -86,6 +88,15 @@ public class RecordsTable extends JTable implements Observer
                         }
                     });
                     popup.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+        
+        addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyReleased(KeyEvent event) {
+                if (KeyEvent.VK_DELETE == event.getKeyCode()) {
+                    deleteSelectedRecords();
                 }
             }
         });
