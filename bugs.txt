@@ -1,4 +1,2 @@
 1. undo redo button
-2. delete confirmation
-3. First name, Last name
-4.
+2. First name, Last name

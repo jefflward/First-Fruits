@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -98,10 +99,15 @@ public class RecordsTable extends JTable implements Observer
     
     public void deleteSelectedRecords()
     {
-        final int[] selectedRows = getSelectedRows();
-        if (selectedRows.length > 0) {
-            final List<GivingRecord> records = model.getRecords(selectedRows);
-            RecordManager.getInstance().deleteRecords(records);
+        final int choice = JOptionPane.showConfirmDialog(this, 
+                        "Are you sure you want to delete the selected records?", "Delete selected records", 
+                        JOptionPane.YES_NO_CANCEL_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+            final int[] selectedRows = getSelectedRows();
+            if (selectedRows.length > 0) {
+                final List<GivingRecord> records = model.getRecords(selectedRows);
+                RecordManager.getInstance().deleteRecords(records);
+            }
         }
     }
     
