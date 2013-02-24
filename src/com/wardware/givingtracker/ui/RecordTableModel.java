@@ -3,6 +3,7 @@ package com.wardware.givingtracker.ui;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -17,9 +18,15 @@ public class RecordTableModel extends DefaultTableModel implements Observer
     private List<GivingRecord> records;
 
     private ArrayList<String> columnNames;
+
+    private String sortColumn;
+
+    private boolean reverseSort;
     
     public RecordTableModel()
     {
+        sortColumn = "";
+        reverseSort = false;
         records = new ArrayList<GivingRecord>();
         columnNames = new ArrayList<String>();
         columnNames.add("Date");
@@ -129,5 +136,44 @@ public class RecordTableModel extends DefaultTableModel implements Observer
     public void update(Observable o, Object arg)
     {
         updateColumns();
+    }
+
+    public void sortByColumn(int nColumn)
+    {
+        final String columnName = getColumnName(nColumn);
+        if (columnName.equals(sortColumn)) {
+            reverseSort = !reverseSort;
+        } else {
+            reverseSort = false;
+        }
+        sortColumn = columnName;
+        Collections.sort(records, new Comparator<GivingRecord>(){
+            @Override
+            public int compare(GivingRecord lhs, GivingRecord rhs) {
+                if (sortColumn.equals("Date")) {
+                    if (reverseSort) {
+                        return rhs.getDate().compareTo(lhs.getDate());
+                    }
+                    return lhs.getDate().compareTo(rhs.getDate());
+                } else if (sortColumn.equals("Name")) {
+                    if (reverseSort) {
+                        return rhs.getName().compareTo(lhs.getName());
+                    }
+                    return lhs.getName().compareTo(rhs.getName());
+                } else if (sortColumn.equals("Total")) {
+                    if (reverseSort) {
+                        return rhs.getTotal().compareTo(lhs.getTotal());
+                    }
+                    return lhs.getTotal().compareTo(rhs.getTotal());
+                } else if (Settings.getInstance().getCategories().contains(sortColumn)) {
+                    if (reverseSort) {
+                        return rhs.getAmountForCategory(sortColumn).compareTo(lhs.getAmountForCategory(sortColumn));
+                    }
+                    return lhs.getAmountForCategory(sortColumn).compareTo(rhs.getAmountForCategory(sortColumn));
+                }
+                return lhs.compareTo(rhs);
+            }
+        });
+        fireTableDataChanged();
     }
 }

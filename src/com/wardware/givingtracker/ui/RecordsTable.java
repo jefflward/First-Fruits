@@ -12,6 +12,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.JTableHeader;
 import javax.swing.text.TextAction;
 
 import com.wardware.givingtracker.GivingRecord;
@@ -24,6 +25,7 @@ public class RecordsTable extends JTable implements Observer
     public RecordsTable()
     {
         model = new RecordTableModel();
+        
         setModel(model);
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         RecordManager.getInstance().addObserver(this);
@@ -40,6 +42,18 @@ public class RecordsTable extends JTable implements Observer
                 }
             }
         });
+        
+        final JTableHeader header = getTableHeader();
+        header.addMouseListener( new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                final JTableHeader h = (JTableHeader)e.getSource();
+                final int nColumn = h.columnAtPoint(e.getPoint());
+                if (nColumn != -1) {
+                    model.sortByColumn(nColumn);
+                }
+            }
+        });
+        header.setReorderingAllowed(false);
         
         addMouseListener(new MouseAdapter() {
             @Override
