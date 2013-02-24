@@ -64,7 +64,6 @@ public class AutoTextField extends JTextField
             } catch (Exception exception) {
             }
         }
-
     }
 
     public AutoTextField(List<?> list)
@@ -108,9 +107,9 @@ public class AutoTextField extends JTextField
         for (Object item : dataList) {
             final String itemString = item.toString();
             if (itemString != null) {
-                if (!isCaseSensitive && itemString.trim().toLowerCase().startsWith(input.trim().toLowerCase()))
+                if (!isCaseSensitive && itemString.toLowerCase().startsWith(input.toLowerCase()))
                     return itemString;
-                if (isCaseSensitive && itemString.trim().startsWith(input.trim()))
+                if (isCaseSensitive && itemString.startsWith(input))
                     return itemString;
             }
         }

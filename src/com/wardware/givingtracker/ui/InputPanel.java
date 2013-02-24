@@ -81,7 +81,7 @@ public class InputPanel extends JPanel implements Observer
 
         nameCombo = new AutoComboBox(new ArrayList<String>());
         nameCombo.setMinimumSize(new Dimension(150, nameCombo.getHeight()));
-        nameCombo.setCaseSensitive(false);
+        nameCombo.setCaseSensitive(true);
         nameCombo.setStrict(false);
         contentPanel.add(nameCombo, Gbc.xyi(1, 2, 2).horizontal());
 
