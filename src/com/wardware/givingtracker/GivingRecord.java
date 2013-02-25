@@ -12,7 +12,8 @@ import java.util.Set;
 public class GivingRecord implements Comparable<GivingRecord>
 {
     private String date;
-    private String name;
+    private String lastName;
+    private String firstName;
     private Map<String, Double> categorizedAmounts;
 
     public GivingRecord()
@@ -20,10 +21,11 @@ public class GivingRecord implements Comparable<GivingRecord>
         categorizedAmounts = new HashMap<String, Double>();
     }
 
-    public GivingRecord(String date, String name)
+    public GivingRecord(String date, String lastName, String firstName)
     {
         this.date = date;
-        this.name = name;
+        this.lastName = lastName;
+        this.firstName = firstName;
         categorizedAmounts = new HashMap<String, Double>();
     }
 
@@ -37,14 +39,24 @@ public class GivingRecord implements Comparable<GivingRecord>
         this.date = date;
     }
 
-    public String getName()
+    public String getLastName()
     {
-        return name;
+        return lastName;
     }
 
-    public void setName(String name)
+    public void setLastName(String name)
     {
-        this.name = name;
+        this.lastName = name;
+    }
+    
+    public String getFirstName()
+    {
+        return firstName;
+    }
+    
+    public void setFirstName(String name)
+    {
+        this.firstName = name;
     }
 
     public Double getAmountForCategory(String category)
@@ -72,7 +84,8 @@ public class GivingRecord implements Comparable<GivingRecord>
     public void update(GivingRecord record)
     {
         setDate(record.getDate());
-        setName(record.getName());
+        setLastName(record.getLastName());
+        setFirstName(record.getLastName());
         categorizedAmounts = new HashMap<String, Double>(record.categorizedAmounts);
     }
 
@@ -80,7 +93,8 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         final StringBuilder sb = new StringBuilder();
         sb.append(date + ", ");
-        sb.append(name);
+        sb.append(lastName + ", ");
+        sb.append(firstName);
 
         for (String category : categorizedAmounts.keySet()) {
             sb.append(", " + category + ": ");
@@ -95,7 +109,8 @@ public class GivingRecord implements Comparable<GivingRecord>
         final StringBuilder sb = new StringBuilder();
         sb.append("GivingRecord [");
         sb.append("date=" + date);
-        sb.append(", name=" + name);
+        sb.append(", lastName=" + lastName);
+        sb.append(", firstName=" + firstName);
 
         for (String category : categorizedAmounts.keySet()) {
             sb.append(", " + category + ": ");
@@ -109,16 +124,17 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         final StringBuilder sb = new StringBuilder();
         sb.append(date);
-        sb.append(", " + name);
+        sb.append("," + lastName);
+        sb.append("," + firstName);
 
         for (String category : Settings.getInstance().getCategories()) {
             if (categorizedAmounts.containsKey(category)) {
-                sb.append(", " + categorizedAmounts.get(category));
+                sb.append("," + categorizedAmounts.get(category));
             } else {
-                sb.append(", ");
+                sb.append(",0.0");
             }
         }
-        sb.append(", " + getTotal());
+        sb.append("," + getTotal());
         return sb.toString();
     }
 
@@ -127,9 +143,9 @@ public class GivingRecord implements Comparable<GivingRecord>
         final StringBuilder sb = new StringBuilder();
         sb.append(date);
         for (String category : categorizedAmounts.keySet()) {
-            sb.append(", " + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
+            sb.append("," + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
         }
-        sb.append(", " + getTotal());
+        sb.append("," + getTotal());
         return sb.toString();
     }
 
@@ -139,9 +155,10 @@ public class GivingRecord implements Comparable<GivingRecord>
             final String[] tokens = csv.split(",");
             int tokenIndex = 0;
             final String date = tokens[tokenIndex++].trim();
-            final String name = tokens[tokenIndex++].trim();
-            final GivingRecord record = new GivingRecord(date, name);
-            final String[] categories = Arrays.copyOfRange(headers, 2, headers.length - 1);
+            final String lastName = tokens[tokenIndex++].trim();
+            final String firstName = tokens[tokenIndex++].trim();
+            final GivingRecord record = new GivingRecord(date, lastName, firstName);
+            final String[] categories = Arrays.copyOfRange(headers, 3, headers.length - 1);
             final List<String> definedCategories = Settings.getInstance().getCategories();
             for (String category : categories) {
                 if (definedCategories.contains(category)) {
@@ -158,7 +175,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     public int compareTo(GivingRecord other)
     {
         if (date.equals(other.date)) {
-            return name.compareTo(other.name);
+            return lastName.compareTo(other.lastName);
         }
         return date.compareTo(other.date);
     }
@@ -170,7 +187,7 @@ public class GivingRecord implements Comparable<GivingRecord>
         int result = 1;
         result = prime * result + ((categorizedAmounts == null) ? 0 : categorizedAmounts.hashCode());
         result = prime * result + ((date == null) ? 0 : date.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
         return result;
     }
 
@@ -194,10 +211,10 @@ public class GivingRecord implements Comparable<GivingRecord>
                 return false;
         } else if (!date.equals(other.date))
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (lastName == null) {
+            if (other.lastName != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!lastName.equals(other.lastName))
             return false;
         return true;
     }

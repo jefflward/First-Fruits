@@ -536,7 +536,8 @@ public class GivingTrackerFrame extends JFrame implements Observer
                     }
                 } catch (ParseException e) {
                     JOptionPane.showMessageDialog(GivingTrackerFrame.this, 
-                                    "Error occurred while loading invalid record file.\n" + f.getAbsolutePath(), 
+                                    "Error occurred while loading invalid record file.\n" + f.getAbsolutePath() +
+                                    "\nline: " + e.getMessage(), 
                                     "Load Error", JOptionPane.ERROR_MESSAGE);
                 }
             }

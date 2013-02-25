@@ -33,7 +33,8 @@ import com.wardware.givingtracker.Settings;
 public class InputPanel extends JPanel implements Observer
 {
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-    private AutoComboBox nameCombo;
+    private AutoComboBox lastNameCombo;
+    private AutoComboBox firstNameCombo;
     private List<CategoryInputPair> categoryInputs;
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
@@ -75,15 +76,37 @@ public class InputPanel extends JPanel implements Observer
         });
         contentPanel.add(picker, Gbc.xyi(1, 0, 2).top(50).horizontal());
         
-        final JLabel nameLabel = new JLabel("Name");
-        nameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(nameLabel, Gbc.xyi(0, 2, 2).east());
+        final JLabel lastName = new JLabel("Last Name");
+        lastName.setHorizontalAlignment(SwingConstants.RIGHT);
+        contentPanel.add(lastName, Gbc.xyi(0, 2, 2).east());
 
-        nameCombo = new AutoComboBox(new ArrayList<String>());
-        nameCombo.setMinimumSize(new Dimension(150, nameCombo.getHeight()));
-        nameCombo.setCaseSensitive(true);
-        nameCombo.setStrict(false);
-        contentPanel.add(nameCombo, Gbc.xyi(1, 2, 2).horizontal());
+        lastNameCombo = new AutoComboBox(new ArrayList<String>());
+        lastNameCombo.setMinimumSize(new Dimension(150, lastNameCombo.getHeight()));
+        lastNameCombo.setCaseSensitive(true);
+        lastNameCombo.setStrict(false);
+        lastNameCombo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (lastNameCombo.getSelectedItem() != null) {
+                    final String lastNameSelection = lastNameCombo.getSelectedItem().toString();
+                    final List<String> firstNames = new ArrayList<String>();
+                    firstNames.add("");
+                    firstNames.addAll(RecordManager.getInstance().getFirstNamesForLastName(lastNameSelection));
+                    firstNameCombo.setDataList(firstNames);
+                }
+            }
+        });
+        contentPanel.add(lastNameCombo, Gbc.xyi(1, 2, 2).horizontal());
+        
+        final JLabel firstName = new JLabel("First Name");
+        firstName.setHorizontalAlignment(SwingConstants.RIGHT);
+        contentPanel.add(firstName, Gbc.xyi(0, 3, 2).east());
+
+        firstNameCombo = new AutoComboBox(new ArrayList<String>());
+        firstNameCombo.setMinimumSize(new Dimension(150, firstNameCombo.getHeight()));
+        firstNameCombo.setCaseSensitive(true);
+        firstNameCombo.setStrict(false);
+        contentPanel.add(firstNameCombo, Gbc.xyi(1, 3, 2).horizontal());
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
@@ -165,10 +188,11 @@ public class InputPanel extends JPanel implements Observer
         }
     }
 
-    public void updateNames(List<String> names)
+    public void updateLastNames(List<String> names)
     {
         Collections.sort(names);
-        nameCombo.setDataList(names);
+        lastNameCombo.setDataList(names);
+        firstNameCombo.setDataList(new ArrayList<String>());
     }
 
     public int updateCategeries()
@@ -183,7 +207,7 @@ public class InputPanel extends JPanel implements Observer
         contentPanel.updateUI();
         categoryInputs.clear();
 
-        int gridy = 3;
+        int gridy = 4;
         for (String category : categories) {
             final JLabel categoryLabel = new JLabel(category);
             categoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -203,13 +227,14 @@ public class InputPanel extends JPanel implements Observer
 
     private void createOrUpdateRecord()
     {
-        if (nameCombo.getSelectedItem().toString().trim().isEmpty()) {
+        if (lastNameCombo.getSelectedItem().toString().trim().isEmpty()) {
             return;
         }
 
         final GivingRecord record = new GivingRecord();
         record.setDate(SDF.format(picker.getDate()));
-        record.setName(nameCombo.getSelectedItem().toString());
+        record.setLastName(lastNameCombo.getSelectedItem().toString());
+        record.setFirstName(firstNameCombo.getSelectedItem().toString());
 
         for (CategoryInputPair input : categoryInputs) {
             final String category = input.getLabel().getText();
@@ -225,8 +250,8 @@ public class InputPanel extends JPanel implements Observer
             }
         }
         RecordManager.getInstance().updateRecord(record);
-        nameCombo.requestFocusInWindow();
-        nameCombo.setSelectedIndex(0);
+        lastNameCombo.requestFocusInWindow();
+        lastNameCombo.setSelectedIndex(0);
         for (CategoryInputPair input : categoryInputs) {
             input.getInputField().setValue(null);
         }
@@ -237,7 +262,7 @@ public class InputPanel extends JPanel implements Observer
     {
         if (o instanceof RecordManager)
         {
-            updateNames(RecordManager.getInstance().getUniqueNames());
+            updateLastNames(RecordManager.getInstance().getUniqueLastNames());
             final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
             if (selectedRecord != null) {
                 try {
@@ -247,14 +272,15 @@ public class InputPanel extends JPanel implements Observer
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                nameCombo.setSelectedItem(selectedRecord.getName());
+                lastNameCombo.setSelectedItem(selectedRecord.getLastName());
+                firstNameCombo.setSelectedItem(selectedRecord.getFirstName());
 
                 for (CategoryInputPair input : categoryInputs) {
                     final String category = input.getLabel().getText();
                     input.getInputField().setValue(selectedRecord.getAmountForCategory(category));
                 }
             } else {
-                nameCombo.setSelectedIndex(0);
+                lastNameCombo.setSelectedIndex(0);
                 for (CategoryInputPair input : categoryInputs) {
                     input.getInputField().setValue(null);
                 }

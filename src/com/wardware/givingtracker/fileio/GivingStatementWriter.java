@@ -34,7 +34,7 @@ import com.wardware.givingtracker.Settings;
 
 public class GivingStatementWriter
 {
-    public static void writeGivingStatement(String name, File outputFile) throws IOException
+    public static void writeGivingStatement(String lastName, String firstName, File outputFile) throws IOException
     {
         final StyleBuilder boldStyle = stl.style().bold();
         final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -77,9 +77,9 @@ public class GivingStatementWriter
             .setColumnTitleStyle(columnTitleStyle)
             .highlightDetailEvenRows()
             .columns(columns)
-            .title(createTitle(name))
+            .title(createTitle(lastName, firstName))
             .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
-            .setDataSource(createDataSource(name))
+            .setDataSource(createDataSource(lastName, firstName))
             .subtotalsAtSummary(sbtBuilders)
             .summary(summary)
             .toXlsx(os);
@@ -91,24 +91,24 @@ public class GivingStatementWriter
         }
     }
     
-    private static ComponentBuilder<?, ?> createTitle(String name)
+    private static ComponentBuilder<?, ?> createTitle(String lastName, String firstName)
     {
         final VerticalListBuilder list = cmp.verticalList();
         list.add(cmp.text("Statement of Giving").setStyle(stl.style().bold()).setHorizontalAlignment(HorizontalAlignment.CENTER));
         list.add(cmp.horizontalList()
                       .setStyle(stl.style(10).setHorizontalAlignment(HorizontalAlignment.LEFT))
                       .setGap(50)
-                      .add(cmp.hListCell(createNameComponent(name)).heightFixedOnTop())
+                      .add(cmp.hListCell(createNameComponent(lastName, firstName)).heightFixedOnTop())
                       .add(cmp.hListCell(createChurchAddressComponent()).heightFixedOnTop()), 
                  cmp.verticalGap(10));
        
         return list;
     }
     
-    private static ComponentBuilder<?, ?> createNameComponent(String name)
+    private static ComponentBuilder<?, ?> createNameComponent(String lastName, String firstName)
     {
         final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
-        addAddressAttribute(list, "Name", name);
+        addAddressAttribute(list, "Name", firstName + " " + lastName);
         final HorizontalListBuilder title = cmp.horizontalFlowList();
         title.add(cmp.text("Contributor").setStyle(Templates.boldStyle)).newRow();
         return cmp.verticalList(title, list);
@@ -140,9 +140,9 @@ public class GivingStatementWriter
         }
     }
 
-    private static JRDataSource createDataSource(String name)
+    private static JRDataSource createDataSource(String lastName, String firstName)
     {
-        final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(name);
+        final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(lastName, firstName);
 
         final List<String> columnList = new ArrayList<String>();
         columnList.add("date");

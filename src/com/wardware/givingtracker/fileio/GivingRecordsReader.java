@@ -44,7 +44,8 @@ public class GivingRecordsReader
         
         final List<String> defaultColumns = new ArrayList<String>();
         defaultColumns.add("Date");
-        defaultColumns.add("Name");
+        defaultColumns.add("Last Name");
+        defaultColumns.add("First Name");
         defaultColumns.add("Total");
         
         final FileInputStream fstream = new FileInputStream(file);

@@ -54,7 +54,7 @@ public class GivingStatementDialog extends JDialog
         nameCombo = new AutoComboBox(new ArrayList<String>());
         nameCombo.setCaseSensitive(false);
         nameCombo.setStrict(false);
-        nameCombo.setDataList(RecordManager.getInstance().getUniqueNames());
+        nameCombo.setDataList(RecordManager.getInstance().getReportNameList());
         nameCombo.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent arg0) {
@@ -125,9 +125,13 @@ public class GivingStatementDialog extends JDialog
     
     private void runReport() throws IOException
     {
-        final String selectedName = (String) nameCombo.getSelectedItem();
-        GivingStatementWriter.writeGivingStatement(selectedName, outputFile);
         setVisible(false);
+        final String selectedName = (String) nameCombo.getSelectedItem();
+        if (!selectedName.isEmpty()) {
+            final String lastName = selectedName.split(",")[0].trim();
+            final String firstName = selectedName.split(",")[1].trim();
+            GivingStatementWriter.writeGivingStatement(lastName, firstName, outputFile);
+        }
         dispose();
     }
 }

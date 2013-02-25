@@ -110,16 +110,20 @@ public class ReportAllDialog extends JDialog
     
     private void runReport() throws IOException
     {
-        final List<String> names = RecordManager.getInstance().getUniqueNames();
+        setVisible(false);
+        final List<String> names = RecordManager.getInstance().getReportNameList();
         
         for (String name : names) {
-            final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(name);
-            if (!name.trim().isEmpty() && records.size() > 0) {
-                final File outputFile = new File(outputDirectory.getAbsoluteFile() + File.separator + name + "." + FileUtils.XLSX);
-                GivingStatementWriter.writeGivingStatement(name, outputFile);
-            } 
+            if (!name.isEmpty()) {
+                final String lastName = name.split(",")[0].trim();
+                final String firstName = name.split(",")[1].trim();
+                final List<GivingRecord> records = RecordManager.getInstance().getRecordsForName(lastName, firstName);
+                if (!name.trim().isEmpty() && records.size() > 0) {
+                    final File outputFile = new File(outputDirectory.getAbsoluteFile() + File.separator + lastName + firstName + "." + FileUtils.XLSX);
+                    GivingStatementWriter.writeGivingStatement(lastName, firstName, outputFile);
+                } 
+            }
         }
-        setVisible(false);
         dispose();
     }
 }

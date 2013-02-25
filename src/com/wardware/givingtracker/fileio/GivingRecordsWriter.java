@@ -21,7 +21,8 @@ public class GivingRecordsWriter
         final PrintWriter printWriter = new PrintWriter(fileWriter);
         final List<String> columns = new ArrayList<String>();
         columns.add("Date");
-        columns.add("Name");
+        columns.add("Last Name");
+        columns.add("First Name");
         columns.addAll(Settings.getInstance().getCategories());
         columns.add("Total");
         final String columnsCsv = StringUtils.join(columns.toArray(), ",");

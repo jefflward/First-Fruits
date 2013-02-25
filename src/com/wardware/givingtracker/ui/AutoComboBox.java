@@ -1,5 +1,7 @@
 package com.wardware.givingtracker.ui;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.util.List;
 
@@ -19,6 +21,13 @@ public class AutoComboBox extends JComboBox
 
         AutoTextFieldEditor(List<?> list) {
             editor = new AutoTextField(list, AutoComboBox.this);
+            editor.addFocusListener(new FocusAdapter(){
+                @Override
+                public void focusLost(FocusEvent e) {
+                    isFired = false;
+                    fireActionEvent();
+                }
+            });
         }
     }
 

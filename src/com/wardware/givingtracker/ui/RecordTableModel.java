@@ -34,7 +34,8 @@ public class RecordTableModel extends DefaultTableModel implements Observer
         records = new ArrayList<GivingRecord>();
         columnNames = new ArrayList<String>();
         columnNames.add("Date");
-        columnNames.add("Name");
+        columnNames.add("Last Name");
+        columnNames.add("First Name");
         columnNames.addAll(Settings.getInstance().getCategories());
         columnNames.add("Total");
         this.setColumnIdentifiers(columnNames.toArray());
@@ -93,7 +94,9 @@ public class RecordTableModel extends DefaultTableModel implements Observer
             if (column == 0) {
                 return record.getDate();
             } else if (column == 1) {
-                return record.getName();
+                return record.getLastName();
+            } else if (column == 2) {
+                return record.getFirstName();
             } else if (column == getColumnCount() - 1) {
                 return NumberFormat.getCurrencyInstance().format(record.getTotal());
             } else {
@@ -166,11 +169,16 @@ public class RecordTableModel extends DefaultTableModel implements Observer
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                } else if (sortColumn.equals("Name")) {
+                } else if (sortColumn.equals("Last Name")) {
                     if (reverseSort) {
-                        return rhs.getName().compareTo(lhs.getName());
+                        return rhs.getLastName().compareTo(lhs.getLastName());
                     }
-                    return lhs.getName().compareTo(rhs.getName());
+                    return lhs.getLastName().compareTo(rhs.getLastName());
+                } else if (sortColumn.equals("First Name")) {
+                    if (reverseSort) {
+                        return rhs.getFirstName().compareTo(lhs.getFirstName());
+                    }
+                    return lhs.getFirstName().compareTo(rhs.getFirstName());
                 } else if (sortColumn.equals("Total")) {
                     if (reverseSort) {
                         return rhs.getTotal().compareTo(lhs.getTotal());

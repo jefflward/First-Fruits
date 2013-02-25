@@ -2,8 +2,10 @@ package com.wardware.givingtracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -12,7 +14,8 @@ public class RecordManager extends Observable implements Observer
 {
     private static RecordManager INSTANCE = new RecordManager();
     private List<GivingRecord> records;
-    private Set<String> uniqueNames;
+    private Set<String> uniqueLastNames;
+    private Map<String, Set<String>> firstNamesForLastName;
     private GivingRecord selectedRecord;
     private boolean unsavedChanges;
     private int selectionCount;
@@ -33,8 +36,9 @@ public class RecordManager extends Observable implements Observer
 
     private RecordManager()
     {
-        uniqueNames = new HashSet<String>();
-        uniqueNames.add("");
+        uniqueLastNames = new HashSet<String>();
+        uniqueLastNames.add("");
+        firstNamesForLastName = new HashMap<String, Set<String>>();
         records = new ArrayList<GivingRecord>();
         unsavedChanges = false;
         Settings.getInstance().addObserver(this);
@@ -53,11 +57,13 @@ public class RecordManager extends Observable implements Observer
             records.add(record);
             setChanged();
             notifyObservers(records);
-            if (!uniqueNames.contains(record.getName())) {
-                uniqueNames.add(record.getName().trim());
+            if (!uniqueLastNames.contains(record.getLastName())) {
+                uniqueLastNames.add(record.getLastName().trim());
                 setChanged();
-                notifyObservers(uniqueNames);
+                notifyObservers(uniqueLastNames);
             }
+            
+            updateFirstNamesForLastName(record.getLastName(), record.getFirstName());
         }
     }
 
@@ -78,18 +84,18 @@ public class RecordManager extends Observable implements Observer
         notifyObservers();
     }
 
-    public List<String> getUniqueNames()
+    public List<String> getUniqueLastNames()
     {
-        final List<String> namesSorted = new ArrayList<String>(uniqueNames);
+        final List<String> namesSorted = new ArrayList<String>(uniqueLastNames);
         Collections.sort(namesSorted);
         return namesSorted;
     }
 
     public void setUniqueNames(Set<String> names)
     {
-        uniqueNames = names;
+        uniqueLastNames = names;
         setChanged();
-        notifyObservers(uniqueNames);
+        notifyObservers(uniqueLastNames);
     }
 
     public void setRecords(List<GivingRecord> records)
@@ -97,8 +103,10 @@ public class RecordManager extends Observable implements Observer
         this.records = records;
         final Set<String> names = new HashSet<String>();
         names.add("");
+        updateFirstNamesForLastName("", "");
         for (GivingRecord record : records) {
-            names.add(record.getName().trim());
+            names.add(record.getLastName().trim());
+            updateFirstNamesForLastName(record.getLastName(), record.getFirstName());
         }
         setUniqueNames(names);
         setChanged();
@@ -142,11 +150,12 @@ public class RecordManager extends Observable implements Observer
         notifyObservers(unsavedChanges);
     }
 
-    public List<GivingRecord> getRecordsForName(String selectedName)
+    public List<GivingRecord> getRecordsForName(String lastName, String firstName)
     {
         final List<GivingRecord> recordsForName = new ArrayList<GivingRecord>();
         for (GivingRecord record : records) {
-            if (record.getName().equals(selectedName)) {
+            if (record.getLastName().equals(lastName) &&
+                record.getFirstName().equals(firstName)) {
                 recordsForName.add(record);
             }
         }
@@ -210,5 +219,38 @@ public class RecordManager extends Observable implements Observer
         for (GivingRecord record : records) {
             record.updateCategories(categories);
         }
+    }
+
+    public List<String> getFirstNamesForLastName(String lastName)
+    {
+        if (firstNamesForLastName.containsKey(lastName)) {
+            final List<String> namesSorted = new ArrayList<String>(firstNamesForLastName.get(lastName));
+            Collections.sort(namesSorted);
+            return namesSorted;
+        }
+        return new ArrayList<String>();
+    }
+    
+    public void updateFirstNamesForLastName(String lastName, String firstName)
+    {
+        if (!firstNamesForLastName.containsKey(lastName)) {
+            firstNamesForLastName.put(lastName, new HashSet<String>());
+        }
+
+        firstNamesForLastName.get(lastName).add(firstName);
+    }
+
+    public List<String> getReportNameList()
+    {
+        final List<String> reportNames = new ArrayList<String>();
+        reportNames.add("");
+        for (String lastName : firstNamesForLastName.keySet()) {
+            if (!lastName.isEmpty()) {
+                for (String firstName : firstNamesForLastName.get(lastName)) {
+                    reportNames.add(lastName + ", " + firstName);
+                }
+            }
+        }
+        return reportNames;
     }
 }
