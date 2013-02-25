@@ -1,10 +1,10 @@
 #Properties for GivingTracker
-#Sun Feb 24 23:10:26 EST 2013
-Zip=13131
+#Sun Feb 24 23:22:36 EST 2013
 OrganizationName=Fellowship Baptist Church
+Zip=13131
 State=NY
 City=Parish
-Address2=PO BOX 558
 Phone=(315) 625-7485
+Address2=PO BOX 558
 Address1=2604 US Rt. 11
 Categories=General;Missions;Building;Other

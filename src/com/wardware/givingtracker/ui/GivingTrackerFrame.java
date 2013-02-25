@@ -395,11 +395,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
 
     private void deleteSelectedRecords()
     {
-        final int choice = JOptionPane.showConfirmDialog(GivingTrackerFrame.this, 
-                        "Are you sure you want to delete the selected records?", "Delete selected records", 
-                        JOptionPane.YES_NO_CANCEL_OPTION);
-        if (choice == JOptionPane.YES_OPTION) {
-            recordsTable.deleteSelectedRecords();
+        if (recordsTable.deleteSelectedRecords()) {
             if (currentFile == null && RecordManager.getInstance().getAllRecords().size() == 0) {
                 RecordManager.getInstance().setUnsavedChanges(false);
             }

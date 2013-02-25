@@ -108,7 +108,7 @@ public class RecordsTable extends JTable implements Observer
         super.changeSelection(rowIndex, columnIndex, true, false);  
     } 
     
-    public void deleteSelectedRecords()
+    public boolean deleteSelectedRecords()
     {
         final int choice = JOptionPane.showConfirmDialog(this, 
                         "Are you sure you want to delete the selected records?", "Delete selected records", 
@@ -118,8 +118,10 @@ public class RecordsTable extends JTable implements Observer
             if (selectedRows.length > 0) {
                 final List<GivingRecord> records = model.getRecords(selectedRows);
                 RecordManager.getInstance().deleteRecords(records);
+                return true;
             }
         }
+        return false;
     }
     
     public void addGivingRecord(GivingRecord record)
