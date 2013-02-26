@@ -74,11 +74,11 @@ public class InputPanel extends JPanel implements Observer
                 }
             }
         });
-        contentPanel.add(picker, Gbc.xyi(1, 0, 2).top(50).horizontal());
+        contentPanel.add(picker, Gbc.xyi(1, 0, 2).top(50).horizontal().right(5));
         
         final JLabel lastName = new JLabel("Last Name");
         lastName.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lastName, Gbc.xyi(0, 2, 2).east());
+        contentPanel.add(lastName, Gbc.xyi(0, 2, 2).east().left(5));
 
         lastNameCombo = new AutoComboBox(new ArrayList<String>());
         lastNameCombo.setMinimumSize(new Dimension(150, lastNameCombo.getHeight()));
@@ -96,17 +96,17 @@ public class InputPanel extends JPanel implements Observer
                 }
             }
         });
-        contentPanel.add(lastNameCombo, Gbc.xyi(1, 2, 2).horizontal());
+        contentPanel.add(lastNameCombo, Gbc.xyi(1, 2, 2).horizontal().right(5));
         
         final JLabel firstName = new JLabel("First Name");
         firstName.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(firstName, Gbc.xyi(0, 3, 2).east());
+        contentPanel.add(firstName, Gbc.xyi(0, 3, 2).east().left(5));
 
         firstNameCombo = new AutoComboBox(new ArrayList<String>());
         firstNameCombo.setMinimumSize(new Dimension(150, firstNameCombo.getHeight()));
         firstNameCombo.setCaseSensitive(true);
         firstNameCombo.setStrict(false);
-        contentPanel.add(firstNameCombo, Gbc.xyi(1, 3, 2).horizontal());
+        contentPanel.add(firstNameCombo, Gbc.xyi(1, 3, 2).horizontal().right(5));
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
@@ -123,7 +123,7 @@ public class InputPanel extends JPanel implements Observer
                 createOrUpdateRecord();
             }
         });
-        contentPanel.add(add, Gbc.xyi(1, gridy++, 2).horizontal());
+        contentPanel.add(add, Gbc.xyi(1, gridy++, 2).horizontal().right(5));
         add(contentPanel, BorderLayout.NORTH);
     }
 
@@ -215,7 +215,7 @@ public class InputPanel extends JPanel implements Observer
 
             final JFormattedTextField valueField = new CurrencyFormattedTextField();
             valueField.addKeyListener(keyListener);
-            contentPanel.add(valueField, Gbc.xyi(1, gridy, 2).horizontal());
+            contentPanel.add(valueField, Gbc.xyi(1, gridy, 2).horizontal().right(5));
 
             categoryInputs.add(new CategoryInputPair(categoryLabel, valueField));
             gridy++;

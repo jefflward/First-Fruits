@@ -1,2 +1,1 @@
 1. undo redo button
-2. First name, Last name

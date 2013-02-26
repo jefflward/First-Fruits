@@ -37,6 +37,7 @@ public class GivingStatementWriter
     public static void writeGivingStatement(String lastName, String firstName, File outputFile) throws IOException
     {
         final StyleBuilder boldStyle = stl.style().bold();
+        final StyleBuilder boldStyleSmall = stl.style().bold().setFontSize(8);
         final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
         final StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle)
                         .setBorder(stl.pen1Point())
@@ -65,8 +66,10 @@ public class GivingStatementWriter
         columnList.toArray(columns);
         
         final VerticalListBuilder summary = cmp.verticalList();
+        summary.add(cmp.verticalGap(5));
+        summary.add(cmp.text("Donor did not receive any goods or services in connection with the donations listed.").setStyle(boldStyleSmall));
         summary.add(cmp.verticalGap(15));
-        summary.add(cmp.text("Authorized signature: ").setStyle(boldStyle));
+        summary.add(cmp.text("Authorized Signature: ").setStyle(boldStyle));
         summary.add(cmp.verticalGap(10));
         summary.add(cmp.text("                                            ").setStyle(stl.style().underline()));
 
@@ -108,9 +111,12 @@ public class GivingStatementWriter
     private static ComponentBuilder<?, ?> createNameComponent(String lastName, String firstName)
     {
         final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
-        addAddressAttribute(list, "Name", firstName + " " + lastName);
+        addAddressAttribute(list, "Address", "", true);
+        addAddressAttribute(list, "", "", true);
+        addAddressAttribute(list, "", "", true);
+        addAddressAttribute(list, "Phone", "", true);
         final HorizontalListBuilder title = cmp.horizontalFlowList();
-        title.add(cmp.text("Contributor").setStyle(Templates.boldStyle)).newRow();
+        title.add(cmp.text(String.format("Donor: %s %s", firstName, lastName)).setStyle(Templates.boldStyle)).newRow();
         return cmp.verticalList(title, list);
     }
     
@@ -118,20 +124,21 @@ public class GivingStatementWriter
     {
         final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
         final Properties properties = Settings.getInstance().getProperties();
-        addAddressAttribute(list, "Name", properties.getProperty(Settings.ORGANIZATION_NAME_KEY));
-        addAddressAttribute(list, "Address", properties.getProperty(Settings.ADDRESS1));
-        addAddressAttribute(list, "", properties.getProperty(Settings.ADDRESS2));
-        addAddressAttribute(list, "City", properties.getProperty(Settings.CITY));
-        addAddressAttribute(list, "State", properties.getProperty(Settings.STATE));
-        addAddressAttribute(list, "Zip", properties.getProperty(Settings.ZIP));
-        addAddressAttribute(list, "Phone", properties.getProperty(Settings.PHONE));
+        addAddressAttribute(list, "Address", properties.getProperty(Settings.ADDRESS1), false);
+        addAddressAttribute(list, "", properties.getProperty(Settings.ADDRESS2), false);
+        final String city = properties.getProperty(Settings.CITY);
+        final String state = properties.getProperty(Settings.STATE);
+        final String zip = properties.getProperty(Settings.ZIP);
+        final String cityStateZip = String.format("%s, %s %s", city, state, zip);
+        addAddressAttribute(list, "", cityStateZip, false);
+        addAddressAttribute(list, "Phone", properties.getProperty(Settings.PHONE), false);
         final HorizontalListBuilder title = cmp.horizontalFlowList();
-        title.add(cmp.text("Organization Address").setStyle(Templates.boldStyle)).newRow();
+        title.add(cmp.text(properties.getProperty(Settings.ORGANIZATION_NAME_KEY)).setStyle(Templates.boldStyle)).newRow();
         return cmp.verticalList(title, list);
     }
     
-    private static void addAddressAttribute(HorizontalListBuilder list, String label, String value) {
-        if (value != null && !value.isEmpty()) {
+    private static void addAddressAttribute(HorizontalListBuilder list, String label, String value, boolean allowEmptyValue) {
+        if (allowEmptyValue || (value != null && !value.isEmpty())) {
             if (label != null && !label.isEmpty()) {
                 list.add(cmp.text(label + ":").setFixedColumns(8).setStyle(Templates.boldStyle), cmp.text(value)).newRow();
             } else {
