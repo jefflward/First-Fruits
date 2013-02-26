@@ -6,12 +6,11 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
@@ -180,7 +179,7 @@ public class SettingsDialog extends JDialog
         {
             final String category = categoryName.getText().trim();
             if (!category.isEmpty()) {
-                final Set<String> currentCategories = getCategories();
+                final List<String> currentCategories = getCategories();
                 if (!currentCategories.contains(category)) {
                     listModel.addElement(category);
                 }
@@ -197,9 +196,9 @@ public class SettingsDialog extends JDialog
             categoryName.setText("");
         }
         
-        public Set<String> getCategories()
+        public List<String> getCategories()
         {
-            final Set<String> categories = new HashSet<String>();
+            final List<String> categories = new ArrayList<String>();
             final Object[] items = listModel.toArray();
             for (Object item : items) {
                 categories.add(item.toString());

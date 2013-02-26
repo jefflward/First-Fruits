@@ -56,12 +56,12 @@ public class Settings extends Observable
     
     public List<String> getCategories()
     {
-        final Set<String> categories = new HashSet<String>();
+        final List<String> categories = new ArrayList<String>();
         final String categoriesProperty = properties.getProperty(Settings.CATEGORIES_KEY);
         if (categoriesProperty != null) {
             categories.addAll(Arrays.asList(categoriesProperty.split(";")));
         }
-        return new ArrayList<String>(categories);
+        return categories;
     }
     
     public void addCategory(String category)
