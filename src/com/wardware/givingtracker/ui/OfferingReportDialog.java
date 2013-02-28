@@ -122,7 +122,7 @@ public class OfferingReportDialog extends JDialog
               .highlightDetailEvenRows()  
               .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
               .title(cmp.horizontalList()
-                        .add(cmp.text(Settings.getInstance().getProperties().getProperty(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                        .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
                         .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
               .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
               .setDataSource(offeringPanel.createDataSource())

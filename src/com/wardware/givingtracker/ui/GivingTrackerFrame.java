@@ -454,7 +454,6 @@ public class GivingTrackerFrame extends JFrame implements Observer
     
     private void handleExitConfirmation()
     {
-        Settings.getInstance().saveSettings();
         if (RecordManager.getInstance().hasUnsavedChanges()) {
             final int choice = JOptionPane.showConfirmDialog(GivingTrackerFrame.this, 
                             "Unsaved changes exist. Do you want to save?", "Save Changes", 

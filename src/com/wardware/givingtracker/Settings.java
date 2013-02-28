@@ -1,19 +1,10 @@
 package com.wardware.givingtracker;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.swing.JOptionPane;
+import java.util.prefs.Preferences;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,9 +20,8 @@ public class Settings extends Observable
     public static final String ZIP = "Zip";
     public static final String PHONE = "Phone";
     
-    private static final String SETTINGS_FILE_NAME = "GivingTracker.props";
     private static Settings INSTANCE;
-    private Properties properties;
+    private Preferences preferences;
     
     static {
         INSTANCE = new Settings();
@@ -50,14 +40,13 @@ public class Settings extends Observable
 
     private Settings()
     {
-        properties = new Properties();
-        loadSettings();
+        preferences = Preferences.userNodeForPackage(this.getClass());
     }
     
     public List<String> getCategories()
     {
         final List<String> categories = new ArrayList<String>();
-        final String categoriesProperty = properties.getProperty(Settings.CATEGORIES_KEY);
+        final String categoriesProperty = preferences.get(Settings.CATEGORIES_KEY, null);
         if (categoriesProperty != null) {
             categories.addAll(Arrays.asList(categoriesProperty.split(";")));
         }
@@ -66,49 +55,22 @@ public class Settings extends Observable
     
     public void addCategory(String category)
     {
-        final Set<String> categories = new HashSet<String>(getCategories());
+        final List<String> categories = getCategories();
         categories.add(category.trim());
-        properties.setProperty(Settings.CATEGORIES_KEY, StringUtils.join(categories, ";"));
-        saveSettings();
-    }
-
-    private void loadSettings()
-    {
-        final File propsFile = new File(SETTINGS_FILE_NAME);
-        if (propsFile.exists()) {
-            try {
-                getProperties().load(new FileInputStream(propsFile));
-            } catch (FileNotFoundException e) {
-                JOptionPane.showMessageDialog(null, "Error occurred while loading settings: " + e.getMessage(), "Load Settings Error", JOptionPane.ERROR_MESSAGE);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Error occurred while loading settings: " + e.getMessage(), "Load Settings Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    public Properties getProperties()
-    {
-        return properties;
-    }
-
-    public void setProperties(Properties props)
-    {
-        this.properties = props;
-        saveSettings();
+        preferences.put(Settings.CATEGORIES_KEY, StringUtils.join(categories, ";"));
         setChanged();
         notifyObservers();
     }
     
-    public void saveSettings()
+    public String getStringValue(String key)
     {
-        try {
-            properties.store(new FileOutputStream(new File(SETTINGS_FILE_NAME)), "Properties for GivingTracker");
-            setChanged();
-            notifyObservers();
-        } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "Error occurred while saving settings: " + e.getMessage(), "Save Settings Error", JOptionPane.ERROR_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error occurred while saving settings: " + e.getMessage(), "Save Settings Error", JOptionPane.ERROR_MESSAGE);
-        }
+        return preferences.get(key, "");
+    }
+
+    public void setStringValue(String key, String value)
+    {
+        preferences.put(key, value);
+        setChanged();
+        notifyObservers();
     }
 }

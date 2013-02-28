@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
@@ -123,17 +122,16 @@ public class GivingStatementWriter
     private static ComponentBuilder<?, ?> createChurchAddressComponent()
     {
         final HorizontalListBuilder list = cmp.horizontalList().setBaseStyle(stl.style().setTopBorder(stl.pen1Point()).setLeftPadding(10));
-        final Properties properties = Settings.getInstance().getProperties();
-        addAddressAttribute(list, "Address", properties.getProperty(Settings.ADDRESS1), false);
-        addAddressAttribute(list, "", properties.getProperty(Settings.ADDRESS2), false);
-        final String city = properties.getProperty(Settings.CITY);
-        final String state = properties.getProperty(Settings.STATE);
-        final String zip = properties.getProperty(Settings.ZIP);
+        addAddressAttribute(list, "Address", Settings.getInstance().getStringValue(Settings.ADDRESS1), false);
+        addAddressAttribute(list, "", Settings.getInstance().getStringValue(Settings.ADDRESS2), false);
+        final String city = Settings.getInstance().getStringValue(Settings.CITY);
+        final String state = Settings.getInstance().getStringValue(Settings.STATE);
+        final String zip = Settings.getInstance().getStringValue(Settings.ZIP);
         final String cityStateZip = String.format("%s, %s %s", city, state, zip);
         addAddressAttribute(list, "", cityStateZip, false);
-        addAddressAttribute(list, "Phone", properties.getProperty(Settings.PHONE), false);
+        addAddressAttribute(list, "Phone", Settings.getInstance().getStringValue(Settings.PHONE), false);
         final HorizontalListBuilder title = cmp.horizontalFlowList();
-        title.add(cmp.text(properties.getProperty(Settings.ORGANIZATION_NAME_KEY)).setStyle(Templates.boldStyle)).newRow();
+        title.add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(Templates.boldStyle)).newRow();
         return cmp.verticalList(title, list);
     }
     

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
@@ -38,7 +37,6 @@ public class SettingsDialog extends JDialog
 {
     private JList optionsList;
     private JSplitPane splitPane;
-    final Properties unsavedProperties;
     private GeneralPanel generalPanel;
     private CategoriesPanel categoriesPanel;
     private JPanel rightPanel;
@@ -50,7 +48,6 @@ public class SettingsDialog extends JDialog
     public SettingsDialog(JFrame parent)
     {
         super(parent);
-        unsavedProperties = new Properties(Settings.getInstance().getProperties());
         initComponents();
         setLocationRelativeTo(parent);
     }
@@ -81,7 +78,7 @@ public class SettingsDialog extends JDialog
             label.setHorizontalAlignment(JLabel.RIGHT);
             contents.add(label, Gbc.xyi(0, y, 2).east());
             
-            final JTextField valueField = new JTextField(Settings.getInstance().getProperties().getProperty(settingsKey));
+            final JTextField valueField = new JTextField(Settings.getInstance().getStringValue(settingsKey));
             contents.add(valueField, Gbc.xyi(1, y, 2).horizontal());
             inputMap.put(settingsKey, valueField);
         }
@@ -89,9 +86,8 @@ public class SettingsDialog extends JDialog
         public void saveSettings()
         {
             for (String key : inputMap.keySet()) {
-                Settings.getInstance().getProperties().put(key, inputMap.get(key).getText().trim());
+                Settings.getInstance().setStringValue(key, inputMap.get(key).getText().trim());
             }
-            Settings.getInstance().saveSettings();
         }
     }
     
@@ -208,7 +204,7 @@ public class SettingsDialog extends JDialog
 
         public void saveSettings()
         {
-            Settings.getInstance().getProperties().setProperty(Settings.CATEGORIES_KEY, StringUtils.join(getCategories(), ";"));
+            Settings.getInstance().setStringValue(Settings.CATEGORIES_KEY, StringUtils.join(getCategories(), ";"));
         }
     }
 
@@ -283,7 +279,6 @@ public class SettingsDialog extends JDialog
     {
         generalPanel.saveSettings();
         categoriesPanel.saveSettings();
-        Settings.getInstance().saveSettings();
     }
     
     public static void main(String[] args)
