@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
@@ -86,6 +88,7 @@ public class GivingStatementWriter
             .summary(summary)
             .toXlsx(os);
         } catch (DRException e) {
+            JOptionPane.showMessageDialog(null, "Exception occurred writing report: " + e.getMessage());
             e.printStackTrace();
         } finally {
             os.flush();

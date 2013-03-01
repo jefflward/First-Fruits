@@ -82,7 +82,7 @@ public class InputPanel extends JPanel implements Observer
 
         lastNameCombo = new AutoComboBox(new ArrayList<String>());
         lastNameCombo.setMinimumSize(new Dimension(150, lastNameCombo.getHeight()));
-        lastNameCombo.setCaseSensitive(true);
+        lastNameCombo.setCaseSensitive(false);
         lastNameCombo.setStrict(false);
         lastNameCombo.addActionListener(new ActionListener() {
             @Override
@@ -104,7 +104,7 @@ public class InputPanel extends JPanel implements Observer
 
         firstNameCombo = new AutoComboBox(new ArrayList<String>());
         firstNameCombo.setMinimumSize(new Dimension(150, firstNameCombo.getHeight()));
-        firstNameCombo.setCaseSensitive(true);
+        firstNameCombo.setCaseSensitive(false);
         firstNameCombo.setStrict(false);
         contentPanel.add(firstNameCombo, Gbc.xyi(1, 3, 2).horizontal().right(5));
 
