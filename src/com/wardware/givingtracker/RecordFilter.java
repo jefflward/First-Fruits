@@ -24,6 +24,7 @@ public class RecordFilter
     private String value;
     private List<String> nonCategoryTypes;
     private Date dateValue;
+    private Double doubleValue;
     
     public RecordFilter()
     {
@@ -84,9 +85,7 @@ public class RecordFilter
 
     private boolean isDoubleMatch(Double recordValue)
     {
-        try {
-            final Double doubleValue = Double.parseDouble(value);
-
+        if (doubleValue != null) {
             if (operation.equals(EQUAL_OPERATION)) {
                 return recordValue.equals(doubleValue);
             } else if (operation.equals(GREATER_THAN_OPERATION)) {
@@ -94,7 +93,6 @@ public class RecordFilter
             } else if (operation.equals(LESS_THAN_OPERATION)) {
                 return recordValue < doubleValue;
             }
-        } catch (NumberFormatException e) {
         }
         return false;
     }
@@ -147,6 +145,11 @@ public class RecordFilter
     public void setValue(String value)
     {
         this.value = value;
+        try {
+            doubleValue = Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            doubleValue = null;
+        }
         this.dateValue = null;
     }
     

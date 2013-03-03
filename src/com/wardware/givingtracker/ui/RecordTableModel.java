@@ -1,13 +1,8 @@
 package com.wardware.givingtracker.ui;
 
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -23,14 +18,8 @@ public class RecordTableModel extends DefaultTableModel implements Observer
 
     private ArrayList<String> columnNames;
 
-    private String sortColumn;
-
-    private boolean reverseSort;
-    
     public RecordTableModel()
     {
-        sortColumn = "";
-        reverseSort = false;
         records = new ArrayList<GivingRecord>();
         columnNames = new ArrayList<String>();
         columnNames.add("Date");
@@ -143,56 +132,5 @@ public class RecordTableModel extends DefaultTableModel implements Observer
     public void update(Observable o, Object arg)
     {
         updateColumns();
-    }
-
-    public void sortByColumn(int nColumn)
-    {
-        final String columnName = getColumnName(nColumn);
-        if (columnName.equals(sortColumn)) {
-            reverseSort = !reverseSort;
-        } else {
-            reverseSort = false;
-        }
-        sortColumn = columnName;
-        Collections.sort(records, new Comparator<GivingRecord>(){
-            @Override
-            public int compare(GivingRecord lhs, GivingRecord rhs) {
-                if (sortColumn.equals("Date")) {
-                    final DateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                    try {
-                        final Date lhsDate = sdf.parse(lhs.getDate());
-                        final Date rhsDate = sdf.parse(rhs.getDate());
-                        if (reverseSort) {
-                            return rhsDate.compareTo(lhsDate);
-                        }
-                        return lhsDate.compareTo(rhsDate);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                } else if (sortColumn.equals("Last Name")) {
-                    if (reverseSort) {
-                        return rhs.getLastName().compareTo(lhs.getLastName());
-                    }
-                    return lhs.getLastName().compareTo(rhs.getLastName());
-                } else if (sortColumn.equals("First Name")) {
-                    if (reverseSort) {
-                        return rhs.getFirstName().compareTo(lhs.getFirstName());
-                    }
-                    return lhs.getFirstName().compareTo(rhs.getFirstName());
-                } else if (sortColumn.equals("Total")) {
-                    if (reverseSort) {
-                        return rhs.getTotal().compareTo(lhs.getTotal());
-                    }
-                    return lhs.getTotal().compareTo(rhs.getTotal());
-                } else if (Settings.getInstance().getCategories().contains(sortColumn)) {
-                    if (reverseSort) {
-                        return rhs.getAmountForCategory(sortColumn).compareTo(lhs.getAmountForCategory(sortColumn));
-                    }
-                    return lhs.getAmountForCategory(sortColumn).compareTo(rhs.getAmountForCategory(sortColumn));
-                }
-                return lhs.compareTo(rhs);
-            }
-        });
-        fireTableDataChanged();
     }
 }
