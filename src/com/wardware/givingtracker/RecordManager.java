@@ -201,6 +201,9 @@ public class RecordManager extends Observable implements Observer
     public void createNew()
     {
         records.clear();
+        uniqueLastNames.clear();
+        uniqueLastNames.add("");
+        firstNamesForLastName.clear();        
         selectedRecord = null;
         selectionCount = 0;
         unsavedChanges = false;
