@@ -19,6 +19,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.text.TextAction;
 
 import com.wardware.givingtracker.GivingRecord;
+import com.wardware.givingtracker.RecordFilter;
 import com.wardware.givingtracker.RecordManager;
 
 public class RecordsTable extends JTable implements Observer
@@ -139,7 +140,7 @@ public class RecordsTable extends JTable implements Observer
             clearSelection();
         } else if (value instanceof List) {
             model.setRecords(RecordManager.getInstance().getRecords());
-        } else if (value instanceof Boolean) {
+        } else if (value instanceof RecordFilter) {
             model.setRecords(RecordManager.getInstance().getRecords());
         }
     }

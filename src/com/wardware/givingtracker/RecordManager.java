@@ -21,7 +21,7 @@ public class RecordManager extends Observable implements Observer
     private int selectionCount;
     private GivingRecord lastUpdated;
     private String selectedDate;
-    private boolean filterByDate;
+    private RecordFilter recordFilter;
 
     public static RecordManager getInstance()
     {
@@ -41,6 +41,7 @@ public class RecordManager extends Observable implements Observer
         firstNamesForLastName = new HashMap<String, Set<String>>();
         records = new ArrayList<GivingRecord>();
         unsavedChanges = false;
+        recordFilter = new RecordFilter();
         Settings.getInstance().addObserver(this);
     }
 
@@ -132,10 +133,24 @@ public class RecordManager extends Observable implements Observer
 
     public List<GivingRecord> getRecords()
     {
-        if (filterByDate) {
-            return getRecordsForDate(selectedDate);
+        if (recordFilter.isEnabled()) {
+            return getFilteredRecordList();
         }
         return records;
+    }
+    
+    private List<GivingRecord> getFilteredRecordList()
+    {
+        final List<GivingRecord> filteredRecords = new ArrayList<GivingRecord>();
+        if (recordFilter.hasValue()) {
+            for (GivingRecord record : records) {
+                if (recordFilter.isMatch(record)) {
+                    filteredRecords.add(record);
+                }
+            }
+        }
+            
+        return filteredRecords;
     }
 
     public boolean hasUnsavedChanges()
@@ -204,12 +219,17 @@ public class RecordManager extends Observable implements Observer
     {
         return selectedDate;
     }
-
-    public void setFilterByDate(boolean filterByDate)
+    
+    public RecordFilter getRecordFilter()
     {
-        this.filterByDate = filterByDate;
+        return recordFilter;
+    }
+    
+    public void setRecordFilter(RecordFilter filter)
+    {
+        recordFilter = filter;
         setChanged();
-        this.notifyObservers(filterByDate);
+        notifyObservers(recordFilter);
     }
 
     @Override

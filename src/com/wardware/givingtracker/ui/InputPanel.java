@@ -59,18 +59,21 @@ public class InputPanel extends JPanel implements Observer
         contentPanel.add(dateLabel, Gbc.xyi(0, 0, 2).top(50).east());
         
         picker = new DatePicker(new Date());
+        picker.setDateFormat(SDF);
         final String date = SDF.format(picker.getDate());
         RecordManager.getInstance().setSelectedDate(date);
         picker.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0)
             {
-                final String date = SDF.format(picker.getDate());
-                RecordManager.getInstance().setSelectedDate(date);
-                final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
-                if (selectedRecord != null) {
-                    selectedRecord.setDate(date);
-                    RecordManager.getInstance().setSelectedRecord(selectedRecord);
+                if (picker.getDate() != null) {
+                    final String date = SDF.format(picker.getDate());
+                    RecordManager.getInstance().setSelectedDate(date);
+                    final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
+                    if (selectedRecord != null) {
+                        selectedRecord.setDate(date);
+                        RecordManager.getInstance().setSelectedRecord(selectedRecord);
+                    }
                 }
             }
         });

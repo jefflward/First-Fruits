@@ -18,7 +18,6 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -58,7 +57,6 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private JMenuItem saveAsItem;
     private JLabel lastEntryLabel;
     private JLabel recordCountLabel;
-    private JCheckBox filterByDateCheckBox;
     private AbstractButton offeringReportButton;
     
     public GivingTrackerFrame()
@@ -72,6 +70,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
         setTitle("Giving Tracker");
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setMinimumSize(new Dimension(500, 350));
         setPreferredSize(new Dimension(1000, 600));
         setLocationByPlatform(true);
         addWindowListener(new WindowAdapter() {
@@ -228,17 +227,10 @@ public class GivingTrackerFrame extends JFrame implements Observer
         
         recordsTable = new RecordsTable();
         final JPanel right = new JPanel(new BorderLayout());
-        final JPanel topRight = new JPanel(new BorderLayout());
-        filterByDateCheckBox = new JCheckBox("Only display records for selected date");
-        //filterByDateCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
-        filterByDateCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                RecordManager.getInstance().setFilterByDate(filterByDateCheckBox.isSelected());
-            }
-        });
-        topRight.add(filterByDateCheckBox, BorderLayout.EAST);
-        right.add(topRight, BorderLayout.NORTH);
+        final JPanel top = new JPanel(new BorderLayout());
+        final RecordFilterSettingsPanel recordFilterSettings = new RecordFilterSettingsPanel();
+        top.add(recordFilterSettings, BorderLayout.EAST);
+        right.add(top, BorderLayout.NORTH);
         final JScrollPane scrollPane = new JScrollPane(recordsTable);
         right.add(scrollPane, BorderLayout.CENTER);
         splitPane.setRightComponent(right);

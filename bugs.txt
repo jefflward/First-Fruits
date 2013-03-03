@@ -1,1 +1,4 @@
 1. undo redo button
+2. reset names when records are deleted and file is opened
+3. tab order in input panel is not working
+4. auto complete field doesn't handle deletion Timothy Tim

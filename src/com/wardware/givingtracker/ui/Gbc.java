@@ -89,4 +89,10 @@ public class Gbc extends GridBagConstraints
         c.insets.right = r;
         return c;
     }
+
+    public Gbc weightx(double d)
+    {
+        c.weightx = d;
+        return c;
+    }
 }
