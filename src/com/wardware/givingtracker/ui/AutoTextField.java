@@ -18,6 +18,10 @@ public class AutoTextField extends JTextField
     {
         public void replace(int i, int j, String s, AttributeSet attributeset) throws BadLocationException
         {
+            // If string didn't change don't try and find match
+            if (s != null && s.equals(getText(0, getLength()))) {
+                return;
+            }
             super.remove(i, j);
             insertString(i, s, attributeset);
         }
@@ -46,23 +50,7 @@ public class AutoTextField extends JTextField
 
         public void remove(int i, int j) throws BadLocationException
         {
-            int selectionStart = getSelectionStart();
-            if (selectionStart > 0)
-                selectionStart--;
-            final String match = getMatch(getText(0, selectionStart));
-            if (!isStrict && match == null) {
-                super.remove(i, j);
-            } else {
-                super.remove(0, getLength());
-                super.insertString(0, match, null);
-            }
-            if (autoComboBox != null && match != null)
-                autoComboBox.setSelectedValue(match);
-            try {
-                setSelectionStart(selectionStart);
-                setSelectionEnd(getLength());
-            } catch (Exception exception) {
-            }
+            super.remove(i, j);
         }
     }
 
