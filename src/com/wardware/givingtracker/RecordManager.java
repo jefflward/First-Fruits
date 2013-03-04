@@ -133,26 +133,9 @@ public class RecordManager extends Observable implements Observer
 
     public List<GivingRecord> getRecords()
     {
-        if (recordFilter.isEnabled()) {
-            return getFilteredRecordList();
-        }
         return records;
     }
     
-    private List<GivingRecord> getFilteredRecordList()
-    {
-        final List<GivingRecord> filteredRecords = new ArrayList<GivingRecord>();
-        if (recordFilter.hasValue()) {
-            for (GivingRecord record : records) {
-                if (recordFilter.isMatch(record)) {
-                    filteredRecords.add(record);
-                }
-            }
-        }
-            
-        return filteredRecords;
-    }
-
     public boolean hasUnsavedChanges()
     {
         return unsavedChanges;

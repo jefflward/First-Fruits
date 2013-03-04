@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowSorter;
+import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
@@ -95,8 +95,24 @@ public class RecordsTable extends JTable implements Observer
             }
         });
         
-        final RowSorter<RecordTableModel> sorter = new TableRowSorter<RecordTableModel>(model);
+        final TableRowSorter<RecordTableModel> sorter = new TableRowSorter<RecordTableModel>(model);
+        sorter.setRowFilter(new RecordTableRowFilter());
         setRowSorter(sorter);
+    }
+    
+    private class RecordTableRowFilter extends RowFilter<RecordTableModel, Integer>
+    {
+        @Override
+        public boolean include(javax.swing.RowFilter.Entry<? extends RecordTableModel, ? extends Integer> entry)
+        {
+            final RecordTableModel recordTableModel = entry.getModel();
+            final GivingRecord record = recordTableModel.getRecord(entry.getIdentifier());
+            final RecordFilter recordFilter = RecordManager.getInstance().getRecordFilter();
+            if (recordFilter == null || !recordFilter.isEnabled() || recordFilter.isMatch(record)) {
+                return true;
+            }
+            return false;
+        }
     }
     
     @Override  
