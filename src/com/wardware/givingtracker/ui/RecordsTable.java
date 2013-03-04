@@ -42,7 +42,8 @@ public class RecordsTable extends JTable implements Observer
                 RecordManager.getInstance().setSelectionCount(selectedRowCount);
                 if (selectedRowCount == 1) {
                     final int row = getSelectedRow();
-                    RecordManager.getInstance().setSelectedRecord(model.getRecord(row));
+                    int selection = convertRowIndexToModel(row);
+                    RecordManager.getInstance().setSelectedRecord(model.getRecord(selection));
                 } else {
                     RecordManager.getInstance().setSelectedRecord(null);
                 }
@@ -148,7 +149,8 @@ public class RecordsTable extends JTable implements Observer
     public void update(Observable o, Object value)
     {
         if (value instanceof GivingRecord) {
-            model.fireTableRowsUpdated(getSelectedRow(), getSelectedRow());
+            int selection = convertRowIndexToModel(getSelectedRow());
+            model.fireTableRowsUpdated(selection, selection);
             clearSelection();
         } else if (value instanceof List) {
             model.setRecords(RecordManager.getInstance().getRecords());
