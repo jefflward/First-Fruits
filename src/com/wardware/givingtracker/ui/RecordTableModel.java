@@ -1,8 +1,8 @@
 package com.wardware.givingtracker.ui;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -87,18 +87,28 @@ public class RecordTableModel extends DefaultTableModel implements Observer
             } else if (column == 2) {
                 return record.getFirstName();
             } else if (column == getColumnCount() - 1) {
-                return NumberFormat.getCurrencyInstance().format(record.getTotal());
+                return record.getTotal();
             } else {
                 final String columnName = getColumnName(column);
-                // MIght not have a category value
-                Double amount = record.getAmountForCategory(columnName);
-                if (amount != null)
-                {
-                    return NumberFormat.getCurrencyInstance().format(record.getAmountForCategory(columnName));
-                }
+                return record.getAmountForCategory(columnName);
             }
         }
         return null;
+    }
+    
+    @Override
+    public Class<?> getColumnClass(int column) 
+    {
+        switch (column) {
+            case 0:
+                return Date.class;
+            case 1:
+                return String.class;
+            case 2:
+                return String.class;
+            default:
+                return Double.class;
+        }
     }
     
     @Override

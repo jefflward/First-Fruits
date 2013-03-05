@@ -165,7 +165,7 @@ public class GivingStatementWriter
 
         for (GivingRecord record : records) {
             final List<Object> data = new ArrayList<Object>();
-            data.add(record.getDate());
+            data.add(record.getDateString());
             for (String category : categories) {
                 final BigDecimal amount = new BigDecimal(record.getAmountForCategory(category));
                 data.add(amount);

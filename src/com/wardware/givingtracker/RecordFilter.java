@@ -49,7 +49,7 @@ public class RecordFilter
         final List<String> categories = Settings.getInstance().getCategories();
         if (nonCategoryTypes.contains(type)) {
             if (type.equals(DATE_TYPE)) {
-                return isDateMatch(record.getDate());
+                return isDateMatch(record.getDateString());
             } else if (type.equals(LAST_NAME_TYPE)) {
                 return isStringMatch(record.getLastName());
             } else if (type.equals(FIRST_NAME_TYPE)) {

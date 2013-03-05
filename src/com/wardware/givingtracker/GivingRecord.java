@@ -2,7 +2,9 @@ package com.wardware.givingtracker;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,32 +13,49 @@ import java.util.Set;
 
 public class GivingRecord implements Comparable<GivingRecord>
 {
-    private String date;
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
+    private String dateString;
     private String lastName;
     private String firstName;
     private Map<String, Double> categorizedAmounts;
+    private Date date;
 
     public GivingRecord()
     {
         categorizedAmounts = new HashMap<String, Double>();
     }
 
-    public GivingRecord(String date, String lastName, String firstName)
+    public GivingRecord(String dateString, String lastName, String firstName)
     {
-        this.date = date;
+        this.dateString = dateString;
+        try {
+            this.date = SDF.parse(dateString);
+        } catch (ParseException e) {
+            System.err.println("Record has invalid date string " + dateString);
+        }
         this.lastName = lastName;
         this.firstName = firstName;
         categorizedAmounts = new HashMap<String, Double>();
     }
 
-    public String getDate()
+    public String getDateString()
+    {
+        return dateString;
+    }
+    
+    public Date getDate()
     {
         return date;
     }
 
-    public void setDate(String date)
+    public void setDateString(String dateString)
     {
-        this.date = date;
+        this.dateString = dateString;
+        try {
+            this.date = SDF.parse(dateString);
+        } catch (ParseException e) {
+            System.err.println("Invalid date string " + dateString);
+        }
     }
 
     public String getLastName()
@@ -83,7 +102,7 @@ public class GivingRecord implements Comparable<GivingRecord>
 
     public void update(GivingRecord record)
     {
-        setDate(record.getDate());
+        setDateString(record.getDateString());
         setLastName(record.getLastName());
         setFirstName(record.getLastName());
         categorizedAmounts = new HashMap<String, Double>(record.categorizedAmounts);
@@ -92,7 +111,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     public String toBasicString()
     {
         final StringBuilder sb = new StringBuilder();
-        sb.append(date + ", ");
+        sb.append(dateString + ", ");
         sb.append(lastName + ", ");
         sb.append(firstName);
 
@@ -108,7 +127,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         final StringBuilder sb = new StringBuilder();
         sb.append("GivingRecord [");
-        sb.append("date=" + date);
+        sb.append("dateString=" + dateString);
         sb.append(", lastName=" + lastName);
         sb.append(", firstName=" + firstName);
 
@@ -123,7 +142,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     public String toCsv()
     {
         final StringBuilder sb = new StringBuilder();
-        sb.append(date);
+        sb.append(dateString);
         sb.append("," + lastName);
         sb.append("," + firstName);
 
@@ -141,7 +160,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     public String toReportCsv()
     {
         final StringBuilder sb = new StringBuilder();
-        sb.append(date);
+        sb.append(dateString);
         for (String category : categorizedAmounts.keySet()) {
             sb.append("," + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
         }
@@ -154,10 +173,10 @@ public class GivingRecord implements Comparable<GivingRecord>
         try {
             final String[] tokens = csv.split(",");
             int tokenIndex = 0;
-            final String date = tokens[tokenIndex++].trim();
+            final String dateString = tokens[tokenIndex++].trim();
             final String lastName = tokens[tokenIndex++].trim();
             final String firstName = tokens[tokenIndex++].trim();
-            final GivingRecord record = new GivingRecord(date, lastName, firstName);
+            final GivingRecord record = new GivingRecord(dateString, lastName, firstName);
             final String[] categories = Arrays.copyOfRange(headers, 3, headers.length - 1);
             final List<String> definedCategories = Settings.getInstance().getCategories();
             for (String category : categories) {
@@ -174,7 +193,7 @@ public class GivingRecord implements Comparable<GivingRecord>
     @Override
     public int compareTo(GivingRecord other)
     {
-        if (date.equals(other.date)) {
+        if (dateString.equals(other.dateString)) {
             return lastName.compareTo(other.lastName);
         }
         return date.compareTo(other.date);
@@ -186,7 +205,7 @@ public class GivingRecord implements Comparable<GivingRecord>
         final int prime = 31;
         int result = 1;
         result = prime * result + ((categorizedAmounts == null) ? 0 : categorizedAmounts.hashCode());
-        result = prime * result + ((date == null) ? 0 : date.hashCode());
+        result = prime * result + ((dateString == null) ? 0 : dateString.hashCode());
         result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
         return result;
     }
@@ -206,10 +225,10 @@ public class GivingRecord implements Comparable<GivingRecord>
                 return false;
         } else if (!categorizedAmounts.equals(other.categorizedAmounts))
             return false;
-        if (date == null) {
-            if (other.date != null)
+        if (dateString == null) {
+            if (other.dateString != null)
                 return false;
-        } else if (!date.equals(other.date))
+        } else if (!dateString.equals(other.dateString))
             return false;
         if (lastName == null) {
             if (other.lastName != null)

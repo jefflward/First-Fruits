@@ -71,7 +71,7 @@ public class InputPanel extends JPanel implements Observer
                     RecordManager.getInstance().setSelectedDate(date);
                     final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
                     if (selectedRecord != null) {
-                        selectedRecord.setDate(date);
+                        selectedRecord.setDateString(date);
                         RecordManager.getInstance().setSelectedRecord(selectedRecord);
                     }
                 }
@@ -235,7 +235,7 @@ public class InputPanel extends JPanel implements Observer
         }
 
         final GivingRecord record = new GivingRecord();
-        record.setDate(SDF.format(picker.getDate()));
+        record.setDateString(SDF.format(picker.getDate()));
         record.setLastName(lastNameCombo.getSelectedItem().toString());
         record.setFirstName(firstNameCombo.getSelectedItem().toString());
 
@@ -269,7 +269,7 @@ public class InputPanel extends JPanel implements Observer
             final GivingRecord selectedRecord = RecordManager.getInstance().getSelectedRecord();
             if (selectedRecord != null) {
                 try {
-                    picker.setDate(SDF.parse(selectedRecord.getDate()));
+                    picker.setDate(SDF.parse(selectedRecord.getDateString()));
                 } catch (PropertyVetoException e) {
                     e.printStackTrace();
                 } catch (ParseException e) {

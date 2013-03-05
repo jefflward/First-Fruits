@@ -124,7 +124,7 @@ public class RecordManager extends Observable implements Observer
         final List<GivingRecord> recordsForSelectedDate = new ArrayList<GivingRecord>();
         for (GivingRecord record : records)
         {
-            if (date != null && date.equals(record.getDate())) {
+            if (date != null && date.equals(record.getDateString())) {
                 recordsForSelectedDate.add(record);
             }
         }
