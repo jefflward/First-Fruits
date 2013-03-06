@@ -19,9 +19,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.text.TextAction;
 
@@ -133,9 +133,9 @@ public class InputPanel extends JPanel implements Observer
     private class CategoryInputPair
     {
         private JLabel label;
-        private JFormattedTextField inputField;
+        private JTextField inputField;
 
-        public CategoryInputPair(JLabel label, JFormattedTextField inputField)
+        public CategoryInputPair(JLabel label, JTextField inputField)
         {
             this.label = label;
             this.inputField = inputField;
@@ -146,7 +146,7 @@ public class InputPanel extends JPanel implements Observer
             return label;
         }
 
-        public JFormattedTextField getInputField()
+        public JTextField getInputField()
         {
             return inputField;
         }
@@ -216,7 +216,7 @@ public class InputPanel extends JPanel implements Observer
             categoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             contentPanel.add(categoryLabel, Gbc.xyi(0, gridy, 2).left(5).east());
 
-            final JFormattedTextField valueField = new CurrencyFormattedTextField();
+            final JTextField valueField = new CurrencyFormattedTextField();
             valueField.addKeyListener(keyListener);
             contentPanel.add(valueField, Gbc.xyi(1, gridy, 2).horizontal().right(5));
 
@@ -256,7 +256,7 @@ public class InputPanel extends JPanel implements Observer
         lastNameCombo.requestFocusInWindow();
         lastNameCombo.setSelectedIndex(0);
         for (CategoryInputPair input : categoryInputs) {
-            input.getInputField().setValue(null);
+            input.getInputField().setText("");
         }
     }
 
@@ -280,12 +280,12 @@ public class InputPanel extends JPanel implements Observer
 
                 for (CategoryInputPair input : categoryInputs) {
                     final String category = input.getLabel().getText();
-                    input.getInputField().setValue(selectedRecord.getAmountForCategory(category));
+                    input.getInputField().setText(selectedRecord.getAmountForCategory(category).toString());
                 }
             } else {
                 lastNameCombo.setSelectedIndex(0);
                 for (CategoryInputPair input : categoryInputs) {
-                    input.getInputField().setValue(null);
+                    input.getInputField().setText("");
                 }
             }
         } else if (o instanceof Settings) {

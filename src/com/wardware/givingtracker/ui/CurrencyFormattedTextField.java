@@ -3,42 +3,23 @@ package com.wardware.givingtracker.ui;
 import java.awt.Component;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.text.NumberFormat;
 
-import javax.swing.JFormattedTextField;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.AbstractDocument;
 
-public class CurrencyFormattedTextField extends JFormattedTextField
+import org.apache.commons.lang3.StringUtils;
+
+public class CurrencyFormattedTextField extends JTextField
 {
-    private static final NumberFormat simpleCurrencyFormat;
-    
-    static {
-        simpleCurrencyFormat = NumberFormat.getNumberInstance();
-        simpleCurrencyFormat.setMaximumFractionDigits(2);
-        simpleCurrencyFormat.setMinimumFractionDigits(2);
-    }
-    
     public CurrencyFormattedTextField()
     {
-        super(simpleCurrencyFormat);
+        ((AbstractDocument) getDocument()).setDocumentFilter(new SimpleCurrencyFilter());
+        
         addFocusListener(new SelectAllFocusListener());
         setHorizontalAlignment(SwingConstants.RIGHT);
     }
-    
-    @Override  
-    protected void processFocusEvent(final FocusEvent e) {  
-        if (e.isTemporary()) {  
-            return;  
-        }  
-
-        if (e.getID() == FocusEvent.FOCUS_LOST) {  
-            if (getText() == null || getText().isEmpty()) {  
-                setValue(null);  
-            }  
-        }  
-        super.processFocusEvent(e);  
-    } 
     
     private class SelectAllFocusListener extends FocusAdapter
     {
@@ -49,11 +30,32 @@ public class CurrencyFormattedTextField extends JFormattedTextField
                 @Override
                 public void run() {
                     final Component component = event.getComponent();
-                    if (component instanceof JFormattedTextField) {
-                        ((JFormattedTextField) component).selectAll();
+                    if (component instanceof JTextField) {
+                        ((JTextField) component).selectAll();
                     }
                 }
             });
+        }
+        
+        @Override
+        public void focusLost(FocusEvent arg0)
+        {
+            padTwoDecimalPlacesIfNeeded();
+            firePropertyChange("focusLost", false, true);
+            super.focusLost(arg0);
+        }
+    }
+    
+    private void padTwoDecimalPlacesIfNeeded()
+    {
+        final String currentText = getText();
+        if (currentText.contains(".")) {
+            int digitsAfterDecimal = (currentText.length() - 1) - currentText.indexOf(".");
+            int padLength = currentText.length() + (2 - digitsAfterDecimal);
+            final String paddedValue = StringUtils.rightPad(currentText, padLength, "0");
+            setText(paddedValue);
+        } else if (!currentText.isEmpty()){
+            setText(currentText + ".00");
         }
     }
 }

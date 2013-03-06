@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -38,7 +37,7 @@ public class OfferingPanel extends JPanel
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
     private List<GivingRecord> recordsForDate;
-    private JFormattedTextField offeringTotalField;
+    private CurrencyFormattedTextField offeringTotalField;
     private JLabel offeringBalancesLabel;
     private Double totalForAllCategories;
     private boolean initialized;
@@ -153,9 +152,9 @@ public class OfferingPanel extends JPanel
     private class CategoryInputFields
     {
         private JLabel categoryNameLabel;
-        private JFormattedTextField currencyField;
-        private JFormattedTextField checksField;
-        private JFormattedTextField totalField;
+        private CurrencyFormattedTextField currencyField;
+        private CurrencyFormattedTextField checksField;
+        private CurrencyFormattedTextField totalField;
         private JLabel balancesLabel;
         private boolean balances;
 
@@ -169,22 +168,18 @@ public class OfferingPanel extends JPanel
             categoryNameLabel = new JLabel(categoryName);
             categoryNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
-            final PropertyChangeListener valueChangedListener = new PropertyChangeListener() {
+            final PropertyChangeListener focusLostListener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    final Object newValue = evt.getNewValue();
-                    final Object oldValue = evt.getOldValue();
-                    if (newValue != null || oldValue != null) {
-                        updateBalances();
-                    }
+                    updateBalances();
                 }
             };
 
             currencyField = new CurrencyFormattedTextField();
-            currencyField.addPropertyChangeListener("value", valueChangedListener);
+            currencyField.addPropertyChangeListener("focusLost", focusLostListener);
             currencyField.setMinimumSize(new Dimension(100, currencyField.getHeight()));
             checksField = new CurrencyFormattedTextField();
-            checksField.addPropertyChangeListener("value", valueChangedListener);
+            checksField.addPropertyChangeListener("focusLost", focusLostListener);
             checksField.setMinimumSize(new Dimension(100, checksField.getHeight()));
             totalField = new CurrencyFormattedTextField();
             totalField.setMinimumSize(new Dimension(100, totalField.getHeight()));
@@ -246,17 +241,17 @@ public class OfferingPanel extends JPanel
             return categoryNameLabel;
         }
 
-        public JFormattedTextField getCurrencyField()
+        public CurrencyFormattedTextField getCurrencyField()
         {
             return currencyField;
         }
 
-        public JFormattedTextField getChecksField()
+        public CurrencyFormattedTextField getChecksField()
         {
             return checksField;
         }
 
-        public JFormattedTextField getTotalField()
+        public CurrencyFormattedTextField getTotalField()
         {
             return totalField;
         }
