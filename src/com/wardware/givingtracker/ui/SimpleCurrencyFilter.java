@@ -10,8 +10,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class SimpleCurrencyFilter extends DocumentFilter
 {
     public void insertString(DocumentFilter.FilterBypass fb, int offset,
@@ -25,20 +23,7 @@ public class SimpleCurrencyFilter extends DocumentFilter
             final Matcher m = p.matcher(sb.toString());
             if (m.matches()) {
                 fb.insertString(offset, text, attr);
-                padTwoDecimalPlacesIfNeeded(fb, sb);
             }
-        }
-    }
-
-    private void padTwoDecimalPlacesIfNeeded(DocumentFilter.FilterBypass fb, final StringBuilder sb)
-                    throws BadLocationException
-    {
-        final String updatedText = fb.getDocument().getText(0, fb.getDocument().getLength());
-        final Pattern twoDecimalDigitsPattern = Pattern.compile("^\\$?([1-9]{1}[0-9]{0,2}(\\,[0-9]{3})*(\\.[0-9]{2})?|[1-9]{1}[0-9]{0,}(\\.[0-9]{2})?|0(\\.[0-9]{2})?|(\\.[0-9]{2})?)$");
-        final Matcher m = twoDecimalDigitsPattern.matcher(sb.toString());
-        if (!m.matches()) {
-            int digitsAfterDecimal = updatedText.length() - updatedText.indexOf(".");
-            StringUtils.rightPad(updatedText, 2-digitsAfterDecimal, "0");
         }
     }
 
@@ -54,7 +39,6 @@ public class SimpleCurrencyFilter extends DocumentFilter
         final Matcher m = p.matcher(sb.toString());
         if (m.matches()) {
             fb.replace(offset, length, text, attr);
-            padTwoDecimalPlacesIfNeeded(fb, sb);
         }
     }
 
