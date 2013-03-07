@@ -9,12 +9,16 @@ import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -47,8 +51,11 @@ public class OfferingReportDialog extends JDialog
     private void initComponents()
     {
         setLayout(new BorderLayout());
-        setModalityType(ModalityType.APPLICATION_MODAL);
+        setModalityType(ModalityType.MODELESS);
 
+        final List<Image> icons = new ArrayList<Image>();
+        icons.add(new ImageIcon(TallyDialog.class.getResource("/icons/offering.png")).getImage());
+        setIconImages(icons);
         setTitle("Offering Report");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         

@@ -2,6 +2,7 @@ package com.wardware.givingtracker.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -68,6 +69,15 @@ public class GivingTrackerFrame extends JFrame implements Observer
     private void initComponents()
     {
         setTitle("Giving Tracker");
+        final List<Image> icons = new ArrayList<Image>();
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main256.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main128.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main48.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main32.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main24.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main20.png")).getImage());
+        icons.add(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main16.png")).getImage());
+        setIconImages(icons);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new Dimension(500, 350));
@@ -210,6 +220,24 @@ public class GivingTrackerFrame extends JFrame implements Observer
         reportsMenu.add(offeringReport);
         menuBar.add(reportsMenu);
         
+        final JMenu toolsMenu = new JMenu("Tools");
+        final JMenuItem tally = new JMenuItem(new TextAction("Quick Tally") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        final TallyDialog tally = new TallyDialog();
+                        tally.setLocationRelativeTo(GivingTrackerFrame.this);
+                        tally.setVisible(true);
+                    }
+                });
+            }
+        });
+        tally.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/tally_small.png")));
+        toolsMenu.add(tally);
+        menuBar.add(toolsMenu); 
+        
         final JMenu helpMenu = new JMenu("Help");
         final JMenuItem about = new JMenuItem(new TextAction("About") {
             @Override
@@ -217,6 +245,7 @@ public class GivingTrackerFrame extends JFrame implements Observer
                 about();
             }
         });
+        about.setIcon(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/main16.png")));
         helpMenu.add(about);
         menuBar.add(helpMenu); 
         setJMenuBar(menuBar);
@@ -286,6 +315,23 @@ public class GivingTrackerFrame extends JFrame implements Observer
         });
         settingsButton.setToolTipText("Settings");
         buttonPanel.add(settingsButton);
+        
+        final JButton tallyButton = new JButton(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/tally_small.png")));
+        tallyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        final TallyDialog tally = new TallyDialog();
+                        tally.setLocationRelativeTo(GivingTrackerFrame.this);
+                        tally.setVisible(true);
+                    }
+                });
+            }
+        });
+        tallyButton.setToolTipText("Quick Tally");
+        buttonPanel.add(tallyButton);
         
         reportButton = new JButton(new ImageIcon(GivingTrackerFrame.class.getResource("/icons/report.png")));
         reportButton.addActionListener(new ActionListener() {
@@ -439,7 +485,6 @@ public class GivingTrackerFrame extends JFrame implements Observer
                 final GivingStatementDialog reportDialog = new GivingStatementDialog();
                 reportDialog.setLocationRelativeTo(GivingTrackerFrame.this);
                 reportDialog.setVisible(true);
-                reportDialog.setAlwaysOnTop(true);
             }
         });
     }
