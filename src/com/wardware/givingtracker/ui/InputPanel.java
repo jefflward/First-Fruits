@@ -280,7 +280,9 @@ public class InputPanel extends JPanel implements Observer
 
                 for (CategoryInputPair input : categoryInputs) {
                     final String category = input.getLabel().getText();
-                    input.getInputField().setText(selectedRecord.getAmountForCategory(category).toString());
+                    final Double amountForCategory = selectedRecord.getAmountForCategory(category);
+                    final String amountText = simpleCurrencyFormat.format(amountForCategory);
+                    input.getInputField().setText(amountText);
                 }
             } else {
                 lastNameCombo.setSelectedIndex(0);
