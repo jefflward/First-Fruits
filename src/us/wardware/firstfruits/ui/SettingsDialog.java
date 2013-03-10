@@ -50,6 +50,7 @@ public class SettingsDialog extends JDialog
     {
         super(parent);
         initComponents();
+        optionsList.getSelectionModel().setSelectionInterval(0,0);
         setLocationRelativeTo(parent);
     }
     
@@ -63,6 +64,7 @@ public class SettingsDialog extends JDialog
         {
             this.setLayout(new BorderLayout());
             contents = new JPanel(new GridBagLayout());
+            contents.setBorder(new TitledBorder("Organization Settings"));
             addNamedInputFields(Settings.ORGANIZATION_NAME_KEY, "Name", 0);
             addNamedInputFields(Settings.ADDRESS1, "Address 1", 1);
             addNamedInputFields(Settings.ADDRESS2, "Address 2", 2);
@@ -215,7 +217,7 @@ public class SettingsDialog extends JDialog
         setModalityType(ModalityType.APPLICATION_MODAL);
         setTitle("Settings");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setMinimumSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(500, 375));
         
         splitPane = new JSplitPane(); 
         
