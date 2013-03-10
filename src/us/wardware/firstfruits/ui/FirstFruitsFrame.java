@@ -71,13 +71,13 @@ public class FirstFruitsFrame extends JFrame implements Observer
     {
         setTitle("First Fruits");
         final List<Image> icons = new ArrayList<Image>();
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main256.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main128.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main48.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main32.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main24.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main20.png")).getImage());
-        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main16.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo256.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo128.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo48.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo32.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo24.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo20.png")).getImage());
+        icons.add(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo16.png")).getImage());
         setIconImages(icons);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -246,7 +246,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 about();
             }
         });
-        about.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/main16.png")));
+        about.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo16.png")));
         helpMenu.add(about);
         menuBar.add(helpMenu); 
         setJMenuBar(menuBar);
@@ -404,10 +404,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
     
     protected void about()
     {
-        JOptionPane.showMessageDialog(this, "First Fruits\n" +
-                "Version: 0.3\n" +
-                "(c) Copyright WardWare 2012, 2013.  All rights reserved.", "About First Fruits", 
-                JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, 
+                        "First Fruits\n" +
+                        "Version: 0.3\n" +
+                        "(c) Copyright WardWare 2012, 2013.  All rights reserved.", "About First Fruits", 
+                        JOptionPane.INFORMATION_MESSAGE,
+                        new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo48.png")));
     }
 
     protected void createNew()
