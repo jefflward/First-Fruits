@@ -15,7 +15,12 @@ public class CurrencyFormattedTextField extends JTextField
 {
     public CurrencyFormattedTextField()
     {
-        ((AbstractDocument) getDocument()).setDocumentFilter(new SimpleCurrencyFilter());
+        this(false);
+    }
+
+    public CurrencyFormattedTextField(boolean allowNegative)
+    {
+        ((AbstractDocument) getDocument()).setDocumentFilter(new SimpleCurrencyFilter(allowNegative));
         
         addFocusListener(new SelectAllFocusListener());
         setHorizontalAlignment(SwingConstants.RIGHT);

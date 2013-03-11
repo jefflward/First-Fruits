@@ -61,7 +61,7 @@ public class TallyDialog extends JDialog
         scrollPane.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         middle.add(scrollPane, BorderLayout.CENTER);
         
-        final JTextField valueField = new CurrencyFormattedTextField(); 
+        final JTextField valueField = new CurrencyFormattedTextField(true); 
         valueField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent event) {
@@ -69,7 +69,7 @@ public class TallyDialog extends JDialog
                     final String value = valueField.getText();
                     try {
                         final double doubleValue = NumberFormat.getNumberInstance().parse(value).doubleValue();
-                        if (doubleValue > 0.0) {
+                        if (doubleValue != 0.0) {
                             tallyTable.addValue(new BigDecimal(doubleValue));
                         }
                     } catch (ParseException e) {
