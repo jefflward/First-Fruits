@@ -19,10 +19,12 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.text.TextAction;
 
 import us.wardware.firstfruits.GivingRecord;
@@ -36,11 +38,14 @@ public class InputPanel extends JPanel implements Observer
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
     private AutoComboBox lastNameCombo;
     private AutoComboBox firstNameCombo;
+    private JComboBox fundType;
     private List<CategoryInputPair> categoryInputs;
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
     private MyKeyListener keyListener;
     private JPanel contentPanel;
+    private JLabel checkNumberLabel;
+    private JTextField checkNumberText;
 
     public InputPanel()
     {
@@ -111,6 +116,38 @@ public class InputPanel extends JPanel implements Observer
         firstNameCombo.setCaseSensitive(false);
         firstNameCombo.setStrict(false);
         contentPanel.add(firstNameCombo, Gbc.xyi(1, 3, 2).horizontal().right(5));
+        
+        final JLabel fundTypeLabel = new JLabel("Fund Type");
+        fundTypeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        contentPanel.add(fundTypeLabel, Gbc.xyi(0, 4, 2).east().left(5));
+        
+        final JPanel p = new JPanel(new GridBagLayout());
+        fundType = new JComboBox(new String[]{"Check","Cash","Online","Other"});
+        fundType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (fundType.getSelectedItem().equals("Check")) {
+                            checkNumberLabel.setEnabled(true);
+                            checkNumberText.setEnabled(true);
+                        } else {
+                            checkNumberLabel.setEnabled(false);
+                            checkNumberText.setEnabled(false);
+                        }
+                    }
+                });
+            }
+        });
+        p.add(fundType, Gbc.xyi(0,0,2).east());
+        
+        checkNumberLabel = new JLabel("#");
+        p.add(checkNumberLabel, Gbc.xyi(1,0,2).left(3));
+        // check #
+        checkNumberText = new NumbersOnlyTextField();
+        p.add(checkNumberText, Gbc.xyi(2, 0, 2).horizontal().right(5));
+        contentPanel.add(p, Gbc.xyi(1, 4, 2).right(5));
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
@@ -119,7 +156,7 @@ public class InputPanel extends JPanel implements Observer
         keyListener = new MyKeyListener();
 
         categoryInputs = new ArrayList<CategoryInputPair>();
-        int gridy = updateCategeries();
+        int gridy = updateCategeries(5);
         
         final JButton add = new JButton(new TextAction("Add") {
             @Override
@@ -199,7 +236,7 @@ public class InputPanel extends JPanel implements Observer
         firstNameCombo.setDataList(new ArrayList<String>());
     }
 
-    public int updateCategeries()
+    public int updateCategeries(int gridy)
     {
         final List<String> categories = Settings.getInstance().getCategories();
         for (CategoryInputPair input : categoryInputs)
@@ -211,7 +248,6 @@ public class InputPanel extends JPanel implements Observer
         contentPanel.updateUI();
         categoryInputs.clear();
 
-        int gridy = 4;
         for (String category : categories) {
             final JLabel categoryLabel = new JLabel(category);
             categoryLabel.setHorizontalAlignment(SwingConstants.RIGHT);
