@@ -46,9 +46,13 @@ public class GivingStatementWriter
                         .setBackgroundColor(Color.LIGHT_GRAY);
 
         final TextColumnBuilder<String> dateColumn = col.column("Date", "date", type.stringType());
+        final TextColumnBuilder<String> fundTypeColumn = col.column("Fund Type", "fundType", type.stringType());
+        final TextColumnBuilder<Short> checkNumberColumn = col.column("Check #", "checkNumber", type.shortType());
 
         final List<TextColumnBuilder<?>> columnList = new ArrayList<TextColumnBuilder<?>>();
         columnList.add(dateColumn);
+        columnList.add(fundTypeColumn);
+        columnList.add(checkNumberColumn);
 
         final List<AggregationSubtotalBuilder<BigDecimal>> subtotalBuilders = new ArrayList<AggregationSubtotalBuilder<BigDecimal>>();
         final List<String> categories = Settings.getInstance().getCategories();
@@ -155,6 +159,8 @@ public class GivingStatementWriter
 
         final List<String> columnList = new ArrayList<String>();
         columnList.add("date");
+        columnList.add("fundType");
+        columnList.add("checkNumber");
         final List<String> categories = Settings.getInstance().getCategories();
         columnList.addAll(categories);
         columnList.add("total");
@@ -167,6 +173,12 @@ public class GivingStatementWriter
         for (GivingRecord record : records) {
             final List<Object> data = new ArrayList<Object>();
             data.add(record.getDateString());
+            data.add(record.getFundType());
+            if (record.getCheckNumber().isEmpty()) {
+                data.add(null);
+            } else {
+                data.add(Short.parseShort(record.getCheckNumber()));
+            }
             for (String category : categories) {
                 final BigDecimal amount = new BigDecimal(record.getAmountForCategory(category));
                 data.add(amount);

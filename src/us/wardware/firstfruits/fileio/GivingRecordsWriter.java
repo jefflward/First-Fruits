@@ -24,8 +24,11 @@ public class GivingRecordsWriter
         columns.add("Date");
         columns.add("Last Name");
         columns.add("First Name");
+        columns.add("Fund Type");
+        columns.add("Check Number");
         columns.addAll(Settings.getInstance().getCategories());
         columns.add("Total");
+        printWriter.println(SchemaSettings.getCurrentSchemaVersionCsv());
         final String columnsCsv = StringUtils.join(columns.toArray(), ",");
         printWriter.println(columnsCsv);
         final List<GivingRecord> records = RecordManager.getInstance().getAllRecords();

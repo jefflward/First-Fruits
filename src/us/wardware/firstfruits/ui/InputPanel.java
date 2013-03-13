@@ -46,6 +46,7 @@ public class InputPanel extends JPanel implements Observer
     private JPanel contentPanel;
     private JLabel checkNumberLabel;
     private JTextField checkNumberText;
+    private JButton addUpdateButton;
 
     public InputPanel()
     {
@@ -134,6 +135,7 @@ public class InputPanel extends JPanel implements Observer
                             checkNumberText.setEnabled(true);
                         } else {
                             checkNumberLabel.setEnabled(false);
+                            checkNumberText.setText("");
                             checkNumberText.setEnabled(false);
                         }
                     }
@@ -146,8 +148,17 @@ public class InputPanel extends JPanel implements Observer
         p.add(checkNumberLabel, Gbc.xyi(1,0,2).left(3));
         // check #
         checkNumberText = new NumbersOnlyTextField();
-        p.add(checkNumberText, Gbc.xyi(2, 0, 2).horizontal().right(5));
-        contentPanel.add(p, Gbc.xyi(1, 4, 2).right(5));
+        
+        checkNumberText.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent event) {
+                if (KeyEvent.VK_ENTER == event.getKeyCode()) {
+                    createOrUpdateRecord();
+                }
+            }
+        });
+        p.add(checkNumberText, Gbc.xyi(2, 0, 2).horizontal());
+        contentPanel.add(p, Gbc.xyi(1, 4, 2).right(3));
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);
@@ -158,13 +169,13 @@ public class InputPanel extends JPanel implements Observer
         categoryInputs = new ArrayList<CategoryInputPair>();
         int gridy = updateCategeries(5);
         
-        final JButton add = new JButton(new TextAction("Add") {
+        addUpdateButton = new JButton(new TextAction("Add") {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 createOrUpdateRecord();
             }
         });
-        contentPanel.add(add, Gbc.xyi(1, gridy++, 2).horizontal().right(5));
+        contentPanel.add(addUpdateButton, Gbc.xyi(1, gridy++, 2).horizontal().right(5));
         add(contentPanel, BorderLayout.NORTH);
     }
 
@@ -275,6 +286,8 @@ public class InputPanel extends JPanel implements Observer
         record.setDateString(SDF.format(picker.getDate()));
         record.setLastName(lastNameCombo.getSelectedItem().toString());
         record.setFirstName(firstNameCombo.getSelectedItem().toString());
+        record.setFundType(fundType.getSelectedItem().toString());
+        record.setCheckNumber(checkNumberText.getText());
 
         for (CategoryInputPair input : categoryInputs) {
             final String category = input.getLabel().getText();
@@ -292,6 +305,7 @@ public class InputPanel extends JPanel implements Observer
         RecordManager.getInstance().updateRecord(record);
         lastNameCombo.requestFocusInWindow();
         lastNameCombo.setSelectedIndex(0);
+        checkNumberText.setText("");
         for (CategoryInputPair input : categoryInputs) {
             input.getInputField().setText("");
         }
@@ -314,18 +328,37 @@ public class InputPanel extends JPanel implements Observer
                 }
                 lastNameCombo.setSelectedItem(selectedRecord.getLastName());
                 firstNameCombo.setSelectedItem(selectedRecord.getFirstName());
-
+                if (!selectedRecord.getFundType().isEmpty()) {
+                    fundType.setSelectedItem(selectedRecord.getFundType());
+                } else {
+                    fundType.setSelectedIndex(0);
+                }
+                checkNumberText.setText(selectedRecord.getCheckNumber());
+                
+                if (fundType.getSelectedItem().equals("Check")) {
+                    checkNumberLabel.setEnabled(true);
+                    checkNumberText.setEnabled(true);
+                } else {
+                    checkNumberLabel.setEnabled(false);
+                    checkNumberText.setText("");
+                    checkNumberText.setEnabled(false);
+                }
+                
                 for (CategoryInputPair input : categoryInputs) {
                     final String category = input.getLabel().getText();
                     final Double amountForCategory = selectedRecord.getAmountForCategory(category);
                     final String amountText = simpleCurrencyFormat.format(amountForCategory);
                     input.getInputField().setText(amountText);
                 }
+                addUpdateButton.setText("Update");
             } else {
                 lastNameCombo.setSelectedIndex(0);
+                fundType.setSelectedIndex(0);
+                checkNumberText.setText("");
                 for (CategoryInputPair input : categoryInputs) {
                     input.getInputField().setText("");
                 }
+                addUpdateButton.setText("Add");
             }
         } else if (o instanceof Settings) {
             initComponents();

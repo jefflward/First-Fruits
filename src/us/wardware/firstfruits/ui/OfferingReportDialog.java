@@ -32,6 +32,7 @@ import us.wardware.firstfruits.fileio.FileUtils;
 import us.wardware.firstfruits.fileio.XlsxFileFilter;
 
 import net.sf.dynamicreports.examples.Templates;
+import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
@@ -109,7 +110,7 @@ public class OfferingReportDialog extends JDialog
         }
     }
     
-    private void saveReport() throws IOException
+    private JasperReportBuilder createReport()
     {
         final StyleBuilder boldStyle         = stl.style().bold();  
         final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);  
@@ -122,20 +123,24 @@ public class OfferingReportDialog extends JDialog
         final TextColumnBuilder<BigDecimal> checkColumn     = col.column("Checks", "checks", type.bigDecimalType());  
         final TextColumnBuilder<BigDecimal> totalsColumn     = col.column("Total", "total", type.bigDecimalType());
         
+        return report()
+          .setTemplate(Templates.reportTemplate)  
+          .setColumnTitleStyle(columnTitleStyle)  
+          .highlightDetailEvenRows()  
+          .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
+          .title(cmp.horizontalList()
+                    .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                    .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
+          .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
+          .setDataSource(offeringPanel.createDataSource())
+          .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn));
+    }
+    
+    private void saveReport() throws IOException
+    {
         final FileOutputStream os = new FileOutputStream(outputFile);
         try {             
-            report()
-              .setTemplate(Templates.reportTemplate)  
-              .setColumnTitleStyle(columnTitleStyle)  
-              .highlightDetailEvenRows()  
-              .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
-              .title(cmp.horizontalList()
-                        .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
-                        .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
-              .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
-              .setDataSource(offeringPanel.createDataSource())
-              .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn))
-              .toXlsx(os);
+            createReport().toXlsx(os);
         } catch (DRException e) {  
             e.printStackTrace();  
         } finally {

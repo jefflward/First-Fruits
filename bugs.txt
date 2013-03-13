@@ -3,9 +3,7 @@
 
 Features
 - Fund type entry [Check, Cash, Online, Other] with check number.
-- Quick tally window allow '+' key to work like enter.
 - Offering report also print out giving records for that week.
-- Quick tally window make come to front and only have one.
 - Offering report allow counter names to be entered.
 - Giving record reports allow name to be entered.
 - Password protection.

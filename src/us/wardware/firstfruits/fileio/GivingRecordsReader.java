@@ -47,6 +47,8 @@ public class GivingRecordsReader
         defaultColumns.add("Date");
         defaultColumns.add("Last Name");
         defaultColumns.add("First Name");
+        defaultColumns.add("Fund Type");
+        defaultColumns.add("Check Number");
         defaultColumns.add("Total");
         
         final FileInputStream fstream = new FileInputStream(file);
@@ -59,9 +61,14 @@ public class GivingRecordsReader
                 throw new RuntimeException(String.format("The file: %f is missing header.", file.getName()));
             }
 
-            final String[] tokens = firstLine.split(",");
+            String[] tokens = firstLine.split(",");
             if (tokens.length == 0) {
                 throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
+            }
+            
+            if (tokens[0].equals("SchemaVersion")) {
+                final String headerLine = br.readLine();
+                tokens = headerLine.split(",");
             }
             
             final List<String> missingColumns = new ArrayList<String>(categoryColumns); 
@@ -97,15 +104,22 @@ public class GivingRecordsReader
                 throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
             }
 
-            // This is the old format
-            String[] headers = {"Date","Name","General", "Missions", "Building", "Total"};
-            if (tokens[0].equals("Date")) {
+            final String schemaVersion;
+            final String[] headers;
+            if (tokens[0].equals("SchemaVersion")) {
+                schemaVersion = tokens[1];
+                final String headerLine = br.readLine();
+                headers = headerLine.split(",");
+            } else if (tokens[0].equals("Date")) {
+                schemaVersion = SchemaSettings.VERSION_1_0;
                 headers = tokens;
+            } else {
+                throw new ParseException("Unable to determine file format", 0);
             }
             
             String line;
             while ((line = br.readLine()) != null)   {
-                final GivingRecord record = GivingRecord.fromCsv(line, headers);
+                final GivingRecord record = fromCsv(line, schemaVersion, headers);
                 records.add(record);
             }
         } finally {
@@ -113,5 +127,61 @@ public class GivingRecordsReader
            br.close();
         }
         return records;
+    }
+    
+    public static GivingRecord fromCsv(String csv, String schemaVersion, String[] headers) throws ParseException
+    {
+        if (schemaVersion.equals(SchemaSettings.VERSION_1_0)) {
+            return fromSchemaVersion10Csv(csv, headers);
+        } else if (schemaVersion.equals(SchemaSettings.VERSION_1_1)) {
+            return fromSchemaVersion11Csv(csv, headers);
+        }
+        return null;
+    }
+    
+    public static GivingRecord fromSchemaVersion10Csv(String csv, String[] headers) throws ParseException
+    {
+        try {
+            final String[] tokens = csv.split(",");
+            int tokenIndex = 0;
+            final String dateString = tokens[tokenIndex++].trim();
+            final String lastName = tokens[tokenIndex++].trim();
+            final String firstName = tokens[tokenIndex++].trim();
+            final GivingRecord record = new GivingRecord(dateString, lastName, firstName, "", "");
+            final String[] categories = Arrays.copyOfRange(headers, tokenIndex, headers.length - 1);
+            final List<String> definedCategories = Settings.getInstance().getCategories();
+            for (String category : categories) {
+                if (definedCategories.contains(category)) {
+                    record.setAmountForCategory(category, Double.parseDouble(tokens[tokenIndex++]));
+                }
+            }
+            return record;
+        } catch (Exception e) {
+            throw new ParseException(csv, 0);
+        }
+    }
+    
+    public static GivingRecord fromSchemaVersion11Csv(String csv, String[] headers) throws ParseException
+    {
+        try {
+            final String[] tokens = csv.split(",");
+            int tokenIndex = 0;
+            final String dateString = tokens[tokenIndex++].trim();
+            final String lastName = tokens[tokenIndex++].trim();
+            final String firstName = tokens[tokenIndex++].trim();
+            final String fundType = tokens[tokenIndex++].trim();
+            final String checkNumber = tokens[tokenIndex++].trim();
+            final GivingRecord record = new GivingRecord(dateString, lastName, firstName, fundType, checkNumber);
+            final String[] categories = Arrays.copyOfRange(headers, tokenIndex, headers.length - 1);
+            final List<String> definedCategories = Settings.getInstance().getCategories();
+            for (String category : categories) {
+                if (definedCategories.contains(category)) {
+                    record.setAmountForCategory(category, Double.parseDouble(tokens[tokenIndex++]));
+                }
+            }
+            return record;
+        } catch (Exception e) {
+            throw new ParseException(csv, 0);
+        }
     }
 }

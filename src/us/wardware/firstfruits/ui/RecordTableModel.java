@@ -26,6 +26,8 @@ public class RecordTableModel extends DefaultTableModel implements Observer
         columnNames.add("Date");
         columnNames.add("Last Name");
         columnNames.add("First Name");
+        columnNames.add("Fund Type");
+        columnNames.add("Check #");
         columnNames.addAll(Settings.getInstance().getCategories());
         columnNames.add("Total");
         this.setColumnIdentifiers(columnNames.toArray());
@@ -36,7 +38,10 @@ public class RecordTableModel extends DefaultTableModel implements Observer
     {
         columnNames = new ArrayList<String>();
         columnNames.add("Date");
-        columnNames.add("Name");
+        columnNames.add("Last Name");
+        columnNames.add("First Name");
+        columnNames.add("Fund Type");
+        columnNames.add("Check #");
         columnNames.addAll(Settings.getInstance().getCategories());
         columnNames.add("Total");
         this.setColumnIdentifiers(columnNames.toArray());
@@ -87,6 +92,10 @@ public class RecordTableModel extends DefaultTableModel implements Observer
                 return record.getLastName();
             } else if (column == 2) {
                 return record.getFirstName();
+            } else if (column == 3) {
+                return record.getFundType();
+            } else if (column == 4) {
+                return record.getCheckNumber();
             } else if (column == getColumnCount() - 1) {
                 return record.getTotal();
             } else {
@@ -106,6 +115,10 @@ public class RecordTableModel extends DefaultTableModel implements Observer
             case 1:
                 return String.class;
             case 2:
+                return String.class;
+            case 3:
+                return String.class;
+            case 4:
                 return String.class;
             default:
                 return Double.class;

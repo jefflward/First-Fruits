@@ -17,6 +17,8 @@ public class GivingRecord implements Comparable<GivingRecord>
     private String dateString;
     private String lastName;
     private String firstName;
+    private String fundType;
+    private String checkNumber;
     private Map<String, Double> categorizedAmounts;
     private Date date;
 
@@ -25,7 +27,7 @@ public class GivingRecord implements Comparable<GivingRecord>
         categorizedAmounts = new HashMap<String, Double>();
     }
 
-    public GivingRecord(String dateString, String lastName, String firstName)
+    public GivingRecord(String dateString, String lastName, String firstName, String fundType, String checkNumber)
     {
         this.dateString = dateString;
         try {
@@ -35,6 +37,8 @@ public class GivingRecord implements Comparable<GivingRecord>
         }
         this.lastName = lastName;
         this.firstName = firstName;
+        this.fundType = fundType;
+        this.checkNumber = checkNumber;
         categorizedAmounts = new HashMap<String, Double>();
     }
 
@@ -77,6 +81,26 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         this.firstName = name;
     }
+    
+    public String getFundType()
+    {
+        return fundType;
+    }
+    
+    public void setFundType(String fundType)
+    {
+        this.fundType = fundType; 
+    }
+    
+    public String getCheckNumber()
+    {
+        return checkNumber;
+    }
+    
+    public void setCheckNumber(String checkNumber)
+    {
+        this.checkNumber = checkNumber; 
+    }
 
     public Double getAmountForCategory(String category)
     {
@@ -104,7 +128,9 @@ public class GivingRecord implements Comparable<GivingRecord>
     {
         setDateString(record.getDateString());
         setLastName(record.getLastName());
-        setFirstName(record.getLastName());
+        setFirstName(record.getFirstName());
+        setFundType(record.getFundType());
+        setCheckNumber(record.getCheckNumber());
         categorizedAmounts = new HashMap<String, Double>(record.categorizedAmounts);
     }
 
@@ -113,7 +139,9 @@ public class GivingRecord implements Comparable<GivingRecord>
         final StringBuilder sb = new StringBuilder();
         sb.append(dateString + ", ");
         sb.append(lastName + ", ");
-        sb.append(firstName);
+        sb.append(firstName + ", ");
+        sb.append(fundType + ", ");
+        sb.append(checkNumber);
 
         for (String category : categorizedAmounts.keySet()) {
             sb.append(", " + category + ": ");
@@ -130,6 +158,8 @@ public class GivingRecord implements Comparable<GivingRecord>
         sb.append("dateString=" + dateString);
         sb.append(", lastName=" + lastName);
         sb.append(", firstName=" + firstName);
+        sb.append(", fundType=" + fundType);
+        sb.append(", checkNumber=" + checkNumber);
 
         for (String category : categorizedAmounts.keySet()) {
             sb.append(", " + category + ": ");
@@ -145,6 +175,8 @@ public class GivingRecord implements Comparable<GivingRecord>
         sb.append(dateString);
         sb.append("," + lastName);
         sb.append("," + firstName);
+        sb.append("," + fundType);
+        sb.append("," + checkNumber);
 
         for (String category : Settings.getInstance().getCategories()) {
             if (categorizedAmounts.containsKey(category)) {
@@ -152,17 +184,6 @@ public class GivingRecord implements Comparable<GivingRecord>
             } else {
                 sb.append(",0.0");
             }
-        }
-        sb.append("," + getTotal());
-        return sb.toString();
-    }
-
-    public String toReportCsv()
-    {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(dateString);
-        for (String category : categorizedAmounts.keySet()) {
-            sb.append("," + NumberFormat.getCurrencyInstance().format(categorizedAmounts.get(category)));
         }
         sb.append("," + getTotal());
         return sb.toString();
@@ -176,8 +197,10 @@ public class GivingRecord implements Comparable<GivingRecord>
             final String dateString = tokens[tokenIndex++].trim();
             final String lastName = tokens[tokenIndex++].trim();
             final String firstName = tokens[tokenIndex++].trim();
-            final GivingRecord record = new GivingRecord(dateString, lastName, firstName);
-            final String[] categories = Arrays.copyOfRange(headers, 3, headers.length - 1);
+            final String fundType = tokens[tokenIndex++].trim();
+            final String checkNumber = tokens[tokenIndex++].trim();
+            final GivingRecord record = new GivingRecord(dateString, lastName, firstName, fundType, checkNumber);
+            final String[] categories = Arrays.copyOfRange(headers, tokenIndex, headers.length - 1);
             final List<String> definedCategories = Settings.getInstance().getCategories();
             for (String category : categories) {
                 if (definedCategories.contains(category)) {
@@ -246,4 +269,5 @@ public class GivingRecord implements Comparable<GivingRecord>
             categorizedAmounts.remove(key);
         }
     }
+
 }
