@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,8 +28,9 @@ public class TallyDialog extends JDialog
     private JLabel totalLabel;
     private TallyTable tallyTable;
     
-    public TallyDialog()
+    public TallyDialog(JFrame owner)
     {
+        super(owner);
         initComponents();
     }
 
@@ -65,7 +67,8 @@ public class TallyDialog extends JDialog
         valueField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent event) {
-                if (KeyEvent.VK_ENTER == event.getKeyCode()) {
+                if (KeyEvent.VK_ENTER == event.getKeyCode() || 
+                    KeyEvent.VK_ADD == event.getKeyCode()) {
                     final String value = valueField.getText();
                     try {
                         final double doubleValue = NumberFormat.getNumberInstance().parse(value).doubleValue();
@@ -75,6 +78,16 @@ public class TallyDialog extends JDialog
                     } catch (ParseException e) {
                     }
                     valueField.setText("");
+                } else if (KeyEvent.VK_SUBTRACT == event.getKeyCode()) {
+                    final String value = valueField.getText();
+                    try {
+                        final double doubleValue = NumberFormat.getNumberInstance().parse(value).doubleValue();
+                        if (doubleValue != 0.0) {
+                            tallyTable.addValue(new BigDecimal(doubleValue));
+                            valueField.setText("-");
+                        }
+                    } catch (ParseException e) {
+                    }
                 }
             }
         });
@@ -101,7 +114,7 @@ public class TallyDialog extends JDialog
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final TallyDialog dialog = new TallyDialog();
+                final TallyDialog dialog = new TallyDialog(null);
                 dialog.setVisible(true);
             }
         });

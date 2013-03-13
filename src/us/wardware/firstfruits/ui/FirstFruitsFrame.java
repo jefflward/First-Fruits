@@ -60,10 +60,13 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private JLabel lastEntryLabel;
     private JLabel recordCountLabel;
     private AbstractButton offeringReportButton;
+    private TallyDialog TALLY_DIALOG;
     
     public FirstFruitsFrame()
     {
         initComponents();
+        TALLY_DIALOG = new TallyDialog(this);
+        TALLY_DIALOG.setLocationRelativeTo(FirstFruitsFrame.this);
         RecordManager.getInstance().addObserver(this);
     }
 
@@ -228,9 +231,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        final TallyDialog tally = new TallyDialog();
-                        tally.setLocationRelativeTo(FirstFruitsFrame.this);
-                        tally.setVisible(true);
+                        if (!TALLY_DIALOG.isVisible()) {
+                            TALLY_DIALOG.setVisible(true);
+                            TALLY_DIALOG.toFront();
+                        }
                     }
                 });
             }
@@ -324,9 +328,11 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        final TallyDialog tally = new TallyDialog();
-                        tally.setLocationRelativeTo(FirstFruitsFrame.this);
-                        tally.setVisible(true);
+                        if (!TALLY_DIALOG.isVisible()) {
+                            TALLY_DIALOG.setVisible(true);
+                            TALLY_DIALOG.toFront();
+                            TALLY_DIALOG.repaint();
+                        }
                     }
                 });
             }
