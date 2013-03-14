@@ -1,5 +1,6 @@
 package us.wardware.firstfruits.ui;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -12,6 +13,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -29,8 +31,9 @@ public class ReportAllDialog extends JDialog
     private JLabel outputFileLabel;
     private JButton runReportButton;
     
-    public ReportAllDialog()
+    public ReportAllDialog(JFrame owner)
     {
+        super(owner);
         initComponents();
     }
 
@@ -39,7 +42,7 @@ public class ReportAllDialog extends JDialog
         setLayout(new GridBagLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
 
-        setTitle("Run Reports");
+        setTitle("Generate All Giving Statements");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(300, 100));
         
@@ -68,7 +71,11 @@ public class ReportAllDialog extends JDialog
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     runReport();
+                    setCursor(Cursor.getDefaultCursor());
+                    setVisible(false);
+                    dispose();
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(ReportAllDialog.this, "Error occurred while running report: " + e.getMessage(), "Run Report Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -79,7 +86,7 @@ public class ReportAllDialog extends JDialog
         
         buttonPanel.add(runReportButton);
         
-        final JButton cancelButton = new JButton(new TextAction("Cancel"){
+        final JButton cancelButton = new JButton(new TextAction("Close"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 setVisible(false);
@@ -111,7 +118,6 @@ public class ReportAllDialog extends JDialog
     
     private void runReport() throws IOException
     {
-        setVisible(false);
         final List<String> names = RecordManager.getInstance().getReportNameList();
         
         for (String name : names) {
@@ -125,6 +131,5 @@ public class ReportAllDialog extends JDialog
                 } 
             }
         }
-        dispose();
     }
 }

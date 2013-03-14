@@ -195,7 +195,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         reportItem.setMnemonic('S');
         reportsMenu.add(reportItem);
         
-        final JMenuItem reportAll = new JMenuItem(new TextAction("Report All") {
+        final JMenuItem reportAll = new JMenuItem(new TextAction("Generate All Giving Statements") {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
@@ -366,7 +366,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        reportAllButton.setToolTipText("Report All");
+        reportAllButton.setToolTipText("Generate All Giving Statements");
         reportAllButton.setEnabled(false);
         buttonPanel.add(reportAllButton);
         
@@ -464,7 +464,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final ReportAllDialog dialog = new ReportAllDialog();
+                final ReportAllDialog dialog = new ReportAllDialog(FirstFruitsFrame.this);
                 dialog.setLocationRelativeTo(FirstFruitsFrame.this);
                 dialog.setVisible(true);
                 dialog.setAlwaysOnTop(true);
@@ -477,7 +477,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final OfferingReportDialog dialog = new OfferingReportDialog();
+                final OfferingReportDialog dialog = new OfferingReportDialog(FirstFruitsFrame.this);
                 dialog.setLocationRelativeTo(FirstFruitsFrame.this);
                 dialog.setVisible(true);
                 dialog.setAlwaysOnTop(true);
@@ -490,7 +490,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final GivingStatementDialog reportDialog = new GivingStatementDialog();
+                final GivingStatementDialog reportDialog = new GivingStatementDialog(FirstFruitsFrame.this);
                 reportDialog.setLocationRelativeTo(FirstFruitsFrame.this);
                 reportDialog.setVisible(true);
             }

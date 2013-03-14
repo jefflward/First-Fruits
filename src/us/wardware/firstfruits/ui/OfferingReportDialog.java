@@ -9,6 +9,7 @@ import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -22,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.text.TextAction;
@@ -41,12 +43,14 @@ import net.sf.dynamicreports.report.exception.DRException;
 
 public class OfferingReportDialog extends JDialog
 {
+    private JButton printButton;
     private JButton saveButton;
     private OfferingPanel offeringPanel;
     private File outputFile;
     
-    public OfferingReportDialog()
+    public OfferingReportDialog(JFrame owner)
     {
+        super(owner);
         initComponents();
     }
 
@@ -65,15 +69,24 @@ public class OfferingReportDialog extends JDialog
         add(offeringPanel, BorderLayout.CENTER);
         
         final JPanel buttonPanel = new JPanel();
+        
+        printButton = new JButton(new TextAction("Print"){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                printReport();
+            }
+        });
+        buttonPanel.add(printButton);
+        
         saveButton = new JButton(new TextAction("Save"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     chooseOutputFile();
                     if (outputFile != null) {
-                        setVisible(false);
+                        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         saveReport();
-                        dispose();
+                        setCursor(Cursor.getDefaultCursor());
                     }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(OfferingReportDialog.this, "Error occurred while running report: " + e.getMessage(), "Run Report Error", JOptionPane.ERROR_MESSAGE);
@@ -136,6 +149,18 @@ public class OfferingReportDialog extends JDialog
           .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn));
     }
     
+    private void printReport()
+    {
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            final JasperReportBuilder report = createReport();
+            setCursor(Cursor.getDefaultCursor());
+            report.print(true);
+        } catch (DRException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void saveReport() throws IOException
     {
         final FileOutputStream os = new FileOutputStream(outputFile);

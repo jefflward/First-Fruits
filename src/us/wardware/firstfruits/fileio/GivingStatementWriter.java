@@ -22,6 +22,7 @@ import us.wardware.firstfruits.RecordManager;
 import us.wardware.firstfruits.Settings;
 
 import net.sf.dynamicreports.examples.Templates;
+import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
 import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
@@ -33,10 +34,9 @@ import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 
-
 public class GivingStatementWriter
 {
-    public static void writeGivingStatement(String lastName, String firstName, File outputFile) throws IOException
+    public static JasperReportBuilder createGivingStatement(String lastName, String firstName )
     {
         final StyleBuilder boldStyle = stl.style().bold();
         final StyleBuilder boldStyleSmall = stl.style().bold().setFontSize(8);
@@ -79,19 +79,24 @@ public class GivingStatementWriter
         summary.add(cmp.verticalGap(10));
         summary.add(cmp.text("                                            ").setStyle(stl.style().underline()));
 
+        return report()// create new report design
+        .setTemplate(Templates.reportTemplate)
+        .setColumnTitleStyle(columnTitleStyle)
+        .highlightDetailEvenRows()
+        .columns(columns)
+        .title(createTitle(lastName, firstName))
+        .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
+        .setDataSource(createDataSource(lastName, firstName))
+        .subtotalsAtSummary(sbtBuilders)
+        .summary(summary);
+    }
+    
+    public static void writeGivingStatement(String lastName, String firstName, File outputFile) throws IOException
+    {
         final FileOutputStream os = new FileOutputStream(outputFile);
         try {
-            report()// create new report design
-            .setTemplate(Templates.reportTemplate)
-            .setColumnTitleStyle(columnTitleStyle)
-            .highlightDetailEvenRows()
-            .columns(columns)
-            .title(createTitle(lastName, firstName))
-            .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
-            .setDataSource(createDataSource(lastName, firstName))
-            .subtotalsAtSummary(sbtBuilders)
-            .summary(summary)
-            .toXlsx(os);
+            final JasperReportBuilder statement = createGivingStatement(lastName, firstName);
+            statement.toXlsx(os);
         } catch (DRException e) {
             JOptionPane.showMessageDialog(null, "Exception occurred writing report: " + e.getMessage());
             e.printStackTrace();
@@ -188,5 +193,15 @@ public class GivingStatementWriter
         }
 
         return dataSource;
+    }
+
+    public static void printGivingStatement(String lastName, String firstName)
+    {
+        final JasperReportBuilder statement = createGivingStatement(lastName, firstName);
+        try {
+            statement.print(true);
+        } catch (DRException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package us.wardware.firstfruits.ui;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -29,10 +31,12 @@ public class GivingStatementDialog extends JDialog
 {
     private AutoComboBox nameCombo;
     private File outputFile;
+    private JButton printButton;
     private JButton saveButton;
     
-    public GivingStatementDialog()
+    public GivingStatementDialog(JFrame owner)
     {
+        super(owner);
         initComponents();
     }
 
@@ -60,8 +64,10 @@ public class GivingStatementDialog extends JDialog
             @Override
             public void itemStateChanged(ItemEvent arg0) {
                 if (!nameCombo.getSelectedItem().toString().trim().isEmpty()) {
+                    printButton.setEnabled(true);
                     saveButton.setEnabled(true);
                 } else {
+                    printButton.setEnabled(false);
                     saveButton.setEnabled(false);
                 }
             }
@@ -71,13 +77,25 @@ public class GivingStatementDialog extends JDialog
         add(nameCombo, c);
         
         final JPanel buttonPanel = new JPanel();
+        printButton = new JButton(new TextAction("Print"){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                printReport();
+                setCursor(Cursor.getDefaultCursor());
+            }
+        });
+        printButton.setEnabled(false);
+        buttonPanel.add(printButton);
+        
         saveButton = new JButton(new TextAction("Save"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     if (chooseOutputFile()) {
-                        setVisible(false);
+                        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         runReport();
+                        setCursor(Cursor.getDefaultCursor());
                     }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(GivingStatementDialog.this, "Error occurred while running report: " + e.getMessage(), "Run report error", JOptionPane.ERROR_MESSAGE);
@@ -89,14 +107,14 @@ public class GivingStatementDialog extends JDialog
         
         buttonPanel.add(saveButton);
         
-        final JButton cancelButton = new JButton(new TextAction("Cancel"){
+        final JButton closeButton = new JButton(new TextAction("Close"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 setVisible(false);
                 dispose();
             }
         });
-        buttonPanel.add(cancelButton);
+        buttonPanel.add(closeButton);
         c.gridx = 1;
         c.gridy = 2;        
         c.gridwidth = 2;
@@ -124,15 +142,23 @@ public class GivingStatementDialog extends JDialog
         return false;
     }
     
+    private void printReport()
+    {
+        final String selectedName = (String) nameCombo.getSelectedItem();
+        if (!selectedName.isEmpty()) {
+            final String lastName = selectedName.split(",")[0].trim();
+            final String firstName = selectedName.split(",")[1].trim();
+            GivingStatementWriter.printGivingStatement(lastName, firstName);
+        }
+    }
+    
     private void runReport() throws IOException
     {
-        setVisible(false);
         final String selectedName = (String) nameCombo.getSelectedItem();
         if (!selectedName.isEmpty()) {
             final String lastName = selectedName.split(",")[0].trim();
             final String firstName = selectedName.split(",")[1].trim();
             GivingStatementWriter.writeGivingStatement(lastName, firstName, outputFile);
         }
-        dispose();
     }
 }
