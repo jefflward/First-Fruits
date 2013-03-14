@@ -35,9 +35,12 @@ import us.wardware.firstfruits.fileio.XlsxFileFilter;
 
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
+import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.PageOrientation;
+import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.exception.DRException;
 
 
@@ -146,7 +149,9 @@ public class OfferingReportDialog extends JDialog
                     .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
           .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
           .setDataSource(offeringPanel.createDataSource())
-          .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn));
+          .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn))
+          .setPageFormat(PageType.LETTER)
+          .setPageMargin(DynamicReports.margin(40));
     }
     
     private void printReport()

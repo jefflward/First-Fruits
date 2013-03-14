@@ -17,12 +17,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import us.wardware.firstfruits.GivingRecord;
-import us.wardware.firstfruits.RecordManager;
-import us.wardware.firstfruits.Settings;
-
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
+import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
 import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
@@ -33,6 +30,9 @@ import net.sf.dynamicreports.report.constant.HorizontalAlignment;
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
+import us.wardware.firstfruits.GivingRecord;
+import us.wardware.firstfruits.RecordManager;
+import us.wardware.firstfruits.Settings;
 
 public class GivingStatementWriter
 {
@@ -88,6 +88,7 @@ public class GivingStatementWriter
         .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
         .setDataSource(createDataSource(lastName, firstName))
         .subtotalsAtSummary(sbtBuilders)
+        .setPageMargin(DynamicReports.margin(40))
         .summary(summary);
     }
     
