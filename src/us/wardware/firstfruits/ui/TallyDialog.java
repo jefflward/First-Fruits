@@ -80,7 +80,8 @@ public class TallyDialog extends JDialog
                     } catch (ParseException e) {
                     }
                     valueField.setText("");
-                } else if (KeyEvent.VK_SUBTRACT == event.getKeyCode()) {
+                } else if (KeyEvent.VK_SUBTRACT == event.getKeyCode() ||
+                           KeyEvent.VK_MINUS == event.getKeyCode()) {
                     final String value = valueField.getText();
                     try {
                         final double doubleValue = NumberFormat.getNumberInstance().parse(value).doubleValue();
