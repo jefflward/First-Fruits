@@ -22,6 +22,13 @@ public class TallyTableModel extends DefaultTableModel
         return total;
     }
     
+    public void clearTableData()
+    {
+        values.clear();
+        updateTotal();
+        fireTableDataChanged();
+    }
+    
     public void addValue(BigDecimal value)
     {
         values.add(value);

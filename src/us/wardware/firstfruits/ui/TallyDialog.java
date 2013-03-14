@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -27,6 +26,7 @@ public class TallyDialog extends JDialog
 {
     private JLabel totalLabel;
     private TallyTable tallyTable;
+    private CurrencyFormattedTextField valueField;
     
     public TallyDialog(JFrame owner)
     {
@@ -46,7 +46,8 @@ public class TallyDialog extends JDialog
         setTitle("Quick Tally");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
-        totalLabel = new JLabel("Total: ");
+        totalLabel = new JLabel("Total: $0.00");
+        //totalLabel.setHorizontalAlignment(JLabel.CENTER);
         add(totalLabel, BorderLayout.SOUTH);
         
         final JPanel middle = new JPanel(new BorderLayout());
@@ -58,12 +59,13 @@ public class TallyDialog extends JDialog
                 updateTotal();
             }
         });
+        tallyTable.setEnabled(false);
         
         final JScrollPane scrollPane = new JScrollPane(tallyTable);
         scrollPane.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         middle.add(scrollPane, BorderLayout.CENTER);
         
-        final JTextField valueField = new CurrencyFormattedTextField(true); 
+        valueField = new CurrencyFormattedTextField(true); 
         valueField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent event) {
@@ -88,11 +90,14 @@ public class TallyDialog extends JDialog
                         }
                     } catch (ParseException e) {
                     }
+                } else if (KeyEvent.VK_ESCAPE == event.getKeyCode()) {
+                    clearData();
                 }
             }
+
         });
+        valueField.requestFocusInWindow();
         valueField.setText("0.00");
-        valueField.requestFocus();
         valueField.setSelectionStart(0);
         valueField.setSelectionEnd(valueField.getText().length()-1);
         
@@ -101,6 +106,12 @@ public class TallyDialog extends JDialog
         add(middle, BorderLayout.CENTER);
         invalidate();
         pack();
+    }
+    
+    private void clearData()
+    {
+        tallyTable.getModel().clearTableData();
+        valueField.setText("");
     }
     
     private void updateTotal()
@@ -116,6 +127,7 @@ public class TallyDialog extends JDialog
             public void run() {
                 final TallyDialog dialog = new TallyDialog(null);
                 dialog.setVisible(true);
+                dialog.setAlwaysOnTop(true);
             }
         });
     }
