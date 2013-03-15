@@ -28,20 +28,22 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.text.TextAction;
 
-import us.wardware.firstfruits.RecordManager;
-import us.wardware.firstfruits.Settings;
-import us.wardware.firstfruits.fileio.FileUtils;
-import us.wardware.firstfruits.fileio.XlsxFileFilter;
-
 import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
+import net.sf.dynamicreports.report.builder.subtotal.AggregationSubtotalBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
-import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
+import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.exception.DRException;
+import net.sf.jasperreports.engine.JRDataSource;
+import us.wardware.firstfruits.GivingRecord;
+import us.wardware.firstfruits.RecordManager;
+import us.wardware.firstfruits.Settings;
+import us.wardware.firstfruits.fileio.FileUtils;
+import us.wardware.firstfruits.fileio.XlsxFileFilter;
 
 
 public class OfferingReportDialog extends JDialog
@@ -145,13 +147,102 @@ public class OfferingReportDialog extends JDialog
           .highlightDetailEvenRows()  
           .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
           .title(cmp.horizontalList()
-                    .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
-                    .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
+                 .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                 .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
           .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
           .setDataSource(offeringPanel.createDataSource())
           .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn))
+          .summary(cmp.verticalList()
+                      .add(cmp.verticalGap(50))
+                      .add(cmp.subreport(createRecordsSubReport())))
           .setPageFormat(PageType.LETTER)
-          .setPageMargin(DynamicReports.margin(40));
+          .setPageMargin(DynamicReports.margin(20));
+    }
+    
+    public JasperReportBuilder createRecordsSubReport()
+    {
+        final StyleBuilder boldStyle = stl.style().bold();
+        final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
+        final StyleBuilder columnTitleStyle = stl.style(boldCenteredStyle)
+                        .setBorder(stl.pen1Point())
+                        .setBackgroundColor(Color.LIGHT_GRAY);
+
+        final TextColumnBuilder<String> lastNameColumn = col.column("Last Name", "lastName", type.stringType());
+        final TextColumnBuilder<String> firstNameColumn = col.column("First Name", "firstName", type.stringType());
+        final TextColumnBuilder<String> fundTypeColumn = col.column("Fund Type", "fundType", type.stringType());
+        final TextColumnBuilder<Short> checkNumberColumn = col.column("Check #", "checkNumber", type.shortType());
+
+        final List<TextColumnBuilder<?>> columnList = new ArrayList<TextColumnBuilder<?>>();
+        columnList.add(lastNameColumn);
+        columnList.add(firstNameColumn);
+        columnList.add(fundTypeColumn);
+        columnList.add(checkNumberColumn);
+
+        final List<AggregationSubtotalBuilder<BigDecimal>> subtotalBuilders = new ArrayList<AggregationSubtotalBuilder<BigDecimal>>();
+        final List<String> categories = Settings.getInstance().getCategories();
+        for (String category : categories) {
+            final TextColumnBuilder<BigDecimal> categoryColumn = col.column(category, category, type.bigDecimalType());
+            columnList.add(categoryColumn);
+            subtotalBuilders.add(sbt.sum(categoryColumn));
+        }
+        final TextColumnBuilder<BigDecimal> totalsColumn = col.column("Total", "total", type.bigDecimalType());
+        columnList.add(totalsColumn);
+        subtotalBuilders.add(sbt.sum(totalsColumn));
+
+        final AggregationSubtotalBuilder<?>[] sbtBuilders = new AggregationSubtotalBuilder<?>[subtotalBuilders.size()];
+        subtotalBuilders.toArray(sbtBuilders);
+
+        final TextColumnBuilder<?>[] columns = new TextColumnBuilder<?>[columnList.size()];
+        columnList.toArray(columns);
+
+        return report()// create new report design
+        .setTemplate(Templates.reportTemplate)
+        .setColumnTitleStyle(columnTitleStyle)
+        .title(cmp.text("Offering Contributions").setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER))
+        .highlightDetailEvenRows()
+        .columns(columns)
+        .setDataSource(createRecordsDataSource())
+        .subtotalsAtSummary(sbtBuilders);
+    }
+    
+    private JRDataSource createRecordsDataSource()
+    {
+        final String selectedDate = offeringPanel.getSelectedDate();
+        final List<GivingRecord> records = RecordManager.getInstance().getRecordsForDate(selectedDate);
+
+        final List<String> columnList = new ArrayList<String>();
+        columnList.add("lastName");
+        columnList.add("firstName");
+        columnList.add("fundType");
+        columnList.add("checkNumber");
+        final List<String> categories = Settings.getInstance().getCategories();
+        columnList.addAll(categories);
+        columnList.add("total");
+
+        final String[] columns = new String[columnList.size()];
+        columnList.toArray(columns);
+
+        final DRDataSource dataSource = new DRDataSource(columns);
+
+        for (GivingRecord record : records) {
+            final List<Object> data = new ArrayList<Object>();
+            data.add(record.getLastName());
+            data.add(record.getFirstName());
+            data.add(record.getFundType());
+            if (record.getCheckNumber().isEmpty()) {
+                data.add(null);
+            } else {
+                data.add(Short.parseShort(record.getCheckNumber()));
+            }
+            for (String category : categories) {
+                final BigDecimal amount = new BigDecimal(record.getAmountForCategory(category));
+                data.add(amount);
+            }
+            data.add(new BigDecimal(record.getTotal()));
+            dataSource.add(data.toArray());
+        }
+
+        return dataSource;
     }
     
     private void printReport()

@@ -55,6 +55,11 @@ public class OfferingPanel extends JPanel
         initComponents();
         initialized = true;
     }
+    
+    public String getSelectedDate()
+    {
+        return SDF.format(picker.getDate());
+    }
 
     private void initComponents()
     {
