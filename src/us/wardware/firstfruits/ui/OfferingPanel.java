@@ -1,6 +1,7 @@
 package us.wardware.firstfruits.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -18,16 +19,18 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-
-import us.wardware.firstfruits.GivingRecord;
-import us.wardware.firstfruits.RecordManager;
-import us.wardware.firstfruits.Settings;
+import javax.swing.border.TitledBorder;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
+import us.wardware.firstfruits.GivingRecord;
+import us.wardware.firstfruits.RecordManager;
+import us.wardware.firstfruits.Settings;
 
 import com.michaelbaranov.microba.calendar.DatePicker;
 
@@ -42,6 +45,13 @@ public class OfferingPanel extends JPanel
     private JLabel offeringBalancesLabel;
     private Double totalForAllCategories;
     private boolean initialized;
+    private JCheckBox includeSignaturesCheckbox;
+    private JCheckBox includeContributionsCheckbox;
+    private JCheckBox includeDonorNames;
+    private JTextField signature1TextField;
+    private JTextField signature2TextField;
+    private Component signature1Label;
+    private JLabel signature2Label;
 
     public OfferingPanel()
     {
@@ -97,37 +107,80 @@ public class OfferingPanel extends JPanel
         add(datePanel, BorderLayout.NORTH);
         
 
-        final JPanel center = new JPanel(new GridBagLayout());
+        final JPanel deposits = new JPanel(new GridBagLayout());
+        deposits.setBorder(new TitledBorder("Deposit Details"));
         final JLabel currencyLabel = new JLabel("Currency");
         currencyLabel.setPreferredSize(new Dimension(100, currencyLabel.getPreferredSize().height));
         currencyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(currencyLabel, Gbc.xyi(1, 0, 0).right(2).top(20));
+        deposits.add(currencyLabel, Gbc.xyi(1, 0, 0).right(2));
         final JLabel checksLabel = new JLabel("Checks");
         checksLabel.setPreferredSize(new Dimension(100, checksLabel.getPreferredSize().height));
         checksLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(checksLabel, Gbc.xyi(2, 0, 0).right(2).top(20));
+        deposits.add(checksLabel, Gbc.xyi(2, 0, 0).right(2));
         final JLabel totalLabel = new JLabel("Total");
         totalLabel.setPreferredSize(new Dimension(100, totalLabel.getPreferredSize().height));
         totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(totalLabel, Gbc.xyi(3, 0, 0).right(2).top(20));
+        deposits.add(totalLabel, Gbc.xyi(3, 0, 0).right(2));
 
         categoryInputs = new HashMap<String, CategoryInputFields>();
         int y = 1;
-        addInputsForCategory(center, y++, "Uncategorized", false);
         final List<String> categories = Settings.getInstance().getCategories();
         for (String category : categories) {
-            addInputsForCategory(center, y++, category, true);
+            addInputsForCategory(deposits, y++, category, true);
         }
         
         final JLabel offeringTotalLabel = new JLabel("Offering Total");
         offeringTotalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        center.add(offeringTotalLabel, Gbc.xyi(2, y, 2).bottom(20));
+        deposits.add(offeringTotalLabel, Gbc.xyi(2, y, 2));
         offeringTotalField = new CurrencyFormattedTextField();
         offeringTotalField.setEditable(false);
         
-        center.add(offeringTotalField, Gbc.xyi(3, y, 2).bottom(20));
+        deposits.add(offeringTotalField, Gbc.xyi(3, y, 2));
         offeringBalancesLabel = new JLabel();
-        center.add(offeringBalancesLabel, Gbc.xyi(4, y, 2).bottom(20));
+        deposits.add(offeringBalancesLabel, Gbc.xyi(4, y, 2));
+        
+        final JPanel options = new JPanel(new GridBagLayout());
+        options.setBorder(new TitledBorder("Report Options"));
+        y = 0; 
+        includeSignaturesCheckbox = new JCheckBox("Include Counters Signatures", true);
+        options.add(includeSignaturesCheckbox, Gbc.xyi(0,y,2).gridWidth(2));
+        
+        includeSignaturesCheckbox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                signature1TextField.setEnabled(includeSignaturesCheckbox.isSelected());
+                signature2TextField.setEnabled(includeSignaturesCheckbox.isSelected());
+            }
+        });
+        
+        signature1TextField = new JTextField("Signature 1");
+        signature1TextField.addFocusListener(new SelectAllFocusListener());
+        options.add(signature1TextField, Gbc.xyi(2,y,2));
+        signature2TextField = new JTextField("Signature 2");
+        signature2TextField.addFocusListener(new SelectAllFocusListener());
+        options.add(signature2TextField, Gbc.xyi(3,y,2));
+        
+        signature1Label = new JLabel("Signature 1", SwingConstants.CENTER);
+        signature1Label.setPreferredSize(new Dimension(100, signature1Label.getPreferredSize().height));
+        options.add(signature1Label, Gbc.xyi(2,++y,2));
+        signature2Label = new JLabel("Signature 2", SwingConstants.CENTER);
+        signature2Label.setPreferredSize(new Dimension(100, signature2Label.getPreferredSize().height));
+        options.add(signature2Label, Gbc.xyi(3,y,2));
+        
+        includeContributionsCheckbox = new JCheckBox("Include Offering Contributions", true);
+        includeContributionsCheckbox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                includeDonorNames.setEnabled(includeContributionsCheckbox.isSelected());
+            }
+        });
+        options.add(includeContributionsCheckbox, Gbc.xyi(0,++y,2).gridWidth(2));
+        includeDonorNames = new JCheckBox("Include Donor Names", true);
+        options.add(includeDonorNames, Gbc.xyi(0,++y,2).gridWidth(2).bottom(20));
+        
+        final JPanel center = new JPanel(new GridBagLayout());
+        center.add(deposits, Gbc.xyi(0,0,5));
+        center.add(options, Gbc.xyi(0,1,5));
         
         add(center, BorderLayout.CENTER);
         
@@ -333,6 +386,26 @@ public class OfferingPanel extends JPanel
             total += record.getAmountForCategory(category);
         }
         return total;
+    }
+    
+    public OfferingReportSettings getOfferingReportSettings()
+    {
+        final OfferingReportSettings settings = new OfferingReportSettings();
+        settings.includeSignatures = includeSignaturesCheckbox.isSelected();
+        settings.signature1 = signature1TextField.getText().trim();
+        settings.signature2 = signature2TextField.getText().trim();
+        settings.includeContributions = includeContributionsCheckbox.isSelected();
+        settings.includeDonorNames = includeDonorNames.isSelected();
+        return settings; 
+    }
+    
+    public static class OfferingReportSettings
+    {
+        public boolean includeSignatures;
+        public String signature1;
+        public String signature2;
+        public boolean includeContributions;
+        public boolean includeDonorNames;
     }
 
     public JRDataSource createDataSource() 

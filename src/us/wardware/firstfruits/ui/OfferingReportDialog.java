@@ -32,6 +32,8 @@ import net.sf.dynamicreports.examples.Templates;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
+import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.builder.subtotal.AggregationSubtotalBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
@@ -44,6 +46,7 @@ import us.wardware.firstfruits.RecordManager;
 import us.wardware.firstfruits.Settings;
 import us.wardware.firstfruits.fileio.FileUtils;
 import us.wardware.firstfruits.fileio.XlsxFileFilter;
+import us.wardware.firstfruits.ui.OfferingPanel.OfferingReportSettings;
 
 
 public class OfferingReportDialog extends JDialog
@@ -62,7 +65,6 @@ public class OfferingReportDialog extends JDialog
     private void initComponents()
     {
         setLayout(new BorderLayout());
-        setModalityType(ModalityType.MODELESS);
 
         final List<Image> icons = new ArrayList<Image>();
         icons.add(new ImageIcon(TallyDialog.class.getResource("/icons/offering.png")).getImage());
@@ -141,25 +143,51 @@ public class OfferingReportDialog extends JDialog
         final TextColumnBuilder<BigDecimal> checkColumn     = col.column("Checks", "checks", type.bigDecimalType());  
         final TextColumnBuilder<BigDecimal> totalsColumn     = col.column("Total", "total", type.bigDecimalType());
         
-        return report()
+        final JasperReportBuilder report = report()
           .setTemplate(Templates.reportTemplate)  
           .setColumnTitleStyle(columnTitleStyle)  
           .highlightDetailEvenRows()  
           .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
-          .title(cmp.horizontalList()
-                 .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
-                 .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
+          .title(cmp.verticalList()
+                    .add(cmp.horizontalList()
+                            .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                            .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
+                    .add(cmp.verticalGap(10)))
           .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))
           .setDataSource(offeringPanel.createDataSource())
           .subtotalsAtSummary(sbt.sum(currencyColumn), sbt.sum(checkColumn), sbt.sum(totalsColumn))
-          .summary(cmp.verticalList()
-                      .add(cmp.verticalGap(50))
-                      .add(cmp.subreport(createRecordsSubReport())))
           .setPageFormat(PageType.LETTER)
           .setPageMargin(DynamicReports.margin(20));
+        
+        final VerticalListBuilder summary = cmp.verticalList();
+        final OfferingReportSettings offeringReportSettings = offeringPanel.getOfferingReportSettings();
+        if (offeringReportSettings.includeContributions) {
+            summary.add(cmp.verticalGap(30));
+            summary.add(cmp.subreport(createRecordsSubReport(offeringReportSettings.includeDonorNames)));
+        }
+        
+        if (offeringReportSettings.includeSignatures) {
+            summary.add(cmp.verticalGap(30));
+            
+            final HorizontalListBuilder signatures = cmp.horizontalList();
+            final VerticalListBuilder signature1 = cmp.verticalList();
+            signature1.add(cmp.filler().setFixedDimension(200, 10).setStyle(stl.style().setTopBorder(stl.pen1Point())));
+            signature1.add(cmp.text(offeringReportSettings.signature1).setStyle(stl.style()));
+            signatures.add(signature1);
+            
+            final VerticalListBuilder signature2 = cmp.verticalList();
+            signature2.add(cmp.filler().setFixedDimension(200, 10).setStyle(stl.style().setTopBorder(stl.pen1Point())));
+            signature2.add(cmp.text(offeringReportSettings.signature2).setStyle(stl.style()));
+            signatures.add(signature2);
+            
+            summary.add(signatures);
+        }
+        report.summary(summary);
+        
+        return report;
     }
     
-    public JasperReportBuilder createRecordsSubReport()
+    public JasperReportBuilder createRecordsSubReport(boolean includeDonorNames)
     {
         final StyleBuilder boldStyle = stl.style().bold();
         final StyleBuilder boldCenteredStyle = stl.style(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER);
@@ -173,8 +201,10 @@ public class OfferingReportDialog extends JDialog
         final TextColumnBuilder<Short> checkNumberColumn = col.column("Check #", "checkNumber", type.shortType());
 
         final List<TextColumnBuilder<?>> columnList = new ArrayList<TextColumnBuilder<?>>();
-        columnList.add(lastNameColumn);
-        columnList.add(firstNameColumn);
+        if (includeDonorNames) {
+            columnList.add(lastNameColumn);
+            columnList.add(firstNameColumn);
+        }
         columnList.add(fundTypeColumn);
         columnList.add(checkNumberColumn);
 
@@ -198,21 +228,25 @@ public class OfferingReportDialog extends JDialog
         return report()// create new report design
         .setTemplate(Templates.reportTemplate)
         .setColumnTitleStyle(columnTitleStyle)
-        .title(cmp.text("Offering Contributions").setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER))
+        .title(cmp.verticalList()
+                  .add(cmp.text("Offering Contributions").setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.CENTER))
+                  .add(cmp.verticalGap(10)))
         .highlightDetailEvenRows()
         .columns(columns)
-        .setDataSource(createRecordsDataSource())
+        .setDataSource(createRecordsDataSource(includeDonorNames))
         .subtotalsAtSummary(sbtBuilders);
     }
     
-    private JRDataSource createRecordsDataSource()
+    private JRDataSource createRecordsDataSource(boolean includeDonorNames)
     {
         final String selectedDate = offeringPanel.getSelectedDate();
         final List<GivingRecord> records = RecordManager.getInstance().getRecordsForDate(selectedDate);
 
         final List<String> columnList = new ArrayList<String>();
-        columnList.add("lastName");
-        columnList.add("firstName");
+        if (includeDonorNames) {
+            columnList.add("lastName");
+            columnList.add("firstName");
+        }
         columnList.add("fundType");
         columnList.add("checkNumber");
         final List<String> categories = Settings.getInstance().getCategories();
@@ -226,8 +260,10 @@ public class OfferingReportDialog extends JDialog
 
         for (GivingRecord record : records) {
             final List<Object> data = new ArrayList<Object>();
-            data.add(record.getLastName());
-            data.add(record.getFirstName());
+            if (includeDonorNames) {
+                data.add(record.getLastName());
+                data.add(record.getFirstName());
+            }
             data.add(record.getFundType());
             if (record.getCheckNumber().isEmpty()) {
                 data.add(null);
