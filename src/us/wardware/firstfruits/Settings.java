@@ -19,6 +19,7 @@ public class Settings extends Observable
     public static final String STATE = "State";
     public static final String ZIP = "Zip";
     public static final String PHONE = "Phone";
+    public static final String INSTALL = "InstallTime";
     
     private static Settings INSTANCE;
     private Preferences preferences;
@@ -43,12 +44,27 @@ public class Settings extends Observable
         preferences = Preferences.userNodeForPackage(this.getClass());
     }
     
+    public String getInstallDate()
+    {
+        return preferences.get(INSTALL, null);
+    }
+    
+    public void setInstallDate(String installDate)
+    {
+        preferences.put(INSTALL, installDate); 
+    }
+
     public List<String> getCategories()
     {
         final List<String> categories = new ArrayList<String>();
         final String categoriesProperty = preferences.get(Settings.CATEGORIES_KEY, null);
         if (categoriesProperty != null) {
             categories.addAll(Arrays.asList(categoriesProperty.split(";")));
+        } else {
+            categories.add("General");
+            categories.add("Missions");
+            categories.add("Building");
+            preferences.put(Settings.CATEGORIES_KEY, StringUtils.join(categories, ";"));
         }
         return categories;
     }
@@ -73,4 +89,5 @@ public class Settings extends Observable
         setChanged();
         notifyObservers();
     }
+
 }

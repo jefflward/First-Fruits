@@ -42,13 +42,15 @@ public class SettingsDialog extends JDialog
     private CategoriesPanel categoriesPanel;
     private JPanel rightPanel;
     private JPanel buttonPanel;
+    private boolean guide;
     
     private static final String GENERAL = "General";
     private static final String CATEGORIES = "Categories";
 
-    public SettingsDialog(JFrame parent)
+    public SettingsDialog(JFrame parent, boolean guide)
     {
         super(parent);
+        this.guide = guide;
         initComponents();
         optionsList.getSelectionModel().setSelectionInterval(0,0);
         setLocationRelativeTo(parent);
@@ -247,6 +249,64 @@ public class SettingsDialog extends JDialog
         final JScrollPane scrollPane = new JScrollPane(optionsList);
         splitPane.setLeftComponent(scrollPane);
         
+        if (guide) {
+            createGuideButtonPanel();
+        } else {
+            createDefaultButtonPanel();
+        }
+        
+        rightPanel = new JPanel(new BorderLayout());
+        splitPane.setRightComponent(rightPanel);
+        splitPane.setDividerLocation(100);
+        rightPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        add(splitPane, BorderLayout.CENTER);
+        pack();
+    }
+    
+    private void createGuideButtonPanel()
+    {
+        buttonPanel = new JPanel();
+        
+        final JButton backButton = new JButton();
+        final JButton nextButton = new JButton();
+        backButton.setAction(new TextAction("Back"){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                optionsList.setSelectedIndex(0);
+                nextButton.setVisible(true);
+                backButton.setVisible(false);
+            }
+        });
+        backButton.setVisible(false);
+        buttonPanel.add(backButton);
+        
+        nextButton.setAction(new TextAction("Next"){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                backButton.setVisible(true);
+                nextButton.setVisible(false);
+                optionsList.setSelectedIndex(1);
+            }
+        });
+        nextButton.setVisible(true);
+        buttonPanel.add(nextButton);
+        
+        JButton finishButton = new JButton(new TextAction("Finish"){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                saveSettings();
+                setVisible(false);
+                dispose();
+            }
+        });
+        finishButton.setDefaultCapable(true);
+        
+        buttonPanel.add(finishButton);
+    }
+
+    private void createDefaultButtonPanel()
+    {
         buttonPanel = new JPanel();
         JButton okButton = new JButton(new TextAction("Ok"){
             @Override
@@ -268,14 +328,6 @@ public class SettingsDialog extends JDialog
             }
         });
         buttonPanel.add(cancelButton);
-        
-        rightPanel = new JPanel(new BorderLayout());
-        splitPane.setRightComponent(rightPanel);
-        splitPane.setDividerLocation(100);
-        rightPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
-        add(splitPane, BorderLayout.CENTER);
-        pack();
     }
     
     private void saveSettings()
@@ -289,7 +341,7 @@ public class SettingsDialog extends JDialog
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final SettingsDialog dialog = new SettingsDialog(null);
+                final SettingsDialog dialog = new SettingsDialog(null, true);
                 dialog.setVisible(true);
             }
         });

@@ -60,13 +60,16 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private JLabel lastEntryLabel;
     private JLabel recordCountLabel;
     private AbstractButton offeringReportButton;
-    private TallyDialog TALLY_DIALOG;
+    private TallyDialog tallyDialog;
+    private SettingsDialog settingsDialog;
     
     public FirstFruitsFrame()
     {
         initComponents();
-        TALLY_DIALOG = new TallyDialog(this);
-        TALLY_DIALOG.setLocationRelativeTo(FirstFruitsFrame.this);
+        tallyDialog = new TallyDialog(this);
+        tallyDialog.setLocationRelativeTo(FirstFruitsFrame.this);
+        settingsDialog = new SettingsDialog(this, false);
+        settingsDialog.setLocationRelativeTo(FirstFruitsFrame.this);
         RecordManager.getInstance().addObserver(this);
     }
 
@@ -231,9 +234,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        if (!TALLY_DIALOG.isVisible()) {
-                            TALLY_DIALOG.setVisible(true);
-                            TALLY_DIALOG.toFront();
+                        if (!tallyDialog.isVisible()) {
+                            tallyDialog.setVisible(true);
+                            tallyDialog.toFront();
+                            tallyDialog.repaint();
                         }
                     }
                 });
@@ -328,10 +332,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        if (!TALLY_DIALOG.isVisible()) {
-                            TALLY_DIALOG.setVisible(true);
-                            TALLY_DIALOG.toFront();
-                            TALLY_DIALOG.repaint();
+                        if (!tallyDialog.isVisible()) {
+                            tallyDialog.setVisible(true);
+                            tallyDialog.toFront();
+                            tallyDialog.repaint();
                         }
                     }
                 });
@@ -453,8 +457,11 @@ public class FirstFruitsFrame extends JFrame implements Observer
         SwingUtilities.invokeLater(new Runnable(){
             @Override
             public void run() {
-                final SettingsDialog settings = new SettingsDialog(FirstFruitsFrame.this);
-                settings.setVisible(true);
+                if (!settingsDialog.isVisible()) {
+                    settingsDialog.setVisible(true);
+                    settingsDialog.toFront();
+                    settingsDialog.repaint();
+                }
             }
         });
     }
