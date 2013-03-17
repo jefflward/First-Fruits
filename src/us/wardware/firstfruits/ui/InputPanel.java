@@ -177,6 +177,7 @@ public class InputPanel extends JPanel implements Observer
         });
         contentPanel.add(addUpdateButton, Gbc.xyi(1, gridy++, 2).horizontal().right(5));
         add(contentPanel, BorderLayout.NORTH);
+        updateLastNames(RecordManager.getInstance().getUniqueLastNames());
     }
 
     private class CategoryInputPair

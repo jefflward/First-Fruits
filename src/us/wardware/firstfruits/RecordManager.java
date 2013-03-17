@@ -38,6 +38,7 @@ public class RecordManager extends Observable implements Observer
     {
         uniqueLastNames = new HashSet<String>();
         uniqueLastNames.add("");
+        uniqueLastNames.add("Anonymous");
         firstNamesForLastName = new HashMap<String, Set<String>>();
         records = new ArrayList<GivingRecord>();
         unsavedChanges = false;
@@ -186,6 +187,7 @@ public class RecordManager extends Observable implements Observer
         records.clear();
         uniqueLastNames.clear();
         uniqueLastNames.add("");
+        uniqueLastNames.add("Anonymous");
         firstNamesForLastName.clear();        
         selectedRecord = null;
         selectionCount = 0;
