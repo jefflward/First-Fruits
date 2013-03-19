@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="libs/DynamicReports/libs/commons-digester-2.1.jar"/>
 	<classpathentry kind="lib" path="libs/DynamicReports/libs/spring-core-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/DynamicReports/libs/spring-beans-2.5.jar"/>
+	<classpathentry kind="lib" path="libs/commons-codec-1.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

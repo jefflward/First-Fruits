@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Properties;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -414,10 +415,16 @@ public class FirstFruitsFrame extends JFrame implements Observer
     
     protected void about()
     {
+        final Properties p = new Properties();
+        try {
+            p.load(FirstFruitsFrame.class.getResourceAsStream("/version.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         JOptionPane.showMessageDialog(this, 
-                        "First Fruits\n" +
-                        "Version: 0.3\n" +
-                        "(c) Copyright WardWare 2012, 2013.  All rights reserved.", "About First Fruits", 
+                        "<HTML><B>First Fruits</B>" +
+                        "<BR>Version: " + p.getProperty("version") + 
+                        "<BR>(c) Copyright WardWare 2012, 2013.  All rights reserved.<HTML>", "About First Fruits", 
                         JOptionPane.INFORMATION_MESSAGE,
                         new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo48.png")));
     }

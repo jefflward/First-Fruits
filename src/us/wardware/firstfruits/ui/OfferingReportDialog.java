@@ -150,7 +150,7 @@ public class OfferingReportDialog extends JDialog
           .columns(categoryColumn, currencyColumn, checkColumn, totalsColumn)  
           .title(cmp.verticalList()
                     .add(cmp.horizontalList()
-                            .add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(boldStyle))
+                            .add(cmp.text(Settings.getInstance().getStringValue(Settings.CHURCH_NAME_KEY)).setStyle(boldStyle))
                             .add(cmp.text("Offering Date: " + RecordManager.getInstance().getSelectedDate()).setStyle(boldStyle).setHorizontalAlignment(HorizontalAlignment.RIGHT)))
                     .add(cmp.verticalGap(10)))
           .pageFooter(cmp.pageXofY().setStyle(boldCenteredStyle))

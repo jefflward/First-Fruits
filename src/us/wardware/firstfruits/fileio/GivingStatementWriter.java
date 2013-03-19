@@ -145,7 +145,7 @@ public class GivingStatementWriter
         addAddressAttribute(list, "", cityStateZip, false);
         addAddressAttribute(list, "Phone", Settings.getInstance().getStringValue(Settings.PHONE), false);
         final HorizontalListBuilder title = cmp.horizontalFlowList();
-        title.add(cmp.text(Settings.getInstance().getStringValue(Settings.ORGANIZATION_NAME_KEY)).setStyle(Templates.boldStyle)).newRow();
+        title.add(cmp.text(Settings.getInstance().getStringValue(Settings.CHURCH_NAME_KEY)).setStyle(Templates.boldStyle)).newRow();
         return cmp.verticalList(title, list);
     }
     

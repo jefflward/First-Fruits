@@ -66,6 +66,12 @@ public class Gbc extends GridBagConstraints
         return c;
     }
     
+    public Gbc gridHeight(int h) 
+    {
+        c.gridheight = h;
+        return c;
+    }
+    
     public Gbc top(int t)
     {
         c.insets.top = t;

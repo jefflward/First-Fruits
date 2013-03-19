@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -42,18 +43,41 @@ public class SettingsDialog extends JDialog
     private CategoriesPanel categoriesPanel;
     private JPanel rightPanel;
     private JPanel buttonPanel;
-    private boolean guide;
+    private boolean initialSetup;
     
+    private List<JPanel> steps;
+    private WelcomePanel welcomePanel;
+    
+    private static final String WELCOME = "Welcome";
     private static final String GENERAL = "General";
     private static final String CATEGORIES = "Categories";
 
-    public SettingsDialog(JFrame parent, boolean guide)
+    public SettingsDialog(JFrame parent, boolean initialSetup)
     {
         super(parent);
-        this.guide = guide;
+        this.initialSetup = initialSetup;
         initComponents();
-        optionsList.getSelectionModel().setSelectionInterval(0,0);
+        optionsList.setSelectedIndex(0);
         setLocationRelativeTo(parent);
+    }
+    
+    private class WelcomePanel extends JPanel
+    {
+        public WelcomePanel()
+        {
+            this.setLayout(new BorderLayout());
+            
+            ImageIcon imageIcon = new ImageIcon(WelcomePanel.class.getResource("/icons/logo48.png"));
+            
+            final JPanel top = new JPanel(new GridBagLayout());
+            final JLabel logo = new JLabel(imageIcon);
+            top.add(logo, Gbc.xyi(0,0,10));
+            top.add(new JLabel("Welcome to First Fruits!"), Gbc.xyi(1,0,5).horizontal());
+            final JLabel welcomeLabel = new JLabel("<HTML>Please take some time to define the program settings." +
+            		"<BR><BR><B>NOTE:</B> These settings can be updated later by choosing settings from the <B>File</B> menu.</HTML>");
+            top.add(welcomeLabel, Gbc.xyi(0,1,5).horizontal().gridWidth(2).top(20));
+            add(top, BorderLayout.NORTH);
+        }
     }
     
     private class GeneralPanel extends JPanel
@@ -66,8 +90,8 @@ public class SettingsDialog extends JDialog
         {
             this.setLayout(new BorderLayout());
             contents = new JPanel(new GridBagLayout());
-            contents.setBorder(new TitledBorder("Organization Settings"));
-            addNamedInputFields(Settings.ORGANIZATION_NAME_KEY, "Name", 0);
+            contents.setBorder(new TitledBorder("Church Address"));
+            addNamedInputFields(Settings.CHURCH_NAME_KEY, "Name", 0);
             addNamedInputFields(Settings.ADDRESS1, "Address 1", 1);
             addNamedInputFields(Settings.ADDRESS2, "Address 2", 2);
             addNamedInputFields(Settings.CITY, "City", 3);
@@ -217,39 +241,50 @@ public class SettingsDialog extends JDialog
     {
         setLayout(new BorderLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
-        setTitle("Settings");
+        setTitle("First Fruits Settings");
+        if (initialSetup) {
+            setTitle("Initial Setup");
+        }
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(500, 375));
         
+        steps = new ArrayList<JPanel>();
         splitPane = new JSplitPane(); 
         
+        welcomePanel = new WelcomePanel();
         generalPanel = new GeneralPanel();
         categoriesPanel = new CategoriesPanel();
         
+        steps.add(welcomePanel);
+        steps.add(generalPanel);
+        steps.add(categoriesPanel);
+      
         optionsList = new JList(new Object[]{GENERAL, CATEGORIES});
+        if (initialSetup) {
+            optionsList = new JList(new Object[]{WELCOME, GENERAL, CATEGORIES});
+        }
         optionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         optionsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent arg0) {
                 final Object selection = optionsList.getSelectedValue();
                 rightPanel.removeAll();
-                if (GENERAL.equals(selection)) {
+                if (WELCOME.equals(selection)) {
+                    rightPanel.add(welcomePanel, BorderLayout.NORTH);
+                } else if (GENERAL.equals(selection)) {
                     rightPanel.add(generalPanel, BorderLayout.NORTH);
                 } else if (CATEGORIES.equals(selection)) {
                     rightPanel.add(categoriesPanel, BorderLayout.CENTER);
                 }
-                rightPanel.add(buttonPanel, BorderLayout.SOUTH);
                 rightPanel.invalidate();
                 rightPanel.updateUI();
-                invalidate();
-                pack();
             }
         });
         
         final JScrollPane scrollPane = new JScrollPane(optionsList);
         splitPane.setLeftComponent(scrollPane);
         
-        if (guide) {
+        if (initialSetup) {
             createGuideButtonPanel();
         } else {
             createDefaultButtonPanel();
@@ -258,9 +293,11 @@ public class SettingsDialog extends JDialog
         rightPanel = new JPanel(new BorderLayout());
         splitPane.setRightComponent(rightPanel);
         splitPane.setDividerLocation(100);
-        rightPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         add(splitPane, BorderLayout.CENTER);
+        final JPanel bottom = new JPanel(new BorderLayout());
+        bottom.add(buttonPanel, BorderLayout.EAST);
+        add(bottom, BorderLayout.SOUTH);
         pack();
     }
     
@@ -273,23 +310,32 @@ public class SettingsDialog extends JDialog
         backButton.setAction(new TextAction("Back"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                optionsList.setSelectedIndex(0);
-                nextButton.setVisible(true);
-                backButton.setVisible(false);
+                int step = optionsList.getSelectedIndex();
+                int previous = step-1;
+                if (previous <= 0) {
+                    backButton.setEnabled(false);
+                    previous = 0;
+                }
+                nextButton.setEnabled(true);
+                optionsList.setSelectedIndex(previous);
             }
         });
-        backButton.setVisible(false);
+        backButton.setEnabled(false);
         buttonPanel.add(backButton);
         
         nextButton.setAction(new TextAction("Next"){
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                backButton.setVisible(true);
-                nextButton.setVisible(false);
-                optionsList.setSelectedIndex(1);
+                int step = optionsList.getSelectedIndex();
+                int next = step+1;
+                if (next >= optionsList.getModel().getSize()-1) {
+                    nextButton.setEnabled(false);
+                    next = optionsList.getModel().getSize()-1;
+                }
+                backButton.setEnabled(true);
+                optionsList.setSelectedIndex(next);
             }
         });
-        nextButton.setVisible(true);
         buttonPanel.add(nextButton);
         
         JButton finishButton = new JButton(new TextAction("Finish"){
@@ -343,6 +389,7 @@ public class SettingsDialog extends JDialog
             public void run() {
                 final SettingsDialog dialog = new SettingsDialog(null, true);
                 dialog.setVisible(true);
+                dialog.setAlwaysOnTop(true);
             }
         });
     }

@@ -10,8 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Settings extends Observable
 {
-    public static final String ORGANIZATION_NAME_KEY = "OrganizationName"; 
-    public static final String ORGANIZATION_ADDRESS_KEY = "OrganizationAddress";
+    public static final String CHURCH_NAME_KEY = "ChurchName"; 
+    public static final String CHURCH_ADDRESS_KEY = "ChurchAddress";
     public static final String CATEGORIES_KEY = "Categories";
     public static final String ADDRESS1 = "Address1";
     public static final String ADDRESS2 = "Address2";
@@ -20,6 +20,8 @@ public class Settings extends Observable
     public static final String ZIP = "Zip";
     public static final String PHONE = "Phone";
     public static final String INSTALL = "InstallTime";
+    public static final String REGISTRATION_KEY = "Registration";
+    public static final String REGISTRATION_NAME = "RegistrationName";
     
     private static Settings INSTANCE;
     private Preferences preferences;
@@ -90,4 +92,23 @@ public class Settings extends Observable
         notifyObservers();
     }
 
+    public String getRegistrationKey()
+    {
+        return getStringValue(REGISTRATION_KEY);
+    }
+
+    public void setRegistrationKey(String key)
+    {
+        preferences.put(REGISTRATION_KEY, key.trim()); 
+    }
+
+    public String getRegistrationName()
+    {
+        return getStringValue(REGISTRATION_NAME);
+    }
+    
+    public void setRegistrationName(String name)
+    {
+        preferences.put(REGISTRATION_NAME, name.trim()); 
+    }
 }
