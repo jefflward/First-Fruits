@@ -261,4 +261,16 @@ public class RecordManager extends Observable implements Observer
         }
         return reportNames;
     }
+
+    public boolean hasRecords()
+    {
+        return !records.isEmpty();
+    }
+
+    public void renameCategory(String oldName, String newName)
+    {
+        for (GivingRecord record : records) {
+            record.renameCategory(oldName, newName);
+        }
+    }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,6 +20,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -32,6 +34,7 @@ import javax.swing.text.TextAction;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.wardware.firstfruits.RecordManager;
 import us.wardware.firstfruits.Settings;
 
 
@@ -126,6 +129,7 @@ public class SettingsDialog extends JDialog
         private DefaultListModel listModel;
         private JTextField categoryName;
         private JButton removeButton;
+        private JButton addButton;
 
         public CategoriesPanel()
         {
@@ -146,6 +150,21 @@ public class SettingsDialog extends JDialog
             
             list = new JList(listModel);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            list.setSelectionModel(new DefaultListSelectionModel() {
+                @Override
+                public void setSelectionInterval(int index0, int index1) {
+                    if (list.isSelectedIndex(index0)) {
+                        list.clearSelection();
+                        removeButton.setEnabled(false);
+                        addButton.setText("Add");
+                    } else {
+                        list.clearSelection();
+                        list.addSelectionInterval(index0, index1);
+                        removeButton.setEnabled(true);
+                        addButton.setText("Rename");
+                    }
+                }
+            });
             list.setDropMode(DropMode.INSERT);
             list.addKeyListener(new KeyAdapter() {
                 @Override
@@ -157,12 +176,7 @@ public class SettingsDialog extends JDialog
                     }
                 }
             });
-            list.addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent arg0) {
-                    removeButton.setEnabled(list.getSelectedIndices().length > 0);
-                }
-            });
+
             JScrollPane scrollPane = new JScrollPane(list);
             
             list.setDragEnabled(true);
@@ -175,15 +189,15 @@ public class SettingsDialog extends JDialog
                 @Override
                 public void keyReleased(KeyEvent event) {
                     if (KeyEvent.VK_ENTER == event.getKeyCode()) {
-                        addCategory();
+                        addOrRenameCategory();
                     }
                 }
             });
             inputPanel.add(categoryName, Gbc.xyi(0, 0, 2).horizontal());
-            final JButton addButton = new JButton(new TextAction("Add"){
+            addButton = new JButton(new TextAction("Add"){
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
-                    addCategory();
+                    addOrRenameCategory();
                 }
             });
             addButton.setDefaultCapable(true);
@@ -200,16 +214,31 @@ public class SettingsDialog extends JDialog
             add(inputPanel, BorderLayout.SOUTH);
         }
         
-        private void addCategory()
+        private void addOrRenameCategory()
         {
             final String category = categoryName.getText().trim();
             if (!category.isEmpty()) {
-                final List<String> currentCategories = getCategories();
-                if (!currentCategories.contains(category)) {
-                    listModel.addElement(category);
+                final String selectedCategory = (String) list.getSelectedValue();
+                if (selectedCategory != null && !selectedCategory.equals(category) ) {
+                    String additionalNote = "";
+                    if (RecordManager.getInstance().hasRecords()) {
+                        additionalNote = "<BR><BR><B>NOTE:</B> This will be applied to records for the currently open database.";
+                    }
+                    final String message = String.format("<HTML>Are you sure you want to rename category '%s' to '%s'?%s</HTML>", selectedCategory, category, additionalNote);
+                    if (JOptionPane.showConfirmDialog(SettingsDialog.this, message, "Rename Category", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+                        RecordManager.getInstance().renameCategory(selectedCategory, category);
+                        categoryName.setText("");
+                        listModel.setElementAt(category, list.getSelectedIndex());
+                    }
+                } else {
+                    final List<String> currentCategories = getCategories();
+                    if (!currentCategories.contains(category)) {
+                        listModel.addElement(category);
+                    }
+                    categoryName.setText("");
                 }
+                saveSettings();
             }
-            categoryName.setText("");
         }
         
         private void removeCategories()
