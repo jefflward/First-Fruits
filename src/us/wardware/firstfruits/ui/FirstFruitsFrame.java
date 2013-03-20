@@ -465,6 +465,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             @Override
             public void run() {
                 if (!settingsDialog.isVisible()) {
+                    settingsDialog.updateCategoryList();
                     settingsDialog.setVisible(true);
                     settingsDialog.toFront();
                     settingsDialog.repaint();

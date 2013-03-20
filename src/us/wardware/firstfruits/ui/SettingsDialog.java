@@ -143,10 +143,7 @@ public class SettingsDialog extends JDialog
             
             listModel = new DefaultListModel();
             
-            final List<String> categories = Settings.getInstance().getCategories();
-            for (String category : categories) {
-                listModel.addElement(category.trim());
-            }
+            updateCategories();
             
             list = new JList(listModel);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -170,9 +167,7 @@ public class SettingsDialog extends JDialog
                 @Override
                 public void keyReleased(KeyEvent event) {
                     if (KeyEvent.VK_DELETE == event.getKeyCode()) {
-                        if (!list.getSelectionModel().isSelectionEmpty()) {
-                            listModel.remove(list.getSelectedIndex());
-                        }
+                        removeCategories();
                     }
                 }
             });
@@ -213,6 +208,15 @@ public class SettingsDialog extends JDialog
             
             add(inputPanel, BorderLayout.SOUTH);
         }
+
+        private void updateCategories()
+        {
+            listModel.clear();
+            final List<String> categories = Settings.getInstance().getCategories();
+            for (String category : categories) {
+                listModel.addElement(category.trim());
+            }
+        }
         
         private void addOrRenameCategory()
         {
@@ -243,11 +247,17 @@ public class SettingsDialog extends JDialog
         
         private void removeCategories()
         {
-            final int[] selectedIndices = list.getSelectedIndices();
-            for (int i = selectedIndices.length-1; i >=0; i--) {
-                listModel.removeElementAt(selectedIndices[i]);
-            } 
-            categoryName.setText("");
+            final String selectedCategory = (String) list.getSelectedValue();
+            if (selectedCategory != null) {
+                final String message = String.format("<HTML>Data may exist for category '%s'. Are you sure you want to remove this category?</HTML>", selectedCategory);
+                if (JOptionPane.showConfirmDialog(SettingsDialog.this, message, "Remove Category", 
+                                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+                    listModel.removeElement(selectedCategory);
+                    categoryName.setText("");
+                    addButton.setText("Add");
+                }
+                saveSettings();
+            }
         }
         
         public List<String> getCategories()
@@ -421,5 +431,12 @@ public class SettingsDialog extends JDialog
                 dialog.setAlwaysOnTop(true);
             }
         });
+    }
+
+    public void updateCategoryList()
+    {
+        if (categoriesPanel != null) {
+            categoriesPanel.updateCategories();
+        }
     }
 }
