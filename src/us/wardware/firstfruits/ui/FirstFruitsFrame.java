@@ -566,16 +566,23 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 try {
                     final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
                     if (categoryComparison.hasExtraCategories()) {
+                        final StringBuilder confirmMessage = new StringBuilder();
+                        confirmMessage.append("<HTML>The records being imported do not match the categories defined in the program settings.<BR>");
+                        confirmMessage.append("The records contain the following categories:<BR>");
+                        confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.allCategories, ", ") + "]</B><BR>");
+                        
+                        if (categoryComparison.missingCategories.size() > 0) {
+                            confirmMessage.append("<BR>The records do not contain the following categories ");
+                            confirmMessage.append("(<I>values will be zero</I>):<BR>");
+                            confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.missingCategories, ", ") + "]</B><BR>");
+                        }
+                        
+                        confirmMessage.append("<BR>Do you want to add these categories to the settings?  If you choose 'No', data for these<BR>");
+                        confirmMessage.append("categories will be ignored:<BR>");
+                        confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.extraCategories, ", ") + "]</B><BR>");
+                        
                         final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
-                                        "<HTML>The records being imported do not match the categories defined in the program settings.<BR>" +
-                                        "The records contain the following categories:<BR>" + 
-                                        "<B>[" + StringUtils.join(categoryComparison.allCategories, ", ") + "]</B><BR>" +
-                                        "<BR>The records do not contain the following categories " + 
-                                        "(<I>values will be zero</I>):<BR>" + 
-                                        "<B>[" + StringUtils.join(categoryComparison.missingCategories, ", ") + "]</B><BR>" +
-                                        "<BR>Do you want to add these categories to the settings?  If you choose 'No', data for these<BR>" +
-                                        "categories will be ignored:<BR>" +
-                                        "<B>[" + StringUtils.join(categoryComparison.extraCategories, ", ") + "]</B><BR>",
+                                        confirmMessage.toString(),
                                         "Category Conflicts Detected", 
                                         JOptionPane.YES_NO_CANCEL_OPTION);
                         if (choice == JOptionPane.YES_OPTION) {
