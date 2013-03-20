@@ -272,5 +272,18 @@ public class RecordManager extends Observable implements Observer
         for (GivingRecord record : records) {
             record.renameCategory(oldName, newName);
         }
+        if (hasRecords()) {
+            unsavedChanges = true;
+        }
+    }
+
+    public void removeCategory(String category)
+    {
+        for (GivingRecord record : records) {
+            record.removeCategory(category);
+        }
+        if (hasRecords()) {
+            unsavedChanges = true;
+        }
     }
 }

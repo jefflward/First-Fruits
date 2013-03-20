@@ -253,6 +253,7 @@ public class SettingsDialog extends JDialog
                 if (JOptionPane.showConfirmDialog(SettingsDialog.this, message, "Remove Category", 
                                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
                     listModel.removeElement(selectedCategory);
+                    RecordManager.getInstance().removeCategory(selectedCategory);
                     categoryName.setText("");
                     addButton.setText("Add");
                 }

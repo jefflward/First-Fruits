@@ -273,6 +273,11 @@ public class GivingRecord implements Comparable<GivingRecord>
     public void renameCategory(String oldName, String newName)
     {
         categorizedAmounts.put(newName, categorizedAmounts.get(oldName));
-        categorizedAmounts.remove(oldName);
+        removeCategory(oldName);
+    }
+
+    public void removeCategory(String category)
+    {
+        categorizedAmounts.remove(category);
     }
 }
