@@ -5,6 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -18,6 +19,7 @@ import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
@@ -26,8 +28,6 @@ import javax.swing.text.TextAction;
 import us.wardware.firstfruits.GivingRecord;
 import us.wardware.firstfruits.RecordFilter;
 import us.wardware.firstfruits.RecordManager;
-import us.wardware.firstfruits.Settings;
-
 
 public class RecordsTable extends JTable implements Observer
 {
@@ -105,19 +105,8 @@ public class RecordsTable extends JTable implements Observer
         sorter.setRowFilter(new RecordTableRowFilter());
         setRowSorter(sorter);
         
-        final List<String> categories = Settings.getInstance().getCategories();
-        
-        final TableColumnModel m = getColumnModel();
-        for (int i = 0; i < m.getColumnCount(); i++) {
-            final TableColumn column = m.getColumn(i);
-            final String columnName = model.getColumnName(i);
-            if (columnName.equals("Date")) {
-                column.setCellRenderer(FormatRenderer.getSimpleDateRenderer());
-            }
-            if (categories.contains(columnName) || columnName.equals("Total")) {
-                column.setCellRenderer(NumberRenderer.getCurrencyRenderer());
-            }
-        }
+        setDefaultRenderer(Date.class, FormatRenderer.getSimpleDateRenderer());
+        setDefaultRenderer(Double.class, NumberRenderer.getCurrencyRenderer());
     }
     
     private class RecordTableRowFilter extends RowFilter<RecordTableModel, Integer>
