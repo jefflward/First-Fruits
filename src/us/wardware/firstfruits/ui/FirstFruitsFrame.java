@@ -1,6 +1,7 @@
 package us.wardware.firstfruits.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -42,8 +44,8 @@ import us.wardware.firstfruits.Settings;
 import us.wardware.firstfruits.fileio.CsvFileFilter;
 import us.wardware.firstfruits.fileio.FileUtils;
 import us.wardware.firstfruits.fileio.GivingRecordsReader;
-import us.wardware.firstfruits.fileio.GivingRecordsWriter;
 import us.wardware.firstfruits.fileio.GivingRecordsReader.CategoryComparison;
+import us.wardware.firstfruits.fileio.GivingRecordsWriter;
 
 
 public class FirstFruitsFrame extends JFrame implements Observer
@@ -63,6 +65,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private AbstractButton offeringReportButton;
     private TallyDialog tallyDialog;
     private SettingsDialog settingsDialog;
+    private JMenu recentFilesMenu;
     
     public FirstFruitsFrame()
     {
@@ -72,6 +75,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         settingsDialog = new SettingsDialog(this, false);
         settingsDialog.setLocationRelativeTo(FirstFruitsFrame.this);
         RecordManager.getInstance().addObserver(this);
+        Settings.getInstance().addObserver(this);
     }
 
     private void initComponents()
@@ -158,15 +162,11 @@ public class FirstFruitsFrame extends JFrame implements Observer
         
         fileMenu.add(new JSeparator());
         
-        final JMenuItem settings = new JMenuItem(new TextAction("Settings") {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                configureSettings();
-            }
-        });
-        settings.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings.png")));
-        settings.setMnemonic('E');
-        fileMenu.add(settings);
+        recentFilesMenu = new JMenu("Recent Files");
+        updateRecentFileList();
+        fileMenu.add(recentFilesMenu);
+        
+
         
         fileMenu.add(new JSeparator());
         
@@ -245,7 +245,18 @@ public class FirstFruitsFrame extends JFrame implements Observer
             }
         });
         tally.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/tally_small.png")));
-        toolsMenu.add(tally);
+        toolsMenu.add(tally);        
+        
+        final JMenuItem settings = new JMenuItem(new TextAction("Settings") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                configureSettings();
+            }
+        });
+        settings.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings.png")));
+        settings.setMnemonic('E');
+        toolsMenu.add(new JSeparator());
+        toolsMenu.add(settings);
         menuBar.add(toolsMenu); 
         
         final JMenu helpMenu = new JMenu("Help");
@@ -412,6 +423,39 @@ public class FirstFruitsFrame extends JFrame implements Observer
         getContentPane().add(statusPanel, BorderLayout.SOUTH);
         pack();
     }
+
+    private void updateRecentFileList()
+    {
+        recentFilesMenu.removeAll(); 
+        final Deque<String> recentFiles = Settings.getInstance().getRecentFiles();
+        for (final String recentFile : recentFiles) {
+            final String fileName = recentFile.substring(recentFile.lastIndexOf(File.separatorChar) + 1);
+            final JMenuItem menuItem = new JMenuItem(new TextAction(fileName) {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    SwingUtilities.invokeLater(new Runnable(){
+                        @Override
+                        public void run() {
+                            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                            final List<GivingRecord> records = new ArrayList<GivingRecord>();
+                            currentFile = new File(recentFile);
+                            try {
+                                Settings.getInstance().addRecentFile(recentFile);
+                                loadFileRecords(records, currentFile);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            RecordManager.getInstance().setRecords(records);
+                            setCursor(Cursor.getDefaultCursor());
+                        }
+                    });
+                }
+            });
+            menuItem.setToolTipText(recentFile);
+            menuItem.setName(recentFile);
+            recentFilesMenu.add(menuItem);
+        }
+    }
     
     protected void about()
     {
@@ -535,21 +579,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
     
     private void openFile() throws IOException
     {
-        if (RecordManager.getInstance().hasUnsavedChanges()) {
-            final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
-                            "Unsaved changes exist. Do you want to save?", "Save Changes", 
-                            JOptionPane.YES_NO_CANCEL_OPTION);
-            if (choice == JOptionPane.YES_OPTION) {
-                try {
-                    saveFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (choice == JOptionPane.CANCEL_OPTION ||
-                       choice == JOptionPane.CLOSED_OPTION) {
-                return;
-            }
+        if (!confirmUnsavedChanges()) {
+            return;
         }
+            
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new CsvFileFilter());
         fileChooser.setMultiSelectionEnabled(true);
@@ -562,49 +595,77 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 currentFile = null;
             }
             
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             for (File f : fileChooser.getSelectedFiles()) {
-                try {
-                    final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
-                    if (categoryComparison.hasExtraCategories()) {
-                        final StringBuilder confirmMessage = new StringBuilder();
-                        confirmMessage.append("<HTML>The records being imported do not match the categories defined in the program settings.<BR>");
-                        confirmMessage.append("The records contain the following categories:<BR>");
-                        confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.allCategories, ", ") + "]</B><BR>");
-                        
-                        if (categoryComparison.missingCategories.size() > 0) {
-                            confirmMessage.append("<BR>The records do not contain the following categories ");
-                            confirmMessage.append("(<I>values will be zero</I>):<BR>");
-                            confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.missingCategories, ", ") + "]</B><BR>");
-                        }
-                        
-                        confirmMessage.append("<BR>Do you want to add these categories to the settings?  If you choose 'No', data for these<BR>");
-                        confirmMessage.append("categories will be ignored:<BR>");
-                        confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.extraCategories, ", ") + "]</B><BR>");
-                        
-                        final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
-                                        confirmMessage.toString(),
-                                        "Category Conflicts Detected", 
-                                        JOptionPane.YES_NO_CANCEL_OPTION);
-                        if (choice == JOptionPane.YES_OPTION) {
-                            for (String category : categoryComparison.extraCategories) {
-                                Settings.getInstance().addCategory(category);
-                            }
-                            records.addAll(GivingRecordsReader.readRecordsFromFile(f));
-                        } else if (choice == JOptionPane.NO_OPTION) {
-                            records.addAll(GivingRecordsReader.readRecordsFromFile(f));
-                        }
-                    } else {
-                        records.addAll(GivingRecordsReader.readRecordsFromFile(f));
-                    }
-                } catch (ParseException e) {
-                    JOptionPane.showMessageDialog(FirstFruitsFrame.this, 
-                                    "Error occurred while loading invalid record file.\n" + f.getAbsolutePath() +
-                                    "\nline: " + e.getMessage(), 
-                                    "Load Error", JOptionPane.ERROR_MESSAGE);
-                }
+                Settings.getInstance().addRecentFile(f.getAbsolutePath());
+                loadFileRecords(records, f);
             }
             RecordManager.getInstance().setRecords(records);
+            setCursor(Cursor.getDefaultCursor());
         }
+    }
+
+    private void loadFileRecords(final List<GivingRecord> records, File f) throws IOException
+    {
+        try {
+            final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
+            if (categoryComparison.hasExtraCategories()) {
+                final StringBuilder confirmMessage = new StringBuilder();
+                confirmMessage.append("<HTML>The records being imported do not match the categories defined in the program settings.<BR>");
+                confirmMessage.append("The records contain the following categories:<BR>");
+                confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.allCategories, ", ") + "]</B><BR>");
+                
+                if (categoryComparison.missingCategories.size() > 0) {
+                    confirmMessage.append("<BR>The records do not contain the following categories ");
+                    confirmMessage.append("(<I>values will be zero</I>):<BR>");
+                    confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.missingCategories, ", ") + "]</B><BR>");
+                }
+                
+                confirmMessage.append("<BR>Do you want to add these categories to the settings?  If you choose 'No', data for these<BR>");
+                confirmMessage.append("categories will be ignored:<BR>");
+                confirmMessage.append("<B>[" + StringUtils.join(categoryComparison.extraCategories, ", ") + "]</B><BR>");
+                
+                final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
+                                confirmMessage.toString(),
+                                "Category Conflicts Detected", 
+                                JOptionPane.YES_NO_CANCEL_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
+                    for (String category : categoryComparison.extraCategories) {
+                        Settings.getInstance().addCategory(category);
+                    }
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                } else if (choice == JOptionPane.NO_OPTION) {
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                }
+            } else {
+                records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+            }
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(FirstFruitsFrame.this, 
+                            "Error occurred while loading invalid record file.\n" + f.getAbsolutePath() +
+                            "\nline: " + e.getMessage(), 
+                            "Load Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean confirmUnsavedChanges()
+    {
+        if (RecordManager.getInstance().hasUnsavedChanges()) {
+            final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
+                            "Unsaved changes exist. Do you want to save?", "Save Changes", 
+                            JOptionPane.YES_NO_CANCEL_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+                try {
+                    saveFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (choice == JOptionPane.CANCEL_OPTION ||
+                       choice == JOptionPane.CLOSED_OPTION) {
+                return false;
+            }
+        }
+        return true;
     }
     
     private void saveAs() throws IOException
@@ -616,7 +677,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
             if (FileUtils.getExtension(currentFile) == null) {
                 currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.CSV));
             }
+            Settings.getInstance().addRecentFile(currentFile.getAbsolutePath());
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             GivingRecordsWriter.writeRecordsToFile(currentFile);
+            setCursor(Cursor.getDefaultCursor());
         }
         RecordManager.getInstance().setUnsavedChanges(false);
     }
@@ -624,7 +688,9 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private void saveFile() throws IOException 
     {
         if (currentFile != null) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             GivingRecordsWriter.writeRecordsToFile(currentFile);
+            setCursor(Cursor.getDefaultCursor());
         } else {
             saveAs();
         }
@@ -632,23 +698,27 @@ public class FirstFruitsFrame extends JFrame implements Observer
     }
 
     @Override
-    public void update(Observable arg0, Object value)
+    public void update(Observable o, Object value)
     {
-        final GivingRecord lastUpdated = RecordManager.getInstance().getLastUpdatedRecord();
-        if (lastUpdated != null) {
-            lastEntryLabel.setText("  Last Entry: " + lastUpdated.toBasicString());
+        if (o instanceof Settings) {
+            updateRecentFileList();
+        } else {
+            final GivingRecord lastUpdated = RecordManager.getInstance().getLastUpdatedRecord();
+            if (lastUpdated != null) {
+                lastEntryLabel.setText("  Last Entry: " + lastUpdated.toBasicString());
+            }
+            recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getRecords().size() + "  ");
+            deleteButton.setEnabled(RecordManager.getInstance().getSelectionCount() > 0);
+
+            boolean hasRecords = RecordManager.getInstance().getAllRecords().size() > 0;
+            boolean hasUnsavedChanges = RecordManager.getInstance().hasUnsavedChanges();
+            saveButton.setEnabled(hasUnsavedChanges);
+            saveItem.setEnabled(hasUnsavedChanges);
+            saveAsItem.setEnabled(hasRecords);
+            reportsMenu.setEnabled(hasRecords);
+            reportButton.setEnabled(hasRecords);
+            reportAllButton.setEnabled(hasRecords);
+            offeringReportButton.setEnabled(hasRecords);
         }
-        recordCountLabel.setText("Record Count: " + RecordManager.getInstance().getRecords().size() + "  ");
-        deleteButton.setEnabled(RecordManager.getInstance().getSelectionCount() > 0);
-        
-        boolean hasRecords = RecordManager.getInstance().getAllRecords().size() > 0;
-        boolean hasUnsavedChanges = RecordManager.getInstance().hasUnsavedChanges();
-        saveButton.setEnabled(hasUnsavedChanges);
-        saveItem.setEnabled(hasUnsavedChanges);
-        saveAsItem.setEnabled(hasRecords);
-        reportsMenu.setEnabled(hasRecords);
-        reportButton.setEnabled(hasRecords);
-        reportAllButton.setEnabled(hasRecords);
-        offeringReportButton.setEnabled(hasRecords);
     }
 }

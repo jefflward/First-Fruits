@@ -77,7 +77,7 @@ public class SettingsDialog extends JDialog
             top.add(logo, Gbc.xyi(0,0,10));
             top.add(new JLabel("Welcome to First Fruits!"), Gbc.xyi(1,0,5).horizontal());
             final JLabel welcomeLabel = new JLabel("<HTML>Please take some time to define the program settings." +
-            		"<BR><BR><B>NOTE:</B> These settings can be updated later by choosing settings from the <B>File</B> menu.</HTML>");
+            		"<BR><BR><B>NOTE:</B> These settings can be updated later by choosing settings from the <B>Tools</B> menu.</HTML>");
             top.add(welcomeLabel, Gbc.xyi(0,1,5).horizontal().gridWidth(2).top(20));
             add(top, BorderLayout.NORTH);
         }

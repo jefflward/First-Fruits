@@ -1,7 +1,9 @@
 package us.wardware.firstfruits;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.Observable;
 import java.util.prefs.Preferences;
@@ -22,6 +24,7 @@ public class Settings extends Observable
     public static final String INSTALL = "InstallTime";
     public static final String REGISTRATION_KEY = "Registration";
     public static final String REGISTRATION_NAME = "RegistrationName";
+    public static final String RECENT_FILES_KEY = "RecentFiles";
     
     private static Settings INSTANCE;
     private Preferences preferences;
@@ -110,5 +113,34 @@ public class Settings extends Observable
     public void setRegistrationName(String name)
     {
         preferences.put(REGISTRATION_NAME, name.trim()); 
+    }
+
+    public Deque<String> getRecentFiles()
+    {
+        final Deque<String> recentFiles = new ArrayDeque<String>();
+        
+        final String files = preferences.get(Settings.RECENT_FILES_KEY, null);
+        if (files != null) {
+            recentFiles.addAll(Arrays.asList(files.split("\\|")));
+        }
+        return recentFiles;
+    }
+    
+    public void addRecentFile(String filePath)
+    {
+        final Deque<String> recentFiles = getRecentFiles();
+        if (recentFiles.contains(filePath)) {
+            recentFiles.remove(filePath);
+        }
+        recentFiles.addFirst(filePath.trim());
+        
+        while (recentFiles.size() > 10) {
+            recentFiles.removeLast();
+        }
+            
+        final String filesJoined = StringUtils.join(recentFiles, "|");
+        preferences.put(Settings.RECENT_FILES_KEY, filesJoined);
+        setChanged();
+        notifyObservers();
     }
 }
