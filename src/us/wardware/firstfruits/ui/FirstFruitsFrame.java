@@ -112,7 +112,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 createNew();
             }
         });
-        newItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/new.png")));
+        newItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/new16.png")));
         newItem.setMnemonic('N');
         fileMenu.add(newItem);
         
@@ -126,7 +126,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        open.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/open.png")));
+        open.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/open16.png")));
         open.setMnemonic('O');
         fileMenu.add(open);
         
@@ -140,7 +140,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        saveItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/save.png")));
+        saveItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/save16.png")));
         saveItem.setMnemonic('S');
         saveItem.setEnabled(false);
         fileMenu.add(saveItem);
@@ -155,7 +155,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        saveAsItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/save_as.png")));
+        saveAsItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/saveas16.png")));
         saveAsItem.setMnemonic('A');
         saveAsItem.setEnabled(false);
         fileMenu.add(saveAsItem);
@@ -195,7 +195,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        reportItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report.png")));
+        reportItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report16.png")));
         reportItem.setMnemonic('S');
         reportsMenu.add(reportItem);
         
@@ -209,7 +209,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        reportAll.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report_all.png")));
+        reportAll.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report_all16.png")));
         reportAll.setMnemonic('A');
         reportsMenu.add(reportAll);
         
@@ -223,7 +223,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 }
             }
         });
-        offeringReport.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/offering.png")));
+        offeringReport.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/offering16.png")));
         offeringReport.setMnemonic('O');
         reportsMenu.add(offeringReport);
         menuBar.add(reportsMenu);
@@ -244,7 +244,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 });
             }
         });
-        tally.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/tally_small.png")));
+        tally.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/calc16.png")));
         toolsMenu.add(tally);        
         
         final JMenuItem settings = new JMenuItem(new TextAction("Settings") {
@@ -253,7 +253,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 configureSettings();
             }
         });
-        settings.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings.png")));
+        settings.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings16.png")));
         settings.setMnemonic('E');
         toolsMenu.add(new JSeparator());
         toolsMenu.add(settings);
@@ -288,7 +288,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         final JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
         
-        final JButton newButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/new.png")));
+        final JButton newButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/new24.png")));
         newButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -298,7 +298,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         newButton.setToolTipText("New");
         buttonPanel.add(newButton);
         
-        final JButton openButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/open.png")));
+        final JButton openButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/open24.png")));
         openButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -312,7 +312,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         openButton.setToolTipText("Open");
         buttonPanel.add(openButton);
         
-        saveButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/save.png")));
+        saveButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/save24.png")));
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -327,7 +327,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         saveButton.setEnabled(false);
         buttonPanel.add(saveButton);
         
-        final JButton settingsButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings.png")));
+        final JButton settingsButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/settings24.png")));
         settingsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -337,7 +337,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         settingsButton.setToolTipText("Settings");
         buttonPanel.add(settingsButton);
         
-        final JButton tallyButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/tally_small.png")));
+        final JButton tallyButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/calc24.png")));
         tallyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -356,7 +356,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         tallyButton.setToolTipText("Quick Tally");
         buttonPanel.add(tallyButton);
         
-        reportButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report.png")));
+        reportButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report24.png")));
         reportButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -371,7 +371,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         reportButton.setEnabled(false);
         buttonPanel.add(reportButton);
         
-        reportAllButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report_all.png")));
+        reportAllButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/report_all24.png")));
         reportAllButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -386,7 +386,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         reportAllButton.setEnabled(false);
         buttonPanel.add(reportAllButton);
         
-        offeringReportButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/offering.png")));
+        offeringReportButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/offering24.png")));
         offeringReportButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -401,7 +401,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         offeringReportButton.setEnabled(false);
         buttonPanel.add(offeringReportButton);
         
-        deleteButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/delete.png")));
+        deleteButton = new JButton(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/delete24.png")));
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {

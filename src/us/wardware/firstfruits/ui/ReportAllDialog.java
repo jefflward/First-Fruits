@@ -4,12 +4,15 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -41,7 +44,9 @@ public class ReportAllDialog extends JDialog
     {
         setLayout(new GridBagLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
-
+        final List<Image> icons = new ArrayList<Image>();
+        icons.add(new ImageIcon(GivingStatementDialog.class.getResource("/icons/report_all16.png")).getImage());
+        setIconImages(icons);
         setTitle("Generate All Giving Statements");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(300, 100));

@@ -38,7 +38,7 @@ public class TallyDialog extends JDialog
     {
         setLayout(new BorderLayout());
         final List<Image> icons = new ArrayList<Image>();
-        icons.add(new ImageIcon(TallyDialog.class.getResource("/icons/tally_small.png")).getImage());
+        icons.add(new ImageIcon(TallyDialog.class.getResource("/icons/calc16.png")).getImage());
         setIconImages(icons);
         setModalityType(ModalityType.MODELESS);
         setPreferredSize(new Dimension(150, 274));

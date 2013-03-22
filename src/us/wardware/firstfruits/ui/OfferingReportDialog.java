@@ -67,7 +67,7 @@ public class OfferingReportDialog extends JDialog
         setLayout(new BorderLayout());
 
         final List<Image> icons = new ArrayList<Image>();
-        icons.add(new ImageIcon(TallyDialog.class.getResource("/icons/offering.png")).getImage());
+        icons.add(new ImageIcon(OfferingReportDialog.class.getResource("/icons/offering16.png")).getImage());
         setIconImages(icons);
         setTitle("Offering Report");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
