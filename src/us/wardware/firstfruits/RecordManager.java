@@ -105,6 +105,7 @@ public class RecordManager extends Observable implements Observer
         this.records = records;
         final Set<String> names = new HashSet<String>();
         names.add("");
+        names.add("Anonymous");
         updateFirstNamesForLastName("", "");
         for (GivingRecord record : records) {
             names.add(record.getLastName().trim());

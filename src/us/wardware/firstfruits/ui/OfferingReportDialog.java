@@ -69,6 +69,7 @@ public class OfferingReportDialog extends JDialog
         final List<Image> icons = new ArrayList<Image>();
         icons.add(new ImageIcon(OfferingReportDialog.class.getResource("/icons/offering16.png")).getImage());
         setIconImages(icons);
+        setModalityType(ModalityType.MODELESS);
         setTitle("Offering Report");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
