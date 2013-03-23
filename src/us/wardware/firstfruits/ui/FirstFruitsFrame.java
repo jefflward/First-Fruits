@@ -66,6 +66,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private TallyDialog tallyDialog;
     private SettingsDialog settingsDialog;
     private JMenu recentFilesMenu;
+    private JMenuItem passwordProtectItem;
     
     public FirstFruitsFrame()
     {
@@ -166,7 +167,19 @@ public class FirstFruitsFrame extends JFrame implements Observer
         updateRecentFileList();
         fileMenu.add(recentFilesMenu);
         
+        fileMenu.add(new JSeparator());
+        
+        passwordProtectItem = new JMenuItem(new TextAction("Password protect this file") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                setPasswordProtection();
+            }
 
+        });
+        passwordProtectItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit.png")));
+        passwordProtectItem.setMnemonic('P');
+        passwordProtectItem.setEnabled(false);
+        fileMenu.add(passwordProtectItem);
         
         fileMenu.add(new JSeparator());
         
@@ -439,6 +452,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             final List<GivingRecord> records = new ArrayList<GivingRecord>();
                             currentFile = new File(recentFile);
+                            passwordProtectItem.setEnabled(true);
                             try {
                                 Settings.getInstance().addRecentFile(recentFile);
                                 loadFileRecords(records, currentFile);
@@ -591,8 +605,10 @@ public class FirstFruitsFrame extends JFrame implements Observer
             final File[] selectedFiles = fileChooser.getSelectedFiles();
             if (selectedFiles.length == 1) {
                 currentFile = selectedFiles[0];
+                passwordProtectItem.setEnabled(true);
             } else {
                 currentFile = null;
+                passwordProtectItem.setEnabled(false);
             }
             
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -676,6 +692,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             currentFile = fileChooser.getSelectedFile();
             if (FileUtils.getExtension(currentFile) == null) {
                 currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.CSV));
+                passwordProtectItem.setEnabled(true);
             }
             Settings.getInstance().addRecentFile(currentFile.getAbsolutePath());
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -683,6 +700,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
             setCursor(Cursor.getDefaultCursor());
         }
         RecordManager.getInstance().setUnsavedChanges(false);
+    }
+    
+    private void setPasswordProtection()
+    {
+        final PasswordEditDialog pd = new PasswordEditDialog(this);
+        pd.setVisible(true);
     }
     
     private void saveFile() throws IOException 
