@@ -470,7 +470,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                             try {
                                 final File f = new File(recentFile);
                                 final String password = GivingRecordsReader.getFilePassword(f);
-                                boolean shouldLoadRecords = promptForPassword(password);
+                                boolean shouldLoadRecords = promptForPassword(f, password);
                                 if (shouldLoadRecords) {
                                     loadFileRecords(records, f, password);
                                     recordsLoaded = true;
@@ -639,7 +639,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             for (File f : selectedFiles) {
                 Settings.getInstance().addRecentFile(f.getAbsolutePath());
                 final String password = GivingRecordsReader.getFilePassword(f);
-                boolean shouldLoadRecords = promptForPassword(password);
+                boolean shouldLoadRecords = promptForPassword(f, password);
                 if (shouldLoadRecords) {
                     loadFileRecords(records, f, password);
                     recordsLoaded = true;
@@ -661,17 +661,17 @@ public class FirstFruitsFrame extends JFrame implements Observer
         }
     }
         
-    private boolean promptForPassword(String password) 
+    private boolean promptForPassword(File f, String password) 
     {
         if (password.isEmpty()) {
             return true;
         }
         boolean passwordCorrect = false;
-        final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(password.toCharArray()); 
+        final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(f.getName(), password.toCharArray()); 
         while (!passwordCorrect) {
             final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock32.png"));
             int answer = JOptionPane.showConfirmDialog(  
-                            null, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
+                            null, fpp, String.format("Password for %s", f.getName()), JOptionPane.OK_CANCEL_OPTION,  
                             JOptionPane.PLAIN_MESSAGE,
                             lockIcon);  
             if (answer == JOptionPane.OK_OPTION)  

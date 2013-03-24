@@ -13,11 +13,13 @@ import javax.swing.UIManager;
 public class FilePasswordPromptPanel extends JPanel
 {
     private JPasswordField passwordField;
+    private String filename;
     private char[] currentPassword;
     private String error;
     
-    public FilePasswordPromptPanel(char[] password)
+    public FilePasswordPromptPanel(String filename, char[] password)
     {
+        this.filename = filename;
         this.currentPassword = password;
         initComponents();
     }
@@ -29,7 +31,7 @@ public class FilePasswordPromptPanel extends JPanel
         int gridy = 0;
         final StringBuilder sb = new StringBuilder();
         sb.append("<HTML>");
-        sb.append("This file is password protected. To open you must provide the password.");
+        sb.append(String.format("The file %s is password protected. To open you must provide the password.", filename));
         sb.append("<BR><B>NOTE:</B> Password is case sensative.");
         sb.append("</HTML>");
         add(new JLabel(sb.toString()), Gbc.xyi(0, gridy, 2).top(5).gridWidth(2));
@@ -74,7 +76,7 @@ public class FilePasswordPromptPanel extends JPanel
             private void testPasswordPrompt(String password)
             {
                 boolean finished = false;
-                final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(password.toCharArray()); 
+                final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel("TestFile.txt", password.toCharArray()); 
                 while (!finished) {
                     int answer = JOptionPane.showConfirmDialog(  
                                     null, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
