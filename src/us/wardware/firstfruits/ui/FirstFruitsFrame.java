@@ -536,6 +536,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         } else {
             RecordManager.getInstance().createNew();
         }
+        currentFile = null;
         currentPassword = "";
         passwordProtectItem.setEnabled(false);
     }
