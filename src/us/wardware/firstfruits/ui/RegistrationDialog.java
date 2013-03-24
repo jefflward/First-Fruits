@@ -4,6 +4,8 @@ import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -32,9 +34,13 @@ import us.wardware.firstfruits.tools.SoftwareKeyGenerator;
 
 public class RegistrationDialog extends JDialog
 {
+    private boolean trialEnded;
+    protected boolean registerSuccessful;
+
     public RegistrationDialog(JFrame owner)
     {
         super(owner);
+        addWindowListener(new WindowClosingListener());
         initComponents();
         setLocationRelativeTo(owner);
     }
@@ -84,22 +90,22 @@ public class RegistrationDialog extends JDialog
         ep.setEditable(false);
         ep.setBackground(label.getBackground());
         
-        add(ep, Gbc.xyi(1,0,2).left(10).horizontal());
+        add(ep, Gbc.xyi(1,0,2).left(10).horizontal().gridWidth(2));
         
         final JPanel inputPanel = new JPanel(new GridBagLayout());
-        final JLabel churchNameLabel = new JLabel("Church Name");
-        inputPanel.add(churchNameLabel, Gbc.xyi(0,0,2).left(10).top(10));
+        final JLabel churchNameLabel = new JLabel("Church Name", JLabel.LEADING);
+        inputPanel.add(churchNameLabel, Gbc.xyi(0,0,2).left(10).top(10).west());
         
-        final JTextField churchName = new JTextField();
-        inputPanel.add(churchName, Gbc.xyi(1,0,2).horizontal().top(10));
+        final JTextField churchName = new JTextField(15);
+        inputPanel.add(churchName, Gbc.xyi(1,0,2).horizontal().top(10).right(5));
         
-        final JLabel keyLabel = new JLabel("Registration Key");
+        final JLabel keyLabel = new JLabel("Registration Key", JLabel.LEADING);
         inputPanel.add(keyLabel, Gbc.xyi(0,1,2).left(10).top(5));
         
-        final JTextField keyField = new JTextField();
-        inputPanel.add(keyField, Gbc.xyi(1,1,2).horizontal().top(5));
+        final JTextField keyField = new JTextField(15);
+        inputPanel.add(keyField, Gbc.xyi(1,1,2).horizontal().top(5).right(5));
         
-        add(inputPanel, Gbc.xyi(1,1,2).gridWidth(2).gridHeight(2));
+        add(inputPanel, Gbc.xyi(1,1,2).gridWidth(2).gridHeight(2).horizontal());
         
         Date installDate = new Date();
         try {
@@ -124,6 +130,7 @@ public class RegistrationDialog extends JDialog
         
         long days = (cal.getTimeInMillis() - now.getTimeInMillis()) / 86400000;
         if (days <= 0) {
+            trialEnded = true;
             add(new JLabel(String.format("<HTML><B>Your trial period has ended. You must register to continue.</B></HTML>", days)), Gbc.xyi(1,3,2).left(10).top(10).horizontal());
         } else {
             add(new JLabel(String.format("<HTML>Your trial period has <B>%d</B> days remaining.</HTML>", days)), Gbc.xyi(1,3,2).left(10).top(10).horizontal());
@@ -148,7 +155,14 @@ public class RegistrationDialog extends JDialog
                 if (keyFromInput.equals(keyField.getText().trim())) {
                     Settings.getInstance().setRegistrationKey(keyFromInput);
                     Settings.getInstance().setRegistrationName(churchName.getText());
+                    registerSuccessful = true;
                     setVisible(false);
+                    JOptionPane.showMessageDialog(RegistrationDialog.this, 
+                                    "<HTML><B>First Fruits</B>" +
+                                    "<BR>Registration complete, thank you!", 
+                                    "Registration Successful", 
+                                    JOptionPane.INFORMATION_MESSAGE,
+                                    new ImageIcon(FirstFruitsFrame.class.getResource("/icons/logo48.png")));
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(RegistrationDialog.this, 
@@ -185,5 +199,16 @@ public class RegistrationDialog extends JDialog
                 dialog.setAlwaysOnTop(true);
             }
         });
+    }
+    
+    private class WindowClosingListener extends WindowAdapter
+    {
+        @Override
+        public void windowClosed(WindowEvent e)
+        {
+            if (trialEnded && !registerSuccessful) {
+                System.exit(1);
+            }
+        }
     }
 }
