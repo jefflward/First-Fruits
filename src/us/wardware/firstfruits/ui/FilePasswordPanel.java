@@ -66,11 +66,7 @@ public class FilePasswordPanel extends JPanel
         sb.append("<BR>It is recommended you use a password that is at least 8 characters.");
         sb.append("<BR><B>NOTE:</B> All passwords are case sensative.");
         sb.append("</HTML>");
-        add(new JLabel(sb.toString()), Gbc.xyi(0, gridy, 2).top(5).left(10).gridWidth(2).gridHeight(3));
-        
-        updateUI();
-        revalidate();
-        repaint();
+        add(new JLabel(sb.toString()), Gbc.xyi(0, gridy, 2).top(5).gridWidth(2).gridHeight(3));
     }
     
     public boolean checkPasswordInput()
@@ -158,11 +154,11 @@ public class FilePasswordPanel extends JPanel
                     {  
                         if (fpp.checkPasswordInput()) {
                             if (!fpp.getNewPassword().isEmpty() && fpp.isChangingPassword()) {
-                                JOptionPane.showMessageDialog(null, "Password successfully changed");
+                                JOptionPane.showMessageDialog(null, "Password successfully changed.");
                             } else if (!fpp.getNewPassword().isEmpty()) {
-                                JOptionPane.showMessageDialog(null, "Password successfully added");
+                                JOptionPane.showMessageDialog(null, "The file is now password protected.");
                             } else {
-                                JOptionPane.showMessageDialog(null, "Password successfully removed");
+                                JOptionPane.showMessageDialog(null, "The file is no longer password protected");
                             }
                             passwordChangeComplete = true;
                         } else {

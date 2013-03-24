@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -186,7 +187,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             }
 
         });
-        passwordProtectItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit.png")));
+        passwordProtectItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit16.png")));
         passwordProtectItem.setMnemonic('P');
         passwordProtectItem.setEnabled(false);
         fileMenu.add(passwordProtectItem);
@@ -522,6 +523,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         } else {
             RecordManager.getInstance().createNew();
         }
+        currentPassword = "";
     }
 
     private void deleteSelectedRecords()
@@ -642,9 +644,26 @@ public class FirstFruitsFrame extends JFrame implements Observer
         final String password = GivingRecordsReader.getFilePassword(f);
         if (!password.isEmpty())
         {
-            // FIXME Prompt for password
-            JOptionPane.showMessageDialog(this, "Password is: " + password);
-            // return if not match
+            boolean passwordCorrect = false;
+            final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(password.toCharArray()); 
+            while (!passwordCorrect) {
+                final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock32.png"));
+                int answer = JOptionPane.showConfirmDialog(  
+                                null, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
+                                JOptionPane.PLAIN_MESSAGE,
+                                lockIcon);  
+                if (answer == JOptionPane.OK_OPTION)  
+                {  
+                    if (fpp.checkPasswordInput()) {
+                        passwordCorrect = true;
+                    } else {
+                        JOptionPane.showMessageDialog(null, fpp.getError(), "Password Failure", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    // Canceled so don't read records
+                    return;
+                }
+            }
         }
         currentPassword = password;  
         try {
@@ -733,18 +752,23 @@ public class FirstFruitsFrame extends JFrame implements Observer
         while (!passwordChangeComplete) {
             fpp.revalidate();
             fpp.repaint();
+            final Icon lockEditIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit32.png"));
             int answer = JOptionPane.showConfirmDialog(  
                             this, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
-                            JOptionPane.PLAIN_MESSAGE);
-            if (answer == JOptionPane.YES_OPTION)  
+                            JOptionPane.PLAIN_MESSAGE,
+                            lockEditIcon);
+            if (answer == JOptionPane.OK_OPTION)  
             {  
                 if (fpp.checkPasswordInput()) {
                     if (!fpp.getNewPassword().isEmpty() && fpp.isChangingPassword()) {
-                        JOptionPane.showMessageDialog(null, "Password successfully changed.");
+                        final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit32.png"));
+                        JOptionPane.showMessageDialog(this, "Password successfully changed.", "File Password", JOptionPane.INFORMATION_MESSAGE, lockIcon);
                     } else if (!fpp.getNewPassword().isEmpty()) {
-                        JOptionPane.showMessageDialog(null, "Password successfully added.");
+                        final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_add32.png"));
+                        JOptionPane.showMessageDialog(this, "The file is now password protected.", "File Password", JOptionPane.INFORMATION_MESSAGE, lockIcon);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Password successfully removed.");
+                        final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_open32.png"));
+                        JOptionPane.showMessageDialog(this, "The file is no longer password protected.", "File Password", JOptionPane.INFORMATION_MESSAGE, lockIcon);
                     }
                     currentPassword = fpp.getNewPassword();
                     passwordChangeComplete = true;
