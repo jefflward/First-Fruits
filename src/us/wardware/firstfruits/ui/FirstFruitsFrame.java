@@ -74,6 +74,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
     public FirstFruitsFrame()
     {
         initComponents();
+        currentPassword = "";
         tallyDialog = new TallyDialog(this);
         tallyDialog.setLocationRelativeTo(FirstFruitsFrame.this);
         settingsDialog = new SettingsDialog(this, false);

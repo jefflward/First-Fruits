@@ -62,16 +62,19 @@ public class GivingRecordsReader
             if (firstLine == null || firstLine.isEmpty()) {
                 throw new RuntimeException(String.format("The file: %f is missing header.", file.getName()));
             }
+            
+            String schemaLine = firstLine;
+            if (encrypted) {
+                schemaLine = FileEncryption.decrypt(firstLine);
+            }
 
-            String[] tokens = firstLine.split(",");
+            String[] tokens = schemaLine.split(",");
             if (tokens.length == 0) {
                 throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
             }
-            
-            if (tokens[0].equals("SchemaVersion")) {
-                br.readLine();
+
+            if (tokens[0].equals(SchemaSettings.SCHEMA_VERSION_KEY)) {
                 String headerLine = br.readLine();
-                br.readLine();
                 if (encrypted) {
                     headerLine = FileEncryption.decrypt(headerLine);
                 }
@@ -107,17 +110,21 @@ public class GivingRecordsReader
             if (firstLine == null || firstLine.isEmpty()) {
                 throw new RuntimeException(String.format("The file: %f is missing header.", file.getName()));
             }
+            
+            String schemaLine = firstLine;
+            if (encrypted) {
+                schemaLine = FileEncryption.decrypt(firstLine);
+            }
 
-            final String[] tokens = firstLine.split(",");
+            final String[] tokens = schemaLine.split(",");
             if (tokens.length == 0) {
                 throw new RuntimeException(String.format("The file: %f is corrupt.", file.getName()));
             }
 
             final String schemaVersion;
             final String[] headers;
-            if (tokens[0].equals("SchemaVersion")) {
+            if (tokens[0].equals(SchemaSettings.SCHEMA_VERSION_KEY)) {
                 schemaVersion = tokens[1];
-                br.readLine();
                 String headerLine = br.readLine();
                 if (encrypted) {
                     headerLine = FileEncryption.decrypt(headerLine);
@@ -164,21 +171,19 @@ public class GivingRecordsReader
                 throw new FileException(String.format("The file: %f is missing header.", file.getName()));
             }
 
-            final String[] tokens = firstLine.split(",");
-            if (tokens.length == 0) {
-                throw new FileException(String.format("The file: %f is corrupt.", file.getName()));
-            }
-
-            if (tokens[0].equals("SchemaVersion")) {
-                final String line = br.readLine();
-                if (!line.isEmpty()) {
-                    return FileEncryption.decrypt(line);
-                }
-            } else if (tokens[0].equals("Date")) {
+            if (firstLine.startsWith(SchemaSettings.SCHEMA_VERSION_KEY) || firstLine.startsWith("Date")) {
+                // Not encrypted
                 return "";
-            } else {
-                throw new FileException("Unable to determine file format");
             }
+            
+            final String decrypted = FileEncryption.decrypt(firstLine);
+            
+            final String[] tokens = decrypted.split(",");
+            if (tokens.length == 0 || tokens.length != SchemaSettings.SCHEMA_TOKEN_LENGTH) {
+                throw new FileException(String.format("Unable to determine file format. The file: %f is corrupt.", file.getName()));
+            }
+            final String password = tokens[3];
+            return password;
         } catch (GeneralSecurityException e) {
             throw new FileException("Could not decrypt file: " + file.getName(), e);
         } catch (IOException e) {
@@ -191,8 +196,6 @@ public class GivingRecordsReader
                 e.printStackTrace();
             }
         }
-        
-        return "";
     }
     
     public static GivingRecord fromCsv(String csv, String schemaVersion, String[] headers) throws ParseException

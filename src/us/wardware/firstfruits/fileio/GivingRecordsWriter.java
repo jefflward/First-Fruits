@@ -33,12 +33,8 @@ public class GivingRecordsWriter
             columns.add("Check Number");
             columns.addAll(Settings.getInstance().getCategories());
             columns.add("Total");
-            writeLine(printWriter, SchemaSettings.getCurrentSchemaVersionCsv(), false);
-            if (encrypt) {
-                writeLine(printWriter, password, encrypt);
-            } else {
-                writeLine(printWriter, "", encrypt);
-            }
+            
+            writeLine(printWriter, SchemaSettings.getCurrentSchemaVersionCsv(password), encrypt);
 
             final String columnsCsv = StringUtils.join(columns.toArray(), ",");
             writeLine(printWriter, columnsCsv, encrypt);
