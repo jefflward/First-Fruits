@@ -466,18 +466,27 @@ public class FirstFruitsFrame extends JFrame implements Observer
                         public void run() {
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             final List<GivingRecord> records = new ArrayList<GivingRecord>();
-                            currentFile = new File(recentFile);
-                            passwordProtectItem.setEnabled(true);
+                            boolean recordsLoaded = false;
                             try {
-                                Settings.getInstance().addRecentFile(recentFile);
-                                loadFileRecords(records, currentFile);
+                                final File f = new File(recentFile);
+                                final String password = GivingRecordsReader.getFilePassword(f);
+                                boolean shouldLoadRecords = promptForPassword(password);
+                                if (shouldLoadRecords) {
+                                    loadFileRecords(records, f, password);
+                                    recordsLoaded = true;
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } catch (FileException e) {
                                 JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
                                 e.printStackTrace();
                             }
-                            RecordManager.getInstance().setRecords(records);
+                            if (recordsLoaded) {
+                                Settings.getInstance().addRecentFile(recentFile);
+                                currentFile = new File(recentFile);
+                                passwordProtectItem.setEnabled(true);
+                                RecordManager.getInstance().setRecords(records);
+                            }
                             setCursor(Cursor.getDefaultCursor());
                         }
                     });
@@ -525,6 +534,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             RecordManager.getInstance().createNew();
         }
         currentPassword = "";
+        passwordProtectItem.setEnabled(false);
     }
 
     private void deleteSelectedRecords()
@@ -622,53 +632,67 @@ public class FirstFruitsFrame extends JFrame implements Observer
         final List<GivingRecord> records = new ArrayList<GivingRecord>();
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             final File[] selectedFiles = fileChooser.getSelectedFiles();
+            
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            String filePassword = "";
+            boolean recordsLoaded = false;
+            for (File f : selectedFiles) {
+                Settings.getInstance().addRecentFile(f.getAbsolutePath());
+                final String password = GivingRecordsReader.getFilePassword(f);
+                boolean shouldLoadRecords = promptForPassword(password);
+                if (shouldLoadRecords) {
+                    loadFileRecords(records, f, password);
+                    recordsLoaded = true;
+                }
+            }
             if (selectedFiles.length == 1) {
                 currentFile = selectedFiles[0];
                 passwordProtectItem.setEnabled(true);
+                currentPassword = filePassword;
             } else {
                 currentFile = null;
                 passwordProtectItem.setEnabled(false);
+                currentPassword = "";
             }
-            
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            for (File f : fileChooser.getSelectedFiles()) {
-                Settings.getInstance().addRecentFile(f.getAbsolutePath());
-                loadFileRecords(records, f);
+            if (recordsLoaded) {
+                RecordManager.getInstance().setRecords(records);
             }
-            RecordManager.getInstance().setRecords(records);
             setCursor(Cursor.getDefaultCursor());
         }
     }
-
-    private void loadFileRecords(final List<GivingRecord> records, File f) throws IOException, FileException
+        
+    private boolean promptForPassword(String password) 
     {
-        final String password = GivingRecordsReader.getFilePassword(f);
-        if (!password.isEmpty())
-        {
-            boolean passwordCorrect = false;
-            final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(password.toCharArray()); 
-            while (!passwordCorrect) {
-                final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock32.png"));
-                int answer = JOptionPane.showConfirmDialog(  
-                                null, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
-                                JOptionPane.PLAIN_MESSAGE,
-                                lockIcon);  
-                if (answer == JOptionPane.OK_OPTION)  
-                {  
-                    if (fpp.checkPasswordInput()) {
-                        passwordCorrect = true;
-                    } else {
-                        JOptionPane.showMessageDialog(null, fpp.getError(), "Password Failure", JOptionPane.ERROR_MESSAGE);
-                    }
+        if (password.isEmpty()) {
+            return true;
+        }
+        boolean passwordCorrect = false;
+        final FilePasswordPromptPanel fpp = new FilePasswordPromptPanel(password.toCharArray()); 
+        while (!passwordCorrect) {
+            final Icon lockIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock32.png"));
+            int answer = JOptionPane.showConfirmDialog(  
+                            null, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
+                            JOptionPane.PLAIN_MESSAGE,
+                            lockIcon);  
+            if (answer == JOptionPane.OK_OPTION)  
+            {  
+                if (fpp.checkPasswordInput()) {
+                    return true;
                 } else {
-                    // Canceled so don't read records
-                    return;
+                    JOptionPane.showMessageDialog(null, fpp.getError(), "Password Failure", JOptionPane.ERROR_MESSAGE);
                 }
+            } else {
+                // Canceled so don't read records
+                return false;
             }
         }
-        currentPassword = password;  
+        return false;
+    }
+
+    private void loadFileRecords(final List<GivingRecord> records, File f, String password) throws IOException, FileException
+    {
         try {
-            final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f, !currentPassword.isEmpty());
+            final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f, !password.isEmpty());
             if (categoryComparison.hasExtraCategories()) {
                 final StringBuilder confirmMessage = new StringBuilder();
                 confirmMessage.append("<HTML>The records being imported do not match the categories defined in the program settings.<BR>");
@@ -693,12 +717,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
                     for (String category : categoryComparison.extraCategories) {
                         Settings.getInstance().addCategory(category);
                     }
-                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !password.isEmpty()));
                 } else if (choice == JOptionPane.NO_OPTION) {
-                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !password.isEmpty()));
                 }
             } else {
-                records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
+                records.addAll(GivingRecordsReader.readRecordsFromFile(f, !password.isEmpty()));
             }
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(FirstFruitsFrame.this, 
