@@ -2,10 +2,15 @@
 - tab order in input panel is not working
 
 Features
-- Offering report also print out giving records for that week.
-- Offering report allow counter names to be entered.
 - Giving record reports allow name to be entered.
-- Password protection.
 
 Finished
+- Add anonymous user
 - Fund type entry [Check, Cash, Online, Other] with check number.
+- Offering report also print out giving records for that week.
+- Offering report allow counter names to be entered.
+- Software registration
+- Password protection.
+- Tally dialog.
+- Recent files menu.
+- Category renaming and deletion.

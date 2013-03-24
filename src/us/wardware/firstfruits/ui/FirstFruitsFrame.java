@@ -180,13 +180,13 @@ public class FirstFruitsFrame extends JFrame implements Observer
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    setPasswordProtection();
-                    saveFile();
+                    if (setPasswordProtection()) {
+                        saveFile();
+                    }
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
-
         });
         passwordProtectItem.setIcon(new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit16.png")));
         passwordProtectItem.setMnemonic('P');
@@ -464,7 +464,6 @@ public class FirstFruitsFrame extends JFrame implements Observer
                     SwingUtilities.invokeLater(new Runnable(){
                         @Override
                         public void run() {
-                            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             final List<GivingRecord> records = new ArrayList<GivingRecord>();
                             boolean recordsLoaded = false;
                             try {
@@ -472,22 +471,26 @@ public class FirstFruitsFrame extends JFrame implements Observer
                                 final String password = GivingRecordsReader.getFilePassword(f);
                                 boolean shouldLoadRecords = promptForPassword(f, password);
                                 if (shouldLoadRecords) {
+                                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                                     loadFileRecords(records, f, password);
                                     recordsLoaded = true;
+                                    currentPassword = password;
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } catch (FileException e) {
                                 JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
                                 e.printStackTrace();
+                            } finally {
+                                setCursor(Cursor.getDefaultCursor());
                             }
+                            
                             if (recordsLoaded) {
                                 Settings.getInstance().addRecentFile(recentFile);
                                 currentFile = new File(recentFile);
                                 passwordProtectItem.setEnabled(true);
                                 RecordManager.getInstance().setRecords(records);
                             }
-                            setCursor(Cursor.getDefaultCursor());
                         }
                     });
                 }
@@ -770,11 +773,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
         RecordManager.getInstance().setUnsavedChanges(false);
     }
     
-    private void setPasswordProtection() throws IOException
+    private boolean setPasswordProtection() throws IOException
     {
-        boolean passwordChangeComplete = false;
+        boolean passwordUpdatesMade = false;
+        boolean finished = false;
         final FilePasswordPanel fpp = new FilePasswordPanel(currentPassword.toCharArray()); 
-        while (!passwordChangeComplete) {
+        while (!finished) {
             fpp.revalidate();
             fpp.repaint();
             final Icon lockEditIcon = new ImageIcon(FirstFruitsFrame.class.getResource("/icons/lock_edit32.png"));
@@ -796,14 +800,16 @@ public class FirstFruitsFrame extends JFrame implements Observer
                         JOptionPane.showMessageDialog(this, "The file is no longer password protected.", "File Password", JOptionPane.INFORMATION_MESSAGE, lockIcon);
                     }
                     currentPassword = fpp.getNewPassword();
-                    passwordChangeComplete = true;
+                    passwordUpdatesMade = true;
+                    finished = true;
                 } else {
                     JOptionPane.showMessageDialog(null, fpp.getError(), "Password Failure", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                passwordChangeComplete = true;
+                finished = true;
             }
         }
+        return passwordUpdatesMade;
     }
     
     private void saveFile() throws Throwable 
