@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,26 +18,55 @@ import us.wardware.firstfruits.Settings;
 
 public class GivingRecordsWriter
 {
-    public static void writeRecordsToFile(File outputFile) throws IOException
+    public static void writeRecordsToFile(File outputFile, String password) throws FileException
     {
-        final FileWriter fileWriter = new FileWriter(outputFile);
-        final PrintWriter printWriter = new PrintWriter(fileWriter);
-        final List<String> columns = new ArrayList<String>();
-        columns.add("Date");
-        columns.add("Last Name");
-        columns.add("First Name");
-        columns.add("Fund Type");
-        columns.add("Check Number");
-        columns.addAll(Settings.getInstance().getCategories());
-        columns.add("Total");
-        printWriter.println(SchemaSettings.getCurrentSchemaVersionCsv());
-        final String columnsCsv = StringUtils.join(columns.toArray(), ",");
-        printWriter.println(columnsCsv);
-        final List<GivingRecord> records = RecordManager.getInstance().getAllRecords();
-        for (GivingRecord record : records) {
-            printWriter.println(record.toCsv());
+        boolean encrypt = (password != null && !password.isEmpty());
+        
+        try {
+            FileWriter fileWriter = new FileWriter(outputFile);
+            final PrintWriter printWriter = new PrintWriter(fileWriter);
+            final List<String> columns = new ArrayList<String>();
+            columns.add("Date");
+            columns.add("Last Name");
+            columns.add("First Name");
+            columns.add("Fund Type");
+            columns.add("Check Number");
+            columns.addAll(Settings.getInstance().getCategories());
+            columns.add("Total");
+            writeLine(printWriter, SchemaSettings.getCurrentSchemaVersionCsv(), false);
+            if (encrypt) {
+                writeLine(printWriter, password, encrypt);
+            } else {
+                writeLine(printWriter, "", encrypt);
+            }
+
+            final String columnsCsv = StringUtils.join(columns.toArray(), ",");
+            writeLine(printWriter, columnsCsv, encrypt);
+            final List<GivingRecord> records = RecordManager.getInstance().getAllRecords();
+            for (GivingRecord record : records) {
+                writeLine(printWriter, record.toCsv(), encrypt);
+            }
+
+            printWriter.flush();
+            printWriter.close();
+        } catch (IOException e) {
+            throw new FileException("Failure occurred while writing file", e);
         }
-        printWriter.flush();
-        printWriter.close();
+    }
+    
+    private static void writeLine(PrintWriter printWriter, String line, boolean encrypt) throws FileException
+    {
+        String output = line;
+        if (encrypt) {
+            try {
+                output = FileEncryption.encrypt(line);
+            } catch (UnsupportedEncodingException e) {
+                throw new FileException("Failure occurred while writing file", e);
+            } catch (GeneralSecurityException e) {
+                throw new FileException("Failure occurred while writing file", e);
+            }
+        }
+        
+        printWriter.println(output);
     }
 }

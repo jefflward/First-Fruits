@@ -135,7 +135,7 @@ public class OfferingPanel extends JPanel
         offeringTotalField = new CurrencyFormattedTextField();
         offeringTotalField.setEditable(false);
         
-        deposits.add(offeringTotalField, Gbc.xyi(3, y, 2));
+        deposits.add(offeringTotalField, Gbc.xyi(3, y, 2).horizontal());
         offeringBalancesLabel = new JLabel();
         deposits.add(offeringBalancesLabel, Gbc.xyi(4, y, 2));
         
@@ -143,7 +143,7 @@ public class OfferingPanel extends JPanel
         options.setBorder(new TitledBorder("Report Options"));
         y = 0; 
         includeSignaturesCheckbox = new JCheckBox("Include Counters Signatures", true);
-        options.add(includeSignaturesCheckbox, Gbc.xyi(0,y,2).gridWidth(2));
+        options.add(includeSignaturesCheckbox, Gbc.xyi(0,y,2).gridHeight(2).northwest());
         
         includeSignaturesCheckbox.addActionListener(new ActionListener() {
             @Override
@@ -155,17 +155,18 @@ public class OfferingPanel extends JPanel
         
         signature1TextField = new JTextField("Signature 1");
         signature1TextField.addFocusListener(new SelectAllFocusListener());
-        options.add(signature1TextField, Gbc.xyi(2,y,2));
+        options.add(signature1TextField, Gbc.xyi(1,y,2).horizontal());
         signature2TextField = new JTextField("Signature 2");
         signature2TextField.addFocusListener(new SelectAllFocusListener());
-        options.add(signature2TextField, Gbc.xyi(3,y,2));
+        options.add(signature2TextField, Gbc.xyi(2,y,2).horizontal());
+        ++y;
         
-        signature1Label = new JLabel("Signature 1", SwingConstants.CENTER);
+        signature1Label = new JLabel("Signature 1", SwingConstants.LEADING);
         signature1Label.setPreferredSize(new Dimension(100, signature1Label.getPreferredSize().height));
-        options.add(signature1Label, Gbc.xyi(2,++y,2));
-        signature2Label = new JLabel("Signature 2", SwingConstants.CENTER);
+        options.add(signature1Label, Gbc.xyi(1,y,2).west().left(5));
+        signature2Label = new JLabel("Signature 2", SwingConstants.LEADING);
         signature2Label.setPreferredSize(new Dimension(100, signature2Label.getPreferredSize().height));
-        options.add(signature2Label, Gbc.xyi(3,y,2));
+        options.add(signature2Label, Gbc.xyi(2,y,2).west().left(5));
         
         includeContributionsCheckbox = new JCheckBox("Include Offering Contributions", true);
         includeContributionsCheckbox.addActionListener(new ActionListener() {
@@ -174,9 +175,9 @@ public class OfferingPanel extends JPanel
                 includeDonorNames.setEnabled(includeContributionsCheckbox.isSelected());
             }
         });
-        options.add(includeContributionsCheckbox, Gbc.xyi(0,++y,2).gridWidth(2));
+        options.add(includeContributionsCheckbox, Gbc.xyi(0,++y,2).west());
         includeDonorNames = new JCheckBox("Include Donor Names", true);
-        options.add(includeDonorNames, Gbc.xyi(0,++y,2).gridWidth(2).bottom(20));
+        options.add(includeDonorNames, Gbc.xyi(0,++y,2).west());
         
         final JPanel center = new JPanel(new GridBagLayout());
         center.add(deposits, Gbc.xyi(0,0,5));

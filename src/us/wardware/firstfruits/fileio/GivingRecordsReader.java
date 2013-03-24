@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +40,7 @@ public class GivingRecordsReader
         }
     }
     
-    public static CategoryComparison getCategoryComparison(File file) throws IOException
+    public static CategoryComparison getCategoryComparison(File file, boolean encrypted) throws IOException, FileException
     {
         final List<String> categoryColumns = new ArrayList<String>();
         categoryColumns.addAll(Settings.getInstance().getCategories());
@@ -67,7 +69,12 @@ public class GivingRecordsReader
             }
             
             if (tokens[0].equals("SchemaVersion")) {
-                final String headerLine = br.readLine();
+                br.readLine();
+                String headerLine = br.readLine();
+                br.readLine();
+                if (encrypted) {
+                    headerLine = FileEncryption.decrypt(headerLine);
+                }
                 tokens = headerLine.split(",");
             }
             
@@ -80,13 +87,15 @@ public class GivingRecordsReader
             allColumns.removeAll(defaultColumns);
             
             return new CategoryComparison(allColumns, extraColumns, missingColumns);
+        } catch (GeneralSecurityException e) {
+            throw new FileException("Could not decrypt file: " + file.getName(), e);
         } finally {
            in.close();
            br.close();
         }
     }
     
-    public static Set<GivingRecord> readRecordsFromFile(File file) throws IOException, ParseException
+    public static Set<GivingRecord> readRecordsFromFile(File file, boolean encrypted) throws IOException, ParseException, FileException
     {
         final Set<GivingRecord> records = new HashSet<GivingRecord>();
         final FileInputStream fstream = new FileInputStream(file);
@@ -108,7 +117,11 @@ public class GivingRecordsReader
             final String[] headers;
             if (tokens[0].equals("SchemaVersion")) {
                 schemaVersion = tokens[1];
-                final String headerLine = br.readLine();
+                br.readLine();
+                String headerLine = br.readLine();
+                if (encrypted) {
+                    headerLine = FileEncryption.decrypt(headerLine);
+                }
                 headers = headerLine.split(",");
             } else if (tokens[0].equals("Date")) {
                 schemaVersion = SchemaSettings.VERSION_1_0;
@@ -119,14 +132,67 @@ public class GivingRecordsReader
             
             String line;
             while ((line = br.readLine()) != null)   {
+                if (encrypted) {
+                    line = FileEncryption.decrypt(line);
+                }
                 final GivingRecord record = fromCsv(line, schemaVersion, headers);
                 records.add(record);
             }
+        } catch (GeneralSecurityException e) {
+            throw new FileException("Could not decrypt file: " + file.getName(), e);
         } finally {
            in.close();
            br.close();
         }
         return records;
+    }
+    
+    public static String getFilePassword(File file) throws FileException 
+    {
+        FileInputStream fstream;
+        try {
+            fstream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new FileException("Could not open file: " + file.getName(), e);
+        }
+        final DataInputStream in = new DataInputStream(fstream);
+        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        try 
+        {
+            final String firstLine = br.readLine();
+            if (firstLine == null || firstLine.isEmpty()) {
+                throw new FileException(String.format("The file: %f is missing header.", file.getName()));
+            }
+
+            final String[] tokens = firstLine.split(",");
+            if (tokens.length == 0) {
+                throw new FileException(String.format("The file: %f is corrupt.", file.getName()));
+            }
+
+            if (tokens[0].equals("SchemaVersion")) {
+                final String line = br.readLine();
+                if (!line.isEmpty()) {
+                    return FileEncryption.decrypt(line);
+                }
+            } else if (tokens[0].equals("Date")) {
+                return "";
+            } else {
+                throw new FileException("Unable to determine file format");
+            }
+        } catch (GeneralSecurityException e) {
+            throw new FileException("Could not decrypt file: " + file.getName(), e);
+        } catch (IOException e) {
+            throw new FileException("Failed to read file: " + file.getName(), e);
+        } finally {
+            try {
+                in.close();
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return "";
     }
     
     public static GivingRecord fromCsv(String csv, String schemaVersion, String[] headers) throws ParseException

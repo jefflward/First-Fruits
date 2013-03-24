@@ -158,7 +158,7 @@ public class InputPanel extends JPanel implements Observer
             }
         });
         p.add(checkNumberText, Gbc.xyi(2, 0, 2).horizontal());
-        contentPanel.add(p, Gbc.xyi(1, 4, 2).right(3));
+        contentPanel.add(p, Gbc.xyi(1, 4, 2).right(3).horizontal());
 
         simpleCurrencyFormat = NumberFormat.getNumberInstance();
         simpleCurrencyFormat.setMaximumFractionDigits(2);

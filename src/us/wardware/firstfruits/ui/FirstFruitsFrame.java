@@ -42,6 +42,7 @@ import us.wardware.firstfruits.GivingRecord;
 import us.wardware.firstfruits.RecordManager;
 import us.wardware.firstfruits.Settings;
 import us.wardware.firstfruits.fileio.CsvFileFilter;
+import us.wardware.firstfruits.fileio.FileException;
 import us.wardware.firstfruits.fileio.FileUtils;
 import us.wardware.firstfruits.fileio.GivingRecordsReader;
 import us.wardware.firstfruits.fileio.GivingRecordsReader.CategoryComparison;
@@ -67,6 +68,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private SettingsDialog settingsDialog;
     private JMenu recentFilesMenu;
     private JMenuItem passwordProtectItem;
+    private String currentPassword;
     
     public FirstFruitsFrame()
     {
@@ -124,6 +126,9 @@ public class FirstFruitsFrame extends JFrame implements Observer
                     openFile();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (FileException e) {
+                    JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });
@@ -136,7 +141,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     saveFile();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
@@ -151,7 +156,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     saveAs();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
@@ -169,10 +174,15 @@ public class FirstFruitsFrame extends JFrame implements Observer
         
         fileMenu.add(new JSeparator());
         
-        passwordProtectItem = new JMenuItem(new TextAction("Password protect this file") {
+        passwordProtectItem = new JMenuItem(new TextAction("File password protection") {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                setPasswordProtection();
+                try {
+                    setPasswordProtection();
+                    saveFile();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
 
         });
@@ -319,6 +329,9 @@ public class FirstFruitsFrame extends JFrame implements Observer
                     openFile();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (FileException e) {
+                    JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });
@@ -331,7 +344,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             public void actionPerformed(ActionEvent arg0) {
                 try {
                     saveFile();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
@@ -458,6 +471,9 @@ public class FirstFruitsFrame extends JFrame implements Observer
                                 loadFileRecords(records, currentFile);
                             } catch (IOException e) {
                                 e.printStackTrace();
+                            } catch (FileException e) {
+                                JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
+                                e.printStackTrace();
                             }
                             RecordManager.getInstance().setRecords(records);
                             setCursor(Cursor.getDefaultCursor());
@@ -497,7 +513,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                 try {
                     saveFile();
                     RecordManager.getInstance().createNew();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             } else if (choice == JOptionPane.NO_OPTION) {
@@ -579,7 +595,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             if (choice == JOptionPane.YES_OPTION) {
                 try {
                     saveFile();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                 }
             } else if (choice == JOptionPane.NO_OPTION) {
                 setVisible(false);
@@ -591,7 +607,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         }
     }
     
-    private void openFile() throws IOException
+    private void openFile() throws IOException, FileException
     {
         if (!confirmUnsavedChanges()) {
             return;
@@ -621,10 +637,18 @@ public class FirstFruitsFrame extends JFrame implements Observer
         }
     }
 
-    private void loadFileRecords(final List<GivingRecord> records, File f) throws IOException
+    private void loadFileRecords(final List<GivingRecord> records, File f) throws IOException, FileException
     {
+        final String password = GivingRecordsReader.getFilePassword(f);
+        if (!password.isEmpty())
+        {
+            // FIXME Prompt for password
+            JOptionPane.showMessageDialog(this, "Password is: " + password);
+            // return if not match
+        }
+        currentPassword = password;  
         try {
-            final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f);
+            final CategoryComparison categoryComparison = GivingRecordsReader.getCategoryComparison(f, !currentPassword.isEmpty());
             if (categoryComparison.hasExtraCategories()) {
                 final StringBuilder confirmMessage = new StringBuilder();
                 confirmMessage.append("<HTML>The records being imported do not match the categories defined in the program settings.<BR>");
@@ -649,12 +673,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
                     for (String category : categoryComparison.extraCategories) {
                         Settings.getInstance().addCategory(category);
                     }
-                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
                 } else if (choice == JOptionPane.NO_OPTION) {
-                    records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                    records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
                 }
             } else {
-                records.addAll(GivingRecordsReader.readRecordsFromFile(f));
+                records.addAll(GivingRecordsReader.readRecordsFromFile(f, !currentPassword.isEmpty()));
             }
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(FirstFruitsFrame.this, 
@@ -673,7 +697,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
             if (choice == JOptionPane.YES_OPTION) {
                 try {
                     saveFile();
-                } catch (IOException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             } else if (choice == JOptionPane.CANCEL_OPTION ||
@@ -684,7 +708,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         return true;
     }
     
-    private void saveAs() throws IOException
+    private void saveAs() throws Throwable
     {
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new CsvFileFilter()); 
@@ -692,27 +716,52 @@ public class FirstFruitsFrame extends JFrame implements Observer
             currentFile = fileChooser.getSelectedFile();
             if (FileUtils.getExtension(currentFile) == null) {
                 currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.CSV));
-                passwordProtectItem.setEnabled(true);
             }
+            passwordProtectItem.setEnabled(true);
             Settings.getInstance().addRecentFile(currentFile.getAbsolutePath());
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            GivingRecordsWriter.writeRecordsToFile(currentFile);
+            GivingRecordsWriter.writeRecordsToFile(currentFile, currentPassword);
             setCursor(Cursor.getDefaultCursor());
         }
         RecordManager.getInstance().setUnsavedChanges(false);
     }
     
-    private void setPasswordProtection()
+    private void setPasswordProtection() throws IOException
     {
-        final PasswordEditDialog pd = new PasswordEditDialog(this);
-        pd.setVisible(true);
+        boolean passwordChangeComplete = false;
+        final FilePasswordPanel fpp = new FilePasswordPanel(currentPassword.toCharArray()); 
+        while (!passwordChangeComplete) {
+            fpp.revalidate();
+            fpp.repaint();
+            int answer = JOptionPane.showConfirmDialog(  
+                            this, fpp, "File Password", JOptionPane.OK_CANCEL_OPTION,  
+                            JOptionPane.PLAIN_MESSAGE);
+            if (answer == JOptionPane.YES_OPTION)  
+            {  
+                if (fpp.checkPasswordInput()) {
+                    if (!fpp.getNewPassword().isEmpty() && fpp.isChangingPassword()) {
+                        JOptionPane.showMessageDialog(null, "Password successfully changed.");
+                    } else if (!fpp.getNewPassword().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Password successfully added.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Password successfully removed.");
+                    }
+                    currentPassword = fpp.getNewPassword();
+                    passwordChangeComplete = true;
+                } else {
+                    JOptionPane.showMessageDialog(null, fpp.getError(), "Password Failure", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                passwordChangeComplete = true;
+            }
+        }
     }
     
-    private void saveFile() throws IOException 
+    private void saveFile() throws Throwable 
     {
         if (currentFile != null) {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            GivingRecordsWriter.writeRecordsToFile(currentFile);
+            GivingRecordsWriter.writeRecordsToFile(currentFile, currentPassword);
             setCursor(Cursor.getDefaultCursor());
         } else {
             saveAs();

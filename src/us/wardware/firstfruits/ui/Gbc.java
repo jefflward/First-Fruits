@@ -9,6 +9,7 @@ public class Gbc extends GridBagConstraints
     
     public static Gbc xyi(int x, int y, int i)
     {
+        c = new Gbc();
         c.insets = new Insets(i, i, i, i);
         c.gridx = x; 
         c.gridy = y;
@@ -20,6 +21,12 @@ public class Gbc extends GridBagConstraints
     public Gbc west()
     {
         c.anchor = GridBagConstraints.WEST;
+        return c;
+    }
+    
+    public Gbc northwest()
+    {
+        c.anchor = GridBagConstraints.NORTHWEST;
         return c;
     }
     
@@ -101,4 +108,5 @@ public class Gbc extends GridBagConstraints
         c.weightx = d;
         return c;
     }
+
 }
