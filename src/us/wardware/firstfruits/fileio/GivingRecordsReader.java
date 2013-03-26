@@ -154,14 +154,10 @@ public class GivingRecordsReader
         return records;
     }
     
-    public static String getFilePassword(File file) throws FileException 
+    public static String getFilePassword(File file) throws FileException, FileNotFoundException 
     {
         FileInputStream fstream;
-        try {
-            fstream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            throw new FileException("Could not open file: " + file.getName(), e);
-        }
+        fstream = new FileInputStream(file);
         final DataInputStream in = new DataInputStream(fstream);
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
         try 

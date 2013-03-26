@@ -143,4 +143,16 @@ public class Settings extends Observable
         setChanged();
         notifyObservers();
     }
+
+    public void removeRecentFile(String filePath)
+    {
+        final Deque<String> recentFiles = getRecentFiles();
+        if (recentFiles.contains(filePath)) {
+            recentFiles.remove(filePath);
+        }
+        final String filesJoined = StringUtils.join(recentFiles, "|");
+        preferences.put(Settings.RECENT_FILES_KEY, filesJoined);
+        setChanged();
+        notifyObservers();
+    }
 }

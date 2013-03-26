@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -458,7 +459,8 @@ public class FirstFruitsFrame extends JFrame implements Observer
         final Deque<String> recentFiles = Settings.getInstance().getRecentFiles();
         for (final String recentFile : recentFiles) {
             final String fileName = recentFile.substring(recentFile.lastIndexOf(File.separatorChar) + 1);
-            final JMenuItem menuItem = new JMenuItem(new TextAction(fileName) {
+            final JMenuItem menuItem = new JMenuItem(fileName);
+            menuItem.addActionListener(new TextAction(fileName) {
                 @Override
                 public void actionPerformed(ActionEvent event) {
                     SwingUtilities.invokeLater(new Runnable(){
@@ -476,11 +478,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
                                     recordsLoaded = true;
                                     currentPassword = password;
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             } catch (FileException e) {
-                                JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage());
-                                e.printStackTrace();
+                                JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage(), "Error Loading File", JOptionPane.ERROR_MESSAGE);
+                            } catch (FileNotFoundException e) {
+                                showRemoveFromRecentList(menuItem, recentFile);
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(FirstFruitsFrame.this, e.getMessage(), "Error Loading File", JOptionPane.ERROR_MESSAGE);
                             } finally {
                                 setCursor(Cursor.getDefaultCursor());
                             }
@@ -498,6 +501,17 @@ public class FirstFruitsFrame extends JFrame implements Observer
             menuItem.setToolTipText(recentFile);
             menuItem.setName(recentFile);
             recentFilesMenu.add(menuItem);
+        }
+    }
+    
+    private void showRemoveFromRecentList(JMenuItem menuItem, String fileName)
+    {
+        final int choice = JOptionPane.showConfirmDialog(FirstFruitsFrame.this, 
+                        "The specified file no longer exists. Would you like to remove it from the list?", "File Not Found", 
+                        JOptionPane.YES_NO_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+            recentFilesMenu.remove(menuItem);
+            Settings.getInstance().removeRecentFile(fileName);
         }
     }
     
