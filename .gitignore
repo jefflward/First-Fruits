@@ -5,3 +5,6 @@ bin
 *.jar
 *.war
 *.ear
+
+# Installer
+Output/

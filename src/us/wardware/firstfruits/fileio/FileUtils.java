@@ -6,6 +6,7 @@ public class FileUtils
 {
     public static final String CSV = "csv";
     public static final String XLSX = "xlsx";
+    public static final String FFDB = "ffdb";
     
     public static String getExtension(File f) {
         String ext = null;

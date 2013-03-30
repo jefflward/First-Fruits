@@ -43,7 +43,7 @@ import org.apache.commons.lang.StringUtils;
 import us.wardware.firstfruits.GivingRecord;
 import us.wardware.firstfruits.RecordManager;
 import us.wardware.firstfruits.Settings;
-import us.wardware.firstfruits.fileio.CsvFileFilter;
+import us.wardware.firstfruits.fileio.FfdbFileFilter;
 import us.wardware.firstfruits.fileio.FileException;
 import us.wardware.firstfruits.fileio.FileUtils;
 import us.wardware.firstfruits.fileio.GivingRecordsReader;
@@ -491,6 +491,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
                             if (recordsLoaded) {
                                 Settings.getInstance().addRecentFile(recentFile);
                                 currentFile = new File(recentFile);
+                                setTitle("First Fruits - " + currentFile.getAbsolutePath());
                                 passwordProtectItem.setEnabled(true);
                                 RecordManager.getInstance().setRecords(records);
                             }
@@ -645,7 +646,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         }
             
         final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new CsvFileFilter());
+        fileChooser.setFileFilter(new FfdbFileFilter());
         fileChooser.setMultiSelectionEnabled(true);
         final List<GivingRecord> records = new ArrayList<GivingRecord>();
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -665,10 +666,12 @@ public class FirstFruitsFrame extends JFrame implements Observer
             }
             if (selectedFiles.length == 1) {
                 currentFile = selectedFiles[0];
+                setTitle("First Fruits - " + currentFile.getAbsolutePath());
                 passwordProtectItem.setEnabled(true);
                 currentPassword = filePassword;
             } else {
                 currentFile = null;
+                setTitle("First Fruits");
                 passwordProtectItem.setEnabled(false);
                 currentPassword = "";
             }
@@ -773,12 +776,13 @@ public class FirstFruitsFrame extends JFrame implements Observer
     private void saveAs() throws Throwable
     {
         final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new CsvFileFilter()); 
+        fileChooser.setFileFilter(new FfdbFileFilter()); 
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             currentFile = fileChooser.getSelectedFile();
             if (FileUtils.getExtension(currentFile) == null) {
-                currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.CSV));
+                currentFile = new File(currentFile.getAbsolutePath().concat("." + FileUtils.FFDB));
             }
+            setTitle("First Fruits - " + currentFile.getAbsolutePath());
             passwordProtectItem.setEnabled(true);
             Settings.getInstance().addRecentFile(currentFile.getAbsolutePath());
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
