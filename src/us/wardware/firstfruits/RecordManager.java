@@ -10,6 +10,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+import us.wardware.firstfruits.util.DateUtils;
+
 public class RecordManager extends Observable implements Observer
 {
     private static RecordManager INSTANCE = new RecordManager();
@@ -126,7 +128,7 @@ public class RecordManager extends Observable implements Observer
         final List<GivingRecord> recordsForSelectedDate = new ArrayList<GivingRecord>();
         for (GivingRecord record : records)
         {
-            if (date != null && date.equals(record.getDateString())) {
+            if (date != null && DateUtils.areEqualDateStrings(date, record.getDateString())) {
                 recordsForSelectedDate.add(record);
             }
         }
