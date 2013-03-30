@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "First Fruits"
-#define MyAppVersion "0.1"
+#define MyAppVersion "1.0"
 #define MyAppPublisher "WardWare"
 #define MyAppURL "http://www.wardware.com/"
 #define MyAppExeName "FirstFruits.jar"
@@ -22,7 +22,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-OutputBaseFilename=FirstFruits_0.1-setup
+OutputBaseFilename=FirstFruits_1.0-setup
 SetupIconFile={#MyAppIcon}
 UninstallDisplayName="Uninstall First Fruits"
 UninstallIconFile={#MyAppIcon}
