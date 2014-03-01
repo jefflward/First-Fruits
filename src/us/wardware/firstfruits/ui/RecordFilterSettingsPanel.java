@@ -29,8 +29,8 @@ import com.michaelbaranov.microba.calendar.DatePicker;
 public class RecordFilterSettingsPanel extends JPanel implements Observer
 {
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
-    private JComboBox filterByCombo;
-    private JComboBox operationCombo;
+    private JComboBox<String> filterByCombo;
+    private JComboBox<String> operationCombo;
     private JTextField valueField;
     private DatePicker datePicker;
     private RecordFilter recordFilter;
@@ -55,7 +55,8 @@ public class RecordFilterSettingsPanel extends JPanel implements Observer
         filterTypes.add("First Name");
         filterTypes.addAll(Settings.getInstance().getCategories());
         filterTypes.add("Total"); 
-        filterByCombo = new JComboBox(filterTypes.toArray());
+        
+        filterByCombo = new JComboBox<String>(filterTypes.toArray(new String[filterTypes.size()]));
         filterByCombo.setMinimumSize(new Dimension(150, filterByCombo.getHeight()));
         filterByCombo.addActionListener(new ActionListener() {
             @Override
@@ -88,7 +89,7 @@ public class RecordFilterSettingsPanel extends JPanel implements Observer
         });
         add(filterByCombo, Gbc.xyi(1,0,2));
         
-        operationCombo = new JComboBox(new Object[]{"=",">","<"});
+        operationCombo = new JComboBox<String>(new String[]{"=",">","<"});
         operationCombo.setMinimumSize(new Dimension(150, operationCombo.getHeight()));
         operationCombo.addActionListener(new ActionListener() {
             @Override

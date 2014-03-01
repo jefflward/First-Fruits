@@ -40,7 +40,7 @@ import us.wardware.firstfruits.Settings;
 
 public class SettingsDialog extends JDialog
 {
-    private JList optionsList;
+    private JList<String> optionsList;
     private JSplitPane splitPane;
     private GeneralPanel generalPanel;
     private CategoriesPanel categoriesPanel;
@@ -125,8 +125,8 @@ public class SettingsDialog extends JDialog
     
     private class CategoriesPanel extends JPanel
     {
-        private JList list;
-        private DefaultListModel listModel;
+        private JList<String> list;
+        private DefaultListModel<String> listModel;
         private JTextField categoryName;
         private JButton removeButton;
         private JButton addButton;
@@ -141,11 +141,11 @@ public class SettingsDialog extends JDialog
             		"<BR><BR><B>Note:</B> To re-order categories simply drag and drop in the desired order.</HTML>");
             add(categorySettingsHelp, BorderLayout.NORTH);
             
-            listModel = new DefaultListModel();
+            listModel = new DefaultListModel<String>();
             
             updateCategories();
             
-            list = new JList(listModel);
+            list = new JList<String>(listModel);
             list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             list.setSelectionModel(new DefaultListSelectionModel() {
                 @Override
@@ -299,9 +299,9 @@ public class SettingsDialog extends JDialog
         steps.add(generalPanel);
         steps.add(categoriesPanel);
       
-        optionsList = new JList(new Object[]{GENERAL, CATEGORIES});
+        optionsList = new JList<String>(new String[]{GENERAL, CATEGORIES});
         if (initialSetup) {
-            optionsList = new JList(new Object[]{WELCOME, GENERAL, CATEGORIES});
+            optionsList = new JList<String>(new String[]{WELCOME, GENERAL, CATEGORIES});
         }
         optionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         optionsList.addListSelectionListener(new ListSelectionListener() {

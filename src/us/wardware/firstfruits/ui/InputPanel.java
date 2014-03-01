@@ -38,7 +38,7 @@ public class InputPanel extends JPanel implements Observer
     private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
     private AutoComboBox lastNameCombo;
     private AutoComboBox firstNameCombo;
-    private JComboBox fundType;
+    private JComboBox<String> fundType;
     private List<CategoryInputPair> categoryInputs;
     private DatePicker picker;
     private NumberFormat simpleCurrencyFormat;
@@ -123,7 +123,7 @@ public class InputPanel extends JPanel implements Observer
         contentPanel.add(fundTypeLabel, Gbc.xyi(0, 4, 2).east().left(5));
         
         final JPanel p = new JPanel(new GridBagLayout());
-        fundType = new JComboBox(new String[]{"Check","Cash","Online","Other"});
+        fundType = new JComboBox<String>(new String[]{"Check","Cash","Online","Other"});
         fundType.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {

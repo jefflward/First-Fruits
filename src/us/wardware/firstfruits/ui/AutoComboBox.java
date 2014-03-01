@@ -9,7 +9,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 
-public class AutoComboBox extends JComboBox
+public class AutoComboBox extends JComboBox<String>
 {
     private AutoTextFieldEditor autoTextFieldEditor;
     private boolean isFired;
@@ -31,17 +31,12 @@ public class AutoComboBox extends JComboBox
         }
     }
 
-    public AutoComboBox(List<?> list)
+    public AutoComboBox(List<String> list)
     {
         isFired = false;
         autoTextFieldEditor = new AutoTextFieldEditor(list);
         setEditable(true);
-        setModel(new DefaultComboBoxModel(list.toArray()) {
-            protected void fireContentsChanged(Object obj, int i, int j) {
-                if (!isFired)
-                    super.fireContentsChanged(obj, i, j);
-            }
-        });
+        setModel(new DefaultComboBoxModel<String>(list.toArray(new String[list.size()])));
         setEditor(autoTextFieldEditor);
     }
 
@@ -70,10 +65,10 @@ public class AutoComboBox extends JComboBox
         return autoTextFieldEditor.getAutoTextFieldEditor().getDataList();
     }
 
-    public void setDataList(List<?> list)
+    public void setDataList(List<String> list)
     {
         autoTextFieldEditor.getAutoTextFieldEditor().setDataList(list);
-        setModel(new DefaultComboBoxModel(list.toArray()));
+        setModel(new DefaultComboBoxModel<String>(list.toArray(new String[list.size()])));
     }
 
     void setSelectedValue(Object obj)

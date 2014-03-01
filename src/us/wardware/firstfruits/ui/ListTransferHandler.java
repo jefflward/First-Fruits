@@ -35,7 +35,9 @@ package us.wardware.firstfruits.ui;
  * ListTransferHandler.java is used by the DropDemo example.
  */
 import javax.swing.*;
+
 import java.awt.datatransfer.*;
+import java.util.List;
 
 public class ListTransferHandler extends TransferHandler
 {
@@ -66,8 +68,9 @@ public class ListTransferHandler extends TransferHandler
             return false;
         }
 
-        JList list = (JList) info.getComponent();
-        DefaultListModel listModel = (DefaultListModel) list.getModel();
+        @SuppressWarnings("unchecked")
+        JList<String> list = (JList<String>) info.getComponent();
+        DefaultListModel<String> listModel = (DefaultListModel<String>) list.getModel();
         JList.DropLocation dl = (JList.DropLocation) info.getDropLocation();
         int index = dl.getIndex();
         boolean insert = dl.isInsert();
@@ -99,16 +102,17 @@ public class ListTransferHandler extends TransferHandler
     // as a single string, for export.
     protected String exportString(JComponent c)
     {
-        JList list = (JList) c;
+        JList<?> list = (JList<?>) c;
         indices = list.getSelectedIndices();
-        Object[] values = list.getSelectedValues();
+
+        List<?> values = list.getSelectedValuesList();
 
         StringBuffer buff = new StringBuffer();
 
-        for (int i = 0; i < values.length; i++) {
-            Object val = values[i];
+        for (int i = 0; i < values.size(); i++) {
+            Object val = values.get(i);
             buff.append(val == null ? "" : val.toString());
-            if (i != values.length - 1) {
+            if (i != values.size() - 1) {
                 buff.append("\n");
             }
         }
@@ -120,8 +124,9 @@ public class ListTransferHandler extends TransferHandler
     // newline, break it into a separate item in the list.
     protected void importString(JComponent c, String str)
     {
-        JList target = (JList) c;
-        DefaultListModel listModel = (DefaultListModel) target.getModel();
+        @SuppressWarnings("unchecked")
+        JList<String> target = (JList<String>) c;
+        DefaultListModel<String> listModel = (DefaultListModel<String>) target.getModel();
         int index = target.getSelectedIndex();
 
         // Prevent the user from dropping data back on itself.
@@ -129,8 +134,7 @@ public class ListTransferHandler extends TransferHandler
         // attempts to insert the items after item #5, this would
         // be problematic when removing the original items.
         // So this is not allowed.
-        if (indices != null && index >= indices[0] - 1 &&
-                        index <= indices[indices.length - 1]) {
+        if (indices != null && index >= indices[0] - 1 && index <= indices[indices.length - 1]) {
             indices = null;
             return;
         }
@@ -158,8 +162,8 @@ public class ListTransferHandler extends TransferHandler
     protected void cleanup(JComponent c, boolean remove)
     {
         if (remove && indices != null) {
-            JList source = (JList) c;
-            DefaultListModel model = (DefaultListModel) source.getModel();
+            JList<?> source = (JList<?>) c;
+            DefaultListModel<?> model = (DefaultListModel<?>) source.getModel();
             model.remove(source.getSelectedIndex());
         }
         indices = null;
