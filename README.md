@@ -1,4 +1,23 @@
-GivingTracker
+First-Fruits
 =============
 
-Tool that allows tracking of charitable contributions.
+First Fruits is a program designed to manage giving records for offerings and donations. 
+Now free software!
+
+
+The Software
+=============
+
+The software in this repository is written in Java. The software has an Eclipse project included.
+
+
+Status
+=============
+
+Recently made public to promote use and contribution.
+
+
+Contributing
+=============
+
+If you have interest in this project, any feedback is very welcome. Issues and pull requests also welcome.
