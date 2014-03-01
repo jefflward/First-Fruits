@@ -82,6 +82,7 @@ public class FirstFruitsFrame extends JFrame implements Observer
         settingsDialog.setLocationRelativeTo(FirstFruitsFrame.this);
         RecordManager.getInstance().addObserver(this);
         Settings.getInstance().addObserver(this);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
     private void initComponents()
