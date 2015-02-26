@@ -3,6 +3,8 @@ First-Fruits
 
 First Fruits is a program designed to manage giving records for Church offerings and donations. 
 
+You can download the latest installer (exe) [here](https://drive.google.com/file/d/0B6o9wNpGdbA0Q1gzNENuaENnWlk/view?usp=sharing)
+
 Features
 =============
 
