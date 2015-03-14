@@ -12,7 +12,7 @@ Features
 
    First Fruits has been designed to allow offering contribution entry to be fast and simple.
 
-   ![First Fruits offering entry](http://www.wardware.us/wp-content/uploads/2013/03/inputPanel1.png)
+   ![First Fruits offering entry](http://screencast.com/t/Qo1uD2Rw)
 
 
 2. **Filter Records**
@@ -20,7 +20,7 @@ Features
    You can easily filter the records that are displayed using the filter option at the top of 
    the records table.
 
-   ![First Fruits filter records](http://www.wardware.us/wp-content/uploads/2013/03/filtering.png)
+   ![First Fruits filter records](http://screencast.com/t/TAmz3OAa)
  
 
 3. **Offering Reports**
@@ -33,16 +33,16 @@ Features
    - If contributions are included in the report you can also choose whether or not to include the 
      donors names.
 
-   ![First Fruits offering reports](http://www.wardware.us/wp-content/uploads/2013/03/offeringDialog.png)
+   ![First Fruits offering reports](http://screencast.com/t/HGmJMeT3hA)
 
 
 4. **Giving Statements**
 
    Generating a giving statement is as simple as selecting a donors name. You can also generate 
-   reports for all donors by clicking the generate all button. ![First Fruits report all](http://www.wardware.us/wp-content/uploads/2013/03/generateAllButton.png)
+   reports for all donors by clicking the generate all button. ![First Fruits report all](http://screencast.com/t/BDn0rXn9)
 
 
-   ![First Fruits giving statements](http://www.wardware.us/wp-content/uploads/2013/03/givingStatement.png)
+   ![First Fruits giving statements](http://screencast.com/t/YBx5w91Z)
  
 
 The Software
